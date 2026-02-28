@@ -1,0 +1,23 @@
+# Archives
+*.tar.gz
+*.zip
+
+# Logs and test results
+lint_results.txt
+*.log
+
+# Backups
+pers_backup/
+
+# Environment files
+.env
+.env.*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

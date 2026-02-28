@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyTrackV3: Autonomous Shipment Tracker | Nick Cardoso</title>
+    <meta name="description" content="HyTrackV3 is a self-hosted, headless tracking engine by Nick Cardoso that monitors emails, scrapes carrier sites, and sends real-time shipment notifications.">
+    <meta name="keywords" content="HyTrackV3, shipment tracker, Python, Selenium, BeautifulSoup, email automation, Nick Cardoso, portfolio project">
+    <meta name="author" content="Nick Cardoso">
+    <link rel="canonical" href="https://link.nickcardoso.com/projects/hytrackv3">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://link.nickcardoso.com/projects/hytrackv3">
+    <meta property="og:title" content="HyTrackV3: Autonomous Shipment Tracker | Nick Cardoso">
+    <meta property="og:description" content="A self-hosted tracking engine that monitors emails for tracking IDs and dispatches HTML notifications upon status changes.">
+    <meta property="og:image" content="https://link.nickcardoso.com/assets/hytrack-preview.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="HyTrackV3: Autonomous Shipment Tracker | Nick Cardoso">
+    <meta name="twitter:description" content="A headless tracking engine that monitors emails, scrapes carrier sites, and sends real-time status notifications.">
+    <meta name="twitter:image" content="https://link.nickcardoso.com/assets/hytrack-preview.jpg">
+
+    <link rel="preconnect" href="https://github.com" crossorigin>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "HyTrackV3",
+      "author": {
+        "@type": "Person",
+        "name": "Nick Cardoso",
+        "url": "https://link.nickcardoso.com/"
+      },
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Linux, Raspberry Pi OS",
+      "description": "A headless tracking engine that monitors emails, scrapes carrier sites, and sends real-time status notifications.",
+      "softwareVersion": "3.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "codeRepository": "https://github.com/nicx17/HyTrackV3"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            /* Utilizing system fonts for zero-latency text rendering */
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%;
+            line-height: 1.6;
+            margin: 0;
+            padding: 6vw 2rem;
+            display: flex;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .project-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.4rem;
+            font-size: 1.15rem;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--text-main);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: var(--text-main);
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: #F0EFEA;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .usage-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .usage-box h3 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        .usage-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            border-bottom: none;
+        }
+        
+        .nav-back:hover {
+            color: var(--text-main);
+            border-bottom: none;
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 2.5rem;
+            }
+
+            h3 {
+                font-size: 1.4rem;
+                margin-top: 2rem;
+            }
+
+            p, ul, ol, .project-meta {
+                font-size: 1.05rem;
+            }
+
+            .data-table {
+                font-size: 0.95rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.5rem;
+            }
+
+            .usage-box {
+                padding: 1.5rem;
+                margin-top: 2.5rem;
+            }
+
+            .usage-box h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-back {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="project-container">
+        <a href="https://link.nickcardoso.com/" class="nav-back" aria-label="Return to main links page">← Back to Links</a>
+
+        <article>
+            <header>
+                <h1>HyTrackV3</h1>
+                <div class="project-meta">
+                    <span><strong>Role:</strong> Developer</span>
+                    <span><strong>Repository:</strong> <a href="https://github.com/nicx17/HyTrackV3" target="_blank" rel="noopener noreferrer">nicx17/HyTrackV3</a></span>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">SQLite</span>
+                        <span class="tag">Selenium</span>
+                        <span class="tag">BeautifulSoup</span>
+                        <span class="tag">IMAP/SMTP</span>
+                    </div>
+                </div>
+            </header>
+
+            <section>
+                <h2>Overview</h2>
+                <p>HyTrackV3 is a self-hosted, headless tracking engine designed for users who want a centralized solution to monitor multiple shipments. Instead of manually checking tracking numbers across different courier websites, HyTrackV3 automatically extracts new tracking numbers from your inbox, tracks them in the background, and emails formatted HTML updates when a package transit status changes.</p>
+            </section>
+
+            <section>
+                <h2>Key Features</h2>
+                <ul>
+                    <li><strong>Automatic Discovery:</strong> Scans Gmail or Outlook inboxes for new 11-digit (Blue Dart) and 12-14 digit (Delhivery) tracking numbers without user intervention.</li>
+                    <li><strong>Smart Change Detection:</strong> Employs SHA-256 hashing to compare a shipment's "fingerprint" against previous states, guaranteeing notifications are only triggered upon genuine status updates.</li>
+                    <li><strong>Hybrid Web Scraper:</strong> Dynamically switches scraping strategies based on the carrier. Utilizes <code>requests</code> and <code>BeautifulSoup</code> for static sites (Blue Dart), and headless <code>Selenium</code> (Chrome) for dynamic pages (Delhivery).</li>
+                    <li><strong>Mobile-First Notifications:</strong> Dispatches HTML emails with direct tracking links, status icons, and chronological progression.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>How It Works</h2>
+                <ol>
+                    <li><strong>Ingestion:</strong> A Python script securely logs into the designated IMAP server and uses Regular Expressions (Regex) to extract newly received waybills.</li>
+                    <li><strong>Tracking:</strong> The core engine routes the tracking ID to the appropriate scraper function to pull the latest shipping event data.</li>
+                    <li><strong>Analysis:</strong> The scraped data is hashed (SHA-256) and compared against the last known status stored in the local SQLite database.</li>
+                    <li><strong>Notification:</strong> If the hash differs, the system triggers the SMTP protocol to construct and send a formatted alert to the user.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Database &amp; State Management</h2>
+                <p>To remain lightweight and portable, the system manages state using a single-table SQLite database. This persistent backend prevents duplicate notifications and allows the script to run statelessly across cron jobs.</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>waybill</code></td>
+                            <td>TEXT (PK)</td>
+                            <td>The unique tracking number.</td>
+                        </tr>
+                        <tr>
+                            <td><code>courier</code></td>
+                            <td>TEXT</td>
+                            <td>Identifier (BLUEDART or DELHIVERY).</td>
+                        </tr>
+                        <tr>
+                            <td><code>last_event_hash</code></td>
+                            <td>TEXT</td>
+                            <td>SHA-256 hash of the last known status.</td>
+                        </tr>
+                        <tr>
+                            <td><code>is_delivered</code></td>
+                            <td>INTEGER</td>
+                            <td>Boolean flag (0/1) to stop tracking.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="usage-box">
+                <h3>Try It Out</h3>
+                <p>The system is currently active and processing requests. If you have tracking IDs you want to monitor, forward them to the system email.</p>
+                <p><strong>Tracking Email:</strong> <a href="mailto:notify@hyclotron.com">notify@hyclotron.com</a></p>
+            </section>
+        </article>
+    </main>
+
+</body>
+</html>

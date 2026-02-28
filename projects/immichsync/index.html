@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImmichSync | Nick Cardoso</title>
+    <meta name="description" content="A Python script to intelligently automate syncing a local folder of images to an Immich server.">
+    <meta name="keywords" content="Immich, Python, API, Automation, Sync, Backup, Nick Cardoso, portfolio project">
+    <meta name="author" content="Nick Cardoso">
+    <link rel="canonical" href="https://link.nickcardoso.com/projects/immichsync">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://link.nickcardoso.com/projects/immichsync">
+    <meta property="og:title" content="ImmichSync | Nick Cardoso">
+    <meta property="og:description" content="A secure script to automatically sync local folders to an Immich server with deduplication and album organization.">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ImmichSync | Nick Cardoso">
+    <meta name="twitter:description" content="A secure script to automatically sync local folders to an Immich server with deduplication and album organization.">
+
+    <link rel="preconnect" href="https://github.com" crossorigin>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ImmichSync",
+      "author": {
+        "@type": "Person",
+        "name": "Nick Cardoso",
+        "url": "https://link.nickcardoso.com/"
+      },
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "description": "A Python script to intelligently automate syncing a local folder of images to an Immich server.",
+      "softwareVersion": "1.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "codeRepository": "https://github.com/nicx17/ImmichSync"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            /* Utilizing system fonts for zero-latency text rendering */
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%;
+            line-height: 1.6;
+            margin: 0;
+            padding: 6vw 2rem;
+            display: flex;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .project-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.4rem;
+            font-size: 1.15rem;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--text-main);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: var(--text-main);
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: #F0EFEA;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .usage-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .usage-box h3 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        .usage-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            border-bottom: none;
+        }
+        
+        .nav-back:hover {
+            color: var(--text-main);
+            border-bottom: none;
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 2.5rem;
+            }
+
+            h3 {
+                font-size: 1.4rem;
+                margin-top: 2rem;
+            }
+
+            p, ul, ol, .project-meta {
+                font-size: 1.05rem;
+            }
+
+            .data-table {
+                font-size: 0.95rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.5rem;
+            }
+
+            .usage-box {
+                padding: 1.5rem;
+                margin-top: 2.5rem;
+            }
+
+            .usage-box h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-back {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="project-container">
+        <a href="https://link.nickcardoso.com/" class="nav-back" aria-label="Return to main links page">&larr; Back to Links</a>
+
+        <article>
+            <header>
+                <h1>ImmichSync</h1>
+                <div class="project-meta">
+                    <span><strong>Role:</strong> Developer</span>
+                    <span><strong>Repository:</strong> <a href="https://github.com/nicx17/ImmichSync" target="_blank" rel="noopener noreferrer">nicx17/ImmichSync</a></span>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Immich API</span>
+                        <span class="tag">Automation</span>
+                        <span class="tag">Sync</span>
+                    </div>
+                </div>
+            </header>
+
+            <section>
+                <h2>Overview</h2>
+                <p>A Python script to intelligently automate syncing a local folder of images (like screenshots) to your Immich server. It safely handles both local network connections and external connections, preventing duplicates and automatically organizing uploaded assets into a designated album.</p>
+            </section>
+
+            <section>
+                <h2>Features and Working Mechanism</h2>
+                <p>This script operates in the following sequence during a given run:</p>
+                <ol>
+                    <li><strong>Environment Loading:</strong> Securely loads credentials and configuration variables, including your API key, target folder, and Immich URLs.</li>
+                    <li><strong>Network Detection:</strong> Pings your local network URL first. If that times out, it seamlessly falls back to your external URL. This is ideal for laptops that frequently switch between home Wi-Fi and outside networks.</li>
+                    <li><strong>Album Resolution:</strong> Queries the Immich API to find the internal ID associated with the album name specified in your configuration.</li>
+                    <li><strong>Local Deduplication:</strong> Consults a local history file (<code>immich_upload_history.json</code>) to skip files that have already been uploaded previously by the script in past runs.</li>
+                    <li><strong>Server Deduplication &amp; Uploading:</strong> Uploads new files along with critical metadata (creation time, modification time). The script properly interprets Immich's API responses to distinguish between a fully new file being created, a soft duplicate that Immich merged, and a hard conflict.</li>
+                    <li><strong>Album Linking:</strong> Any successfully finalized uploads are subsequently linked to the specified target album.</li>
+                    <li><strong>Status Logging:</strong> Every operation is logged both to the console and to a local <code>immich_backup.log</code> file, ensuring complete visibility of its operations over time.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Security Considerations</h2>
+                <ul>
+                    <li><strong>Authentication:</strong> The script authenticates exclusively via the Immich API Key. The key is loaded from a <code>.env</code> file that should be excluded from version control to prevent token leakage.</li>
+                    <li><strong>Safe Uploads:</strong> It uses a purely additive approach. The script reads files from your local system and posts them to the Immich server; it never deletes or modifies your local files.</li>
+                    <li><strong>Local Storage:</strong> Upload history is saved locally within a JSON file to prevent re-upload attempts, ensuring API rate limits and server resources are respected.</li>
+                </ul>
+            </section>
+
+            <section class="usage-box">
+                <h3>Installation &amp; Usage</h3>
+                <p>Ensure you have Python 3 installed. It is recommended to use a virtual environment.</p>
+                <p><code>pip install requests python-dotenv</code></p>
+                <p>Create a <code>.env</code> file with the variables <code>SCREENSHOTS_PATH</code>, <code>IMMICH_API_KEY</code>, <code>IMMICH_LOCAL_URL</code>, <code>IMMICH_EXTERNAL_URL</code>, and <code>IMMICH_ALBUM_NAME</code>.</p>
+                <p>Run via: <code>python uploader_v1.py</code></p>
+                <p><strong>View Source:</strong> <a href="https://github.com/nicx17/ImmichSync" target="_blank" rel="noopener noreferrer">nicx17/ImmichSync</a></p>
+            </section>
+        </article>
+    </main>
+
+</body>
+</html>
