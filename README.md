@@ -4,7 +4,7 @@ Welcome to the source code for my personal portfolio and technical documentation
 
 **Live Website:** [link.nickcardoso.com](https://link.nickcardoso.com)
 
-## 🏗️ Architecture & Tech Stack
+## Architecture & Tech Stack
 
 This site is built with a focus on maximum performance, absolute minimalism, and dependency-free engineering.
 
@@ -14,7 +14,7 @@ This site is built with a focus on maximum performance, absolute minimalism, and
 * **Hosting Platform:** Entirely self-hosted on bare-metal edge hardware (Raspberry Pi 5 running Debian Linux).
 * **Web Server:** Apache2 handling local HTML serving, situated behind an Nginx Proxy Manager (OpenResty) edge router for SSL termination and secure reverse proxying.
 
-## 🚀 Featured Projects
+## Featured Projects
 
 The `/projects` route dynamically showcases my standalone software engineering logic and hardware integrations. Some highlighted repositories currently linked include:
 
@@ -23,13 +23,13 @@ The `/projects` route dynamically showcases my standalone software engineering l
 * **[ImmichSync](https://github.com/nicx17/ImmichSync)**: A secure Python script utilizing targeted environment variables and recursive deduplication logic to safely synchronize local machine directories directly to an Immich backend server.
 * **[MultiWave](https://github.com/nicx17/MultiWave)**: A custom-built, wirelessly communicating multi-cable tester encompassing C++ and Arduino Mega hardware logic. 
 
-## 🛡️ Security & Validations
+## Security & Validations
 
 * **Strict DOM Compliance:** Every single HTML file rigorously conforms to the `html-validate` linter, guaranteeing 0 syntax errors, 0 raw/unescaped characters, and 0 inline styles.
 * **Proxy Safety:** Apache `.htaccess` rewrite conditions natively ingest Nginx's `%{HTTP_HOST}` X-Forwarded headers to absolutely prevent internal routing topologies or loopback ports (`127.0.0.1:9393`) from leaking via HTTPS `Location` redirects.
 * **Stateless Workspace:** Excludes all environment `.env` artifacts, `.DS_Store` caching, and production `.tar.gz` deployment bundles through stringent `.gitignore` indexing. 
 
-## 💻 Local Development
+## Local Development
 
 To run this site locally on your own machine:
 
