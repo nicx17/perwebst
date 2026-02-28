@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About This Site | Nick Cardoso</title>
+    <meta name="description" content="Technical specifications, hardware, and architecture of Nick Cardoso's self-hosted portfolio.">
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </noscript>
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            --border-hover: #D0CEC4;
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 110%; 
+            line-height: 1.7;
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4vw 2rem 0 2rem;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            position: relative; 
+        }
+
+        /* The Premium Grain Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04; 
+            pointer-events: none; 
+            z-index: -1; 
+        }
+
+        main {
+            flex: 1; 
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 4rem;
+        }
+
+        .container {
+            max-width: 850px; 
+            width: 100%;
+            z-index: 1; 
+        }
+
+        header {
+            margin-bottom: 3rem;
+            margin-top: 1rem;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            font-size: 2.8rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: #1A1A1A;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        /* Tables for Specs & Routing */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-main);
+            width: 30%;
+            background-color: #FDFDFB;
+        }
+
+        .data-table tr:last-child td, .data-table tr:last-child th {
+            border-bottom: none;
+        }
+
+        /* Stack Grid */
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stack-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .stack-card i {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stack-card h3 {
+            margin-top: 0;
+            color: #1A1A1A;
+        }
+
+        .stack-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* Code/Monospace blocks */
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: #F0EFEA;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #1A1A1A;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .nav-back:hover {
+            color: var(--text-main);
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin-top: 2rem;
+            }
+
+            p, .data-table, .stack-card p {
+                font-size: 1.05rem;
+            }
+
+            .stack-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.8rem;
+                display: block;
+                width: 100%;
+            }
+
+            .data-table th {
+                background-color: var(--bg-primary);
+                border-bottom: none;
+                padding-bottom: 0.2rem;
+            }
+
+            .data-table td {
+                padding-top: 0.2rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+        footer {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0.1rem 0;
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto; 
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="container">
+            <a href="https://link.nickcardoso.com/" class="nav-back" aria-label="Return to links page">← Back to Home</a>
+
+            <header>
+                <h1>System Architecture</h1>
+                <p>An overview of the hardware, network routing, and software stack powering this self-hosted portfolio.</p>
+            </header>
+
+            <section>
+                <h2>The Stack</h2>
+                <div class="stack-grid">
+                    <div class="stack-card">
+                        <i class="fas fa-network-wired"></i>
+                        <h3>Edge &amp; Routing</h3>
+                        <p>DNS and edge caching are handled by <strong>Cloudflare</strong>, masking a dedicated <strong>Static IP</strong>. Inbound traffic is securely routed using <strong>Nginx Proxy Manager</strong> for SSL termination and reverse proxying.</p>
+                    </div>
+                    <div class="stack-card">
+                        <i class="fas fa-server"></i>
+                        <h3>Web Server</h3>
+                        <p>The site is served using a bare-metal <strong>Apache2</strong> web server configured to serve static, flat-file HTML and CSS directly from the file system for zero-latency TTFB (Time to First Byte).</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Hardware Specifications</h2>
+                <p>This entire infrastructure is self-hosted and runs 24/7 on a single-board computer located on-premises.</p>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <th>Machine</th>
+                            <td>Raspberry Pi 5</td>
+                        </tr>
+                        <tr>
+                            <th>Architecture</th>
+                            <td>64-bit ARM Cortex-A76 (Quad-core @ 2.4GHz)</td>
+                        </tr>
+                        <tr>
+                            <th>Memory</th>
+                            <td>8GB LPDDR4X-4267 SDRAM / 8GB Swap</td>
+                        </tr>
+                        <tr>
+                            <th>Storage</th>
+                            <td>500GB NVMe SSD</td>
+                        </tr>
+                        <tr>
+                            <th>Network Uplink</th>
+                            <td>1 Gbps Local Ethernet Switch &rarr; 500 Mbps ISP Uplink</td>
+                        </tr>
+                        <tr>
+                            <th>Operating System</th>
+                            <td>Debian / Raspberry Pi OS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Performance &amp; Optimizations</h2>
+                <p>This site is brutally optimized for speed and minimalism. It intentionally avoids modern, heavy JavaScript frameworks in favor of raw performance.</p>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <th>Zero Dependencies</th>
+                            <td>No React, Vue, or heavy libraries. The UI is built entirely with vanilla HTML5 and CSS3.</td>
+                        </tr>
+                        <tr>
+                            <th>System Typography</th>
+                            <td>Zero external font requests. The site relies exclusively on native OS fonts (<code>system-ui</code>, <code>ui-serif</code>) eliminating layout shifts and font-loading latency.</td>
+                        </tr>
+                        <tr>
+                            <th>Visuals</th>
+                            <td>No heavy background images. The matte grain texture is generated dynamically via a microscopic inline SVG data URI.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Site Map &amp; Services</h2>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <th><code>/</code> (Root)</th>
+                            <td>Main directory / Social link tree.</td>
+                        </tr>
+                        <tr>
+                            <th><code>/projects</code></th>
+                            <td>Engineering portfolio grid.</td>
+                        </tr>
+                        <tr>
+                            <th><code>/projects/hytrack3</code></th>
+                            <td>Individual project showcase pages.</td>
+                        </tr>
+                        <tr>
+                            <th><code>uptime.nickcardoso.com</code></th>
+                            <td>Live infrastructure health tracking powered by <strong><a href="https://uptime.nickcardoso.com/" class="footer-link">Uptime Kuma</a></strong>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Nick Cardoso</p>
+    </footer>
+</body>
+</html>

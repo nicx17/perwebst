@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nick Cardoso — Links</title>
+    <meta name="description" content="Nick Cardoso's technical portfolio, infrastructure documentation, and hardware routing logs.">
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </noscript>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            --border-hover: #D0CEC4;
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%; /* 15% larger baseline font */
+            line-height: 1.6;
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4vw 2rem 0 2rem;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            position: relative; /* Needed for the grain overlay */
+        }
+
+        /* The Premium Grain Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            /* SVG Noise generated via data URI for zero-latency loading */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04; /* Keeps the grain subtle and elegant */
+            pointer-events: none; /* Ensures you can still click the links underneath */
+            z-index: -1; /* Pushes it behind the content */
+        }
+
+        main {
+            flex: 1; 
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            width: 100%;
+            margin-top: 15vh;
+            margin-bottom: 3rem;
+        }
+
+        .container {
+            max-width: 1200px; 
+            width: 100%;
+            z-index: 1; /* Keeps content above the grain */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            font-size: 3.5rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+        }
+
+        /* Rectangular Grid Layout */
+        .links-container {
+            display: grid;
+            /* Wider minmax forces rectangles. Drops to 1 column on mobile automatically */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        /* Rectangular Block Styling */
+        .link-block {
+            background-color: var(--bg-secondary);
+            border: 1.2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem; /* Wider padding for horizontal layout */
+            display: flex;
+            flex-direction: row; /* Horizontal alignment */
+            align-items: center;
+            justify-content: flex-start; /* Aligns content to the left */
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 1.3rem;
+            font-weight: 550;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .link-block:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+            border-color: var(--border-hover);
+        }
+
+        .link-icon {
+            font-size: 1.8rem; /* Scaled down slightly to fit the row */
+            color: var(--text-muted);
+            margin-bottom: 0; /* Removed bottom margin */
+            margin-right: 1.5rem; /* Added right spacing between icon and text */
+            width: 30px; /* Ensures text aligns perfectly straight down the column */
+            text-align: center;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        /* Subtle interactions on hover */
+        .link-block:hover .fa-github { color: #333; transform: scale(1.1); }
+        .link-block:hover .fa-linkedin-in { color: #0077B5; transform: scale(1.1); }
+        .link-block:hover .fa-unsplash { color: #000; transform: scale(1.1); }
+        .link-block:hover .fa-instagram { color: #E1306C; transform: scale(1.1); }
+        .link-block:hover .fa-code { color: var(--text-main); transform: scale(1.1); }
+
+footer {
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto; 
+            z-index: 1;
+            display: flex;
+            justify-content: center; /* Centers the inner container */
+            padding: 0.3rem 0; /* Keeps vertical padding consistent */
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between; /* Pushes copyright to the left, link to the right */
+            align-items: center;
+            width: 100%;
+            max-width: 1000px; /* Matches your main container width */
+            font-size: 0.95rem;
+        }
+
+        .footer-inner p {
+            margin: 0;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-main);
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem 0 1.2rem;
+            }
+
+            main {
+                margin-top: 5vh;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .link-block {
+                font-size: 1.15rem;
+                padding: 1.2rem 1.5rem;
+            }
+
+            /* Stack links vertically on mobile */
+            .links-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="container">
+            <header>
+                <h1>Nick Cardoso</h1>
+                <p class="subtitle">Engineering &amp; Photography</p>
+            </header>
+
+            <section class="links-container">
+                <a href="https://link.nickcardoso.com/projects/" class="link-block" aria-label="Projects">
+                    <i class="fas fa-code link-icon" aria-hidden="true"></i>
+                    <span>Projects</span>
+                </a>
+
+                <a href="https://github.com/nicx17" target="_blank" rel="noopener noreferrer" class="link-block" aria-label="GitHub">
+                    <i class="fab fa-github link-icon" aria-hidden="true"></i>
+                    <span>GitHub</span>
+                </a>
+
+                <a href="https://www.linkedin.com/in/nick-cardoso-b9346324a/" target="_blank" rel="noopener noreferrer" class="link-block" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in link-icon" aria-hidden="true"></i>
+                    <span>LinkedIn</span>
+                </a>
+
+                <a href="https://unsplash.com/@nickcardoso" target="_blank" rel="noopener noreferrer" class="link-block" aria-label="Unsplash">
+                    <i class="fab fa-unsplash link-icon" aria-hidden="true"></i>
+                    <span>Unsplash</span>
+                </a>
+
+                <a href="https://www.instagram.com/nickcardoso14/" target="_blank" rel="noopener noreferrer" class="link-block" aria-label="Instagram">
+                    <i class="fab fa-instagram link-icon" aria-hidden="true"></i>
+                    <span>Instagram</span>
+                </a>
+            </section>
+        </div>
+    </main>
+
+<footer>
+        <div class="footer-inner">
+            <p>&copy; 2026 Nick Cardoso</p>
+            <a href="/about/" class="footer-link">About This Site</a>
+        </div>
+    </footer>
+</body>
+</html>

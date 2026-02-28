@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyTrack API v2.0.0 | Nick Cardoso</title>
+    <meta name="description" content="A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses for Blue Dart and Delhivery.">
+    <meta name="keywords" content="HyTrack API, FastAPI, Python, Selenium, SQLite, Bcrypt, Nick Cardoso, portfolio project">
+    <meta name="author" content="Nick Cardoso">
+    <link rel="canonical" href="https://link.nickcardoso.com/projects/hytrackapi">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://link.nickcardoso.com/projects/hytrackapi">
+    <meta property="og:title" content="HyTrack API v2.0.0 | Nick Cardoso">
+    <meta property="og:description" content="A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses.">
+    <meta property="og:image" content="https://link.nickcardoso.com/assets/hytrackapi-preview.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="HyTrack API v2.0.0 | Nick Cardoso">
+    <meta name="twitter:description" content="A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses.">
+    <meta name="twitter:image" content="https://link.nickcardoso.com/assets/hytrackapi-preview.jpg">
+
+    <link rel="preconnect" href="https://github.com" crossorigin>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "HyTrack API",
+      "author": {
+        "@type": "Person",
+        "name": "Nick Cardoso",
+        "url": "https://link.nickcardoso.com/"
+      },
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, Raspberry Pi OS",
+      "description": "A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses.",
+      "softwareVersion": "2.0.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "codeRepository": "https://github.com/nicx17/hytrackapi"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            /* Utilizing system fonts for zero-latency text rendering */
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%;
+            line-height: 1.6;
+            margin: 0;
+            padding: 6vw 2rem;
+            display: flex;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .project-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.4rem;
+            font-size: 1.15rem;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--text-main);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: var(--text-main);
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: #F0EFEA;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .usage-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .usage-box h3 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        .usage-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            border-bottom: none;
+        }
+        
+        .nav-back:hover {
+            color: var(--text-main);
+            border-bottom: none;
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 2.5rem;
+            }
+
+            h3 {
+                font-size: 1.4rem;
+                margin-top: 2rem;
+            }
+
+            p, ul, ol, .project-meta {
+                font-size: 1.05rem;
+            }
+
+            .data-table {
+                font-size: 0.95rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.5rem;
+            }
+
+            .usage-box {
+                padding: 1.5rem;
+                margin-top: 2.5rem;
+            }
+
+            .usage-box h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-back {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="project-container">
+        <a href="https://link.nickcardoso.com/" class="nav-back" aria-label="Return to main links page">&larr; Back to Links</a>
+
+        <article>
+            <header>
+                <h1>HyTrack API</h1>
+                <div class="project-meta">
+                    <span><strong>Role:</strong> Developer</span>
+                    <span><strong>Repository:</strong> <a href="https://github.com/nicx17/hytrackapi" target="_blank" rel="noopener noreferrer">nicx17/hytrackapi</a></span>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">FastAPI</span>
+                        <span class="tag">SQLite</span>
+                        <span class="tag">Bcrypt</span>
+                        <span class="tag">Selenium</span>
+                    </div>
+                </div>
+            </header>
+
+            <section>
+                <h2>Overview</h2>
+                <p>A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses for Blue Dart and Delhivery. This application serves as an independent microservice that replaces unreliable public APIs or manual checking by automating web scraping intelligently. It includes robust local API key management, rate-limiting, and hardened bcrypt hashing for administrative scale and security.</p>
+            </section>
+
+            <section>
+                <h2>Architecture &amp; How It Works</h2>
+                <ul>
+                    <li><strong>Blue Dart:</strong> The API maps directly to their hidden third-party tracking GET endpoints and parses the HTML response using <code>BeautifulSoup4</code>.</li>
+                    <li><strong>Delhivery:</strong> Because Delhivery's tracking portal is heavily JavaScript-rendered and blocks basic HTTP requests, HyTrack utilizes <code>webdriver-manager</code> to spin up live, headless Google Chrome instances via Selenium. It dynamically waits for the WebSockets and React components to load before extracting the tracking timeline.</li>
+                    <li><strong>Hardware Platform:</strong> Running on a Raspberry Pi 5 (AArch64). Because launching headless Chrome browsers is highly RAM-intensive, the system utilizes global asynchronous semaphores to cap concurrent browser instances to strictly prevent out-of-memory crashes.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Security Features</h2>
+                <ul>
+                    <li><strong>Military-Grade Hashing:</strong> All generated client keys are instantly hashed using native Python <code>bcrypt</code> (v5+). Plaintext tokens are never stored, ensuring full forward-secrecy.</li>
+                    <li><strong>Rate Limiting:</strong> Active Rate Limiting via <code>slowapi</code> enforces a strict 10 requests/minute ceiling per IP address to prevent Denial of Service (DoS) sweeps.</li>
+                    <li><strong>Timing Attack Prevention:</strong> The Master API Key is verified using constant-time digest comparison (<code>secrets.compare_digest</code>) to defeat side-channel timing attacks.</li>
+                    <li><strong>Parameter Injection Protection:</strong> The FastAPI endpoints enforce rigid Regex bounds and character limits on all tracking waybills to prevent URL injection.</li>
+                </ul>
+            </section>
+
+            <section class="usage-box">
+                <h3>Utilizing the Tracker API</h3>
+                <p><strong>Endpoint:</strong> <code>GET /track</code><br>
+                <strong>Headers Required:</strong> <code>X-API-Key: &lt;your_generated_client_key&gt;</code><br>
+                <strong>Query Parameters:</strong><br>
+                - <code>courier</code>: <code>BLUEDART</code> or <code>DELHIVERY</code><br>
+                - <code>waybill</code>: The tracking number (Alphanumeric only, max 50 characters)
+                </p>
+                <p><strong>Public API Access:</strong> The official API is currently hosted at <code>https://assa.hyclotron.com</code>. To obtain an active Client API Key, please submit a pull request detailing your integration use case.</p>
+            </section>
+        </article>
+    </main>
+
+</body>
+</html>

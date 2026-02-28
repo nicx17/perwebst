@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# 1. Enforce Trailing Slash for Directories via NPM
+# Check if requested URI is a directory without a trailing slash
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/$
+# Use the Host header defined by Nginx (e.g. link.nickcardoso.com) and force https scheme
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1/ [R=301,L]
+
+# 2. Extensionless HTML routing (Optional but good for cleanliness)
+# If the request is for a path (like /about) that is NOT a directory and NOT an exact file, 
+# but a .html file exists for it, serve the corresponding .html file invisibly.
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# 3. Handle Directory Indexes explicitly
+DirectoryIndex index.html

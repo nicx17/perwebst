@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Projects | Nick Cardoso</title>
+    <meta name="description"
+        content="A collection of software engineering projects, tools, and experiments by Nick Cardoso.">
+    <meta name="author" content="Nick Cardoso">
+    <link rel="canonical" href="https://link.nickcardoso.com/projects/">
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            --border-hover: #D0CEC4;
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%;
+            line-height: 1.6;
+            margin: 0;
+            padding: 6vw 2rem;
+            display: flex;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            font-size: 3.5rem;
+            margin-top: 3rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-bottom: 3.5rem;
+        }
+
+        /* Grid Layout for Project Blocks */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Project Card / Block Styling */
+        .project-block {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .project-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            border-color: var(--border-hover);
+        }
+
+        .project-block h2 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 0.8rem;
+            color: #1A1A1A;
+        }
+
+        .project-block p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 1.8rem;
+            flex-grow: 1;
+        }
+
+        /* Tags inside blocks */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .tag {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-top: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+
+            .projects-grid {
+                gap: 1.2rem;
+            }
+
+            .project-block {
+                padding: 1.5rem;
+            }
+
+            .project-block h2 {
+                font-size: 1.4rem;
+            }
+
+            .project-block p {
+                font-size: 1.05rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .tag {
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+        <a href="https://link.nickcardoso.com/" class="nav-back" aria-label="Return to main links page">← Back to
+            Links</a>
+
+        <header>
+            <h1>Projects</h1>
+            <p class="subtitle">A collection of tools, scripts, and software engineering experiments.</p>
+        </header>
+
+        <section class="projects-grid">
+
+            <a href="/projects/hytrackv3/" class="project-block">
+                <h2>HyTrackV3</h2>
+                <p>A self-hosted, headless tracking engine that monitors emails for waybills and dispatches real-time
+                    status notifications.</p>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Selenium</span>
+                    <span class="tag">SQLite</span>
+                </div>
+            </a>
+
+            <a href="/projects/multiwave/" class="project-block">
+                <h2>MultiWave</h2>
+                <p>A custom-built, wirelessly communicating multi-cable tester for RJ45, RJ11, and BNC connections.</p>
+                <div class="tags">
+                    <span class="tag">C++</span>
+                    <span class="tag">Arduino</span>
+                    <span class="tag">Hardware</span>
+                </div>
+            </a>
+
+            <a href="/projects/hytrackapi/" class="project-block">
+                <h2>HyTrack API</h2>
+                <p>A secure, high-performance REST API built with FastAPI to actively scrape and track shipment statuses.</p>
+                <div class="tags">
+                    <span class="tag">FastAPI</span>
+                    <span class="tag">Python</span>
+                    <span class="tag">SQLite</span>
+                </div>
+            </a>
+
+            <a href="/projects/immichsync/" class="project-block">
+                <h2>ImmichSync</h2>
+                <p>A secure Python script to automate syncing local folders to an Immich backend with built-in deduplication.</p>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Immich API</span>
+                    <span class="tag">Automation</span>
+                </div>
+            </a>
+
+        </section>
+    </main>
+
+</body>
+
+</html>
