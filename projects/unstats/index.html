@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unstats | Nick Cardoso</title>
+    <meta name="description" content="A Home Assistant custom integration to fetch Unsplash statistics natively with robust privacy preservation.">
+    <meta name="keywords" content="Unstats, Home Assistant, HACS, Unsplash API, Python, Integration, Nick Cardoso">
+    <meta name="author" content="Nick Cardoso">
+    <link rel="canonical" href="https://link.nickcardoso.com/projects/unstats">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://link.nickcardoso.com/projects/unstats">
+    <meta property="og:title" content="Unstats | Nick Cardoso">
+    <meta property="og:description" content="A Home Assistant custom integration to fetch Unsplash statistics natively with robust privacy preservation.">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Unstats | Nick Cardoso">
+    <meta name="twitter:description" content="A Home Assistant custom integration to fetch Unsplash statistics natively with robust privacy preservation.">
+
+    <link rel="preconnect" href="https://github.com" crossorigin>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Unstats",
+      "author": {
+        "@type": "Person",
+        "name": "Nick Cardoso",
+        "url": "https://link.nickcardoso.com/"
+      },
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Home Assistant OS",
+      "description": "A Home Assistant custom integration to fetch Unsplash statistics natively with robust privacy preservation.",
+      "codeRepository": "https://github.com/nicx17/unstats"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #FAF9F6;
+            --bg-secondary: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-muted: #555555;
+            --border-color: #E5E3DB;
+            /* Utilizing system fonts for zero-latency text rendering */
+            --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 115%;
+            line-height: 1.6;
+            margin: 0;
+            padding: 6vw 2rem;
+            display: flex;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .project-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            color: #1A1A1A;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.4rem;
+            font-size: 1.15rem;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--text-main);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: var(--text-main);
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: #F0EFEA;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .usage-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .usage-box h3 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        .usage-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            border-bottom: none;
+        }
+        
+        .nav-back:hover {
+            color: var(--text-main);
+            border-bottom: none;
+        }
+
+        /* Mobile Screens */
+        @media (max-width: 600px) {
+            body {
+                font-size: 90%;
+                padding: 6vw 1.2rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 2.5rem;
+            }
+
+            h3 {
+                font-size: 1.4rem;
+                margin-top: 2rem;
+            }
+
+            p, ul, ol, .project-meta {
+                font-size: 1.05rem;
+            }
+
+            .data-table {
+                font-size: 0.95rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.5rem;
+            }
+
+            .usage-box {
+                padding: 1.5rem;
+                margin-top: 2.5rem;
+            }
+
+            .usage-box h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-back {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="project-container">
+        <a href="https://link.nickcardoso.com/projects" class="nav-back" aria-label="Return to projects index">&larr; Back to Projects</a>
+
+        <article>
+            <header>
+                <h1>Unstats</h1>
+                <div class="project-meta">
+                    <span><strong>Role:</strong> Engineering Student</span>
+                    <span><strong>Repository:</strong> <a href="https://github.com/nicx17/unstats" target="_blank" rel="noopener noreferrer">nicx17/unstats</a></span>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Home Assistant</span>
+                        <span class="tag">HACS</span>
+                        <span class="tag">API Integration</span>
+                    </div>
+                </div>
+            </header>
+
+            <section>
+                <h2>Overview</h2>
+                <p>A custom component for Home Assistant that actively fetches a user's Unsplash statistics natively. Instead of relying on brittle external cron-jobs, disparate bash scripts, or complex OAuth developer setups, this integration polls statistical data directly within the Home Assistant event loop and provisions rich, persistent entity sensors.</p>
+            </section>
+
+            <section>
+                <h2>Provided Telemetry Sensors</h2>
+                <p>Upon configuring a username via the standard UI interface, the core dynamically registers three tracking entities that auto-refresh every hour:</p>
+                <ul>
+                    <li><code>sensor.unsplash_views</code>: Total lifetime impressions on uploaded photographs.</li>
+                    <li><code>sensor.unsplash_downloads</code>: Cumulative history of high-resolution asset downloads.</li>
+                    <li><code>sensor.unsplash_likes</code>: The aggregate volume of user favorites.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Architecture &amp; Data Privacy</h2>
+                <p>To eliminate the abrasive requirement of mandating standard Home Assistant users setup complex Unsplash Developer OAuth Applications to generate API keys, this integration acts solely as an edge client pointing to a centralized proxy relay.</p>
+                <ul>
+                    <li><strong>Edge Relay Request:</strong> The local Home Assistant instance fires a sanitized webhook containing <em>only</em> the target Unsplash Username up to the configured proxy endpoint.</li>
+                    <li><strong>Secure Proxy Appendage:</strong> The isolated proxy server (`un.hyclotron.com`) receives the request, intelligently embeds the heavily-guarded master Developer Credentials, queries the public Unsplash API over encrypted limits, and returns the strict JSON artifact back to the edge node.</li>
+                    <li><strong>Guaranteed Obfuscation:</strong> The client machine never sees the secrets. The relay server executes fully stateless transitions—it tracks zero IP addresses, stores no personal telemetry, and securely evaporates requests upon fulfillment.</li>
+                </ul>
+            </section>
+
+            <section class="usage-box">
+                <h3>Installation Setup</h3>
+                <p>This integration supports native inclusion via HACS (Home Assistant Community Store).</p>
+                <ol>
+                    <li>Access the HACS integrations panel.</li>
+                    <li>Select <strong>Custom Repositories</strong>, add <code>https://github.com/nicx17/unstats</code> as an <em>Integration</em>.</li>
+                    <li>Restart the core Home Assistant engine.</li>
+                    <li>Navigate to <strong>Settings &gt; Devices &amp; Services &gt; Add Integration</strong>, search for <em>Unstats</em>, and provide your active username. No manual YAML definitions or `.env` state required.</li>
+                </ol>
+            </section>
+        </article>
+    </main>
+
+</body>
+</html>
