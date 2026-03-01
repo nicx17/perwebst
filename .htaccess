@@ -17,3 +17,30 @@ RewriteRule ^(.*)$ $1.html [L]
 
 # 3. Handle Directory Indexes explicitly
 DirectoryIndex index.html
+
+# 4. Enable Browser Caching for exceptional PageSpeed Insights Scores
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # CSS & Media: Cache for 1 Year
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Default fallback
+    ExpiresDefault "access plus 2 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Enforce strict Cache-Control headers natively
+    <FilesMatch "\.(css|png|jpg|jpeg|svg|ico)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+    
+    # Keep HTML fresh
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "max-age=3600, must-revalidate"
+    </FilesMatch>
+</IfModule>
