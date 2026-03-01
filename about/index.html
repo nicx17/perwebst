@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About This Site | Nick Cardoso</title>
 <meta name="description" content="Technical specifications, hardware, and architecture of Nick Cardoso's self-hosted portfolio.">
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</noscript>
+
 <link rel="stylesheet" href="/css/about.css">
 </head>
 <body>
@@ -23,12 +20,12 @@
 <h2>The Stack</h2>
 <div class="stack-grid">
 <div class="stack-card">
-<i class="fas fa-network-wired"></i>
+<svg viewBox="0 0 640 512" aria-hidden="true" fill="currentColor"><path d="M640 264v-16c0-8.8-7.2-16-16-16H496c-8.8 0-16 7.2-16 16v16c0 53-43 96-96 96H256c-53 0-96-43-96-96v-16c0-8.8-7.2-16-16-16H16c-8.8 0-16 7.2-16 16v16c0 64.9 48.7 118.5 112 127.3v8.7c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16v-8.7h224v8.7c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16v-8.7c63.3-8.8 112-62.4 112-127.3zM256 128h128c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32zm0 192h128c17.7 0 32-14.3 32-32v-64c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32z"/></svg>
 <h3>Edge &amp; Routing</h3>
 <p>DNS and edge caching are handled by <strong>Cloudflare</strong>, masking a dedicated <strong>Static IP</strong>. Inbound traffic is securely routed using <strong>Nginx Proxy Manager</strong> for SSL termination and reverse proxying.</p>
 </div>
 <div class="stack-card">
-<i class="fas fa-server"></i>
+<svg viewBox="0 0 512 512" aria-hidden="true" fill="currentColor"><path d="M480 160H32c-17.673 0-32-14.327-32-32V64c0-17.673 14.327-32 32-32h448c17.673 0 32 14.327 32 32v64c0 17.673-14.327 32-32 32zm-48-88c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24zm-64 0c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24zm112 248H32c-17.673 0-32-14.327-32-32v-64c0-17.673 14.327-32 32-32h448c17.673 0 32 14.327 32 32v64c0 17.673-14.327 32-32 32zm-48-88c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24zm-64 0c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24zm112 248H32c-17.673 0-32-14.327-32-32v-64c0-17.673 14.327-32 32-32h448c17.673 0 32 14.327 32 32v64c0 17.673-14.327 32-32 32zm-48-88c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24zm-64 0c-13.255 0-24 10.745-24 24s10.745 24 24 24 24-10.745 24-24-10.745-24-24-24z"/></svg>
 <h3>Web Server</h3>
 <p>The site is served using a bare-metal <strong>Apache2</strong> web server configured to serve static, flat-file HTML and CSS directly from the file system for zero-latency TTFB (Time to First Byte).</p>
 </div>
