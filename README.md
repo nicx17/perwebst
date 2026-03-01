@@ -1,51 +1,52 @@
-# Nick Cardoso - Personal Portfolio & Infrastructure Logs
+# Nick Cardoso — Personal Portfolio & Infrastructure Logs
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/nicx17/pers?color=blue)](https://github.com/nicx17/pers/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Welcome to the source code for my personal portfolio and technical documentation site. This repository serves as the frontend hub linking to my various software engineering projects, hardware experiments, and self-hosted infrastructure logs. 
 
 **Live Website:** [link.nickcardoso.com](https://link.nickcardoso.com)
 
-## Architecture & Tech Stack
+---
 
-This site is built with a focus on maximum performance, absolute minimalism, and dependency-free engineering.
+##  Architecture & Tech Stack
 
-* **Frontend:** 100% Vanilla HTML5 and CSS3. No heavy JavaScript frameworks, no Tailwind overhead, and no external UI libraries. 
-* **Design System:** Custom CSS variables (`:root`) handling a refined light-theme aesthetic (`#FAF9F6` background / `#2D2D2D` text) and a fluid, mobile-first responsive layout via strict CSS `@media` queries. Typography deliberately relies on native OS system fonts (`system-ui`, `ui-serif`) for true zero-latency rendering.
-* **Routing:** Extensionless (`/projects/hytrackv3` instead of `/projects/hytrackv3.html`) URL structuring powered by custom Apache `.htaccess` proxy rewrite rules.
-* **Hosting Platform:** Entirely self-hosted on bare-metal edge hardware (Raspberry Pi 5 running Debian Linux).
-* **Web Server:** Apache2 handling local HTML serving, situated behind an Nginx Proxy Manager (OpenResty) edge router for SSL termination and secure reverse proxying.
+This site is built with a hyper-focus on maximum performance, absolute minimalism, and zero-dependency engineering. It scores a flawless **100/100 on Google Lighthouse** for Performance across both [Desktop](https://pagespeed.web.dev/analysis/https-link-nickcardoso-com/2zw9esilz5?form_factor=desktop) and [Mobile](https://pagespeed.web.dev/analysis/https-link-nickcardoso-com/2zw9esilz5?form_factor=mobile) metrics.
 
-## Featured Projects
+* **Frontend:** 100% Vanilla HTML5 and CSS3. No heavy JavaScript frameworks (React/Vue), no Tailwind overhead, and zero external UI libraries. 
+* **Design System:** Custom CSS variables (`:root`) handling a refined light-theme aesthetic (`#FAF9F6` background / `#2D2D2D` text) and a fluid, mobile-first layout. Typography deliberately relies on native OS system fonts (`system-ui`, `ui-serif`) for true zero-latency rendering and zero Layout Shifts (CLS).
+* **Zero External Dependencies:** Removed all CDN requests (including FontAwesome) in favor of crisp, embedded inline SVG paths to permanently eliminate Render Blocking network requests.
+* **Routing & Caching:** Extensionless URL structuring (`/projects/hytrackv3`) powered by custom Apache `.htaccess` proxy rewrite rules, alongside aggressive `mod_expires` and `Cache-Control (max-age=31536000)` headers for instant return-visitor paints.
+* **Infrastructure:** Entirely self-hosted on bare-metal edge hardware (Raspberry Pi 5 running Debian Linux) served via an Apache2 engine sat behind an Nginx Proxy Manager (OpenResty) edge router.
 
-The `/projects` route dynamically showcases my standalone software engineering logic and hardware integrations. Some highlighted repositories currently linked include:
+---
+
+##  Featured Projects
+
+The `/projects` route dynamically showcases my standalone software engineering logic and hardware integrations. Highlighted repositories include:
 
 * **[HyTrackV3](https://github.com/nicx17/HyTrackV3)**: An autonomous, locally-hosted Python engine that ingests emails, actively scrapes dynamic courier sites via headless Selenium, constructs SHA-256 state hashes, and dispatches real-time shipment notifications.
 * **[HyTrack API](https://github.com/nicx17/hytrackapi)**: The backend REST microservice powering HyTrack. Built with FastAPI and secured with military-grade bcrypt hashing, constant-time token comparison, and proactive slowapi rate-limiting.
 * **[ImmichSync](https://github.com/nicx17/ImmichSync)**: A secure Python script utilizing targeted environment variables and recursive deduplication logic to safely synchronize local machine directories directly to an Immich backend server.
+* **[Unstats](https://github.com/nicx17/unstats)**: A native Home Assistant custom integration (HACS) that acts as an edge client to securely fetch and provision live Unsplash account statistics natively within the Python event loop.
 * **[MultiWave](https://github.com/nicx17/MultiWave)**: A custom-built, wirelessly communicating multi-cable tester encompassing C++ and Arduino Mega hardware logic. 
 
-## Security & Validations
+---
+
+##  Security & Validations
+
+> [!NOTE]
+> All code in this repository is regularly subjected to strict CI/CD and linting sweeps to maintain architectural integrity.
 
 * **Strict DOM Compliance:** Every single HTML file rigorously conforms to the `html-validate` linter, guaranteeing 0 syntax errors, 0 raw/unescaped characters, and 0 inline styles.
-* **Proxy Safety:** Apache `.htaccess` rewrite conditions natively ingest Nginx's `%{HTTP_HOST}` X-Forwarded headers to absolutely prevent internal routing topologies or loopback ports (`127.0.0.1:9393`) from leaking via HTTPS `Location` redirects.
-* **Stateless Workspace:** Excludes all environment `.env` artifacts, `.DS_Store` caching, and production `.tar.gz` deployment bundles through stringent `.gitignore` indexing. 
-
-## Local Development
-
-To run this site locally on your own machine:
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/nicx17/pers.git
-   ```
-2. Navigate into the directory:
-   ```bash
-   cd pers
-   ```
-3. Boot a lightweight local Python HTTP server:
-   ```bash
-   python -m http.server 8000
-   ```
-4. Open your browser and navigate to `http://localhost:8000/`.
+* **Header Fortification:** Apache `.htaccess` rewrite conditions natively ingest Nginx's `%{HTTP_HOST}` X-Forwarded headers to absolutely prevent internal routing topologies or loopback ports from leaking via HTTPS `Location` redirects.
+* **Stateless Repository:** Stringent `.gitignore` indexing excludes all local `.env` artifacts, IDE `.DS_Store` caching, Cloudflare deployment logs, and generated minification scripts.
 
 ---
-*Developed by Nick Cardoso.*
+
+
+##  License
+
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for full details.
+
+Developed by [Nick Cardoso](https://link.nickcardoso.com).
