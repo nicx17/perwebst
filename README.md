@@ -29,7 +29,8 @@ The `/projects` route dynamically showcases my standalone software engineering l
 * **[HyTrack API](https://github.com/nicx17/hytrackapi)**: The backend REST microservice powering HyTrack. Built with FastAPI and secured with military-grade bcrypt hashing, constant-time token comparison, and proactive slowapi rate-limiting.
 * **[ImmichSync](https://github.com/nicx17/ImmichSync)**: A secure Python script utilizing targeted environment variables and recursive deduplication logic to safely synchronize local machine directories directly to an Immich backend server.
 * **[Unstats](https://github.com/nicx17/unstats)**: A native Home Assistant custom integration (HACS) that acts as an edge client to securely fetch and provision live Unsplash account statistics natively within the Python event loop.
-* **[MultiWave](https://github.com/nicx17/MultiWave)**: A custom-built, wirelessly communicating multi-cable tester encompassing C++ and Arduino Mega hardware logic. 
+* **[MultiWave](https://github.com/nicx17/MultiWave)**: A custom-built, wirelessly communicating multi-cable tester encompassing C++ and Arduino Mega hardware logic.
+* **[InfinityX](https://github.com/nicx17/InfinityX)**: An ESPHome configuration that physically integrates an ESP32 microcontroller inside a Bluetooth speaker, wiring GPIO outputs to the speaker's physical buttons for native Home Assistant control.
 
 ---
 
