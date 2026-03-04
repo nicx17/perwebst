@@ -66,6 +66,7 @@
 <li><strong>File Monitoring:</strong> Utilizes <code>inotify</code> to immediately detect and queue new local files for upload.</li>
 <li><strong>Intelligent Connectivity:</strong> Automatically switches between Internal (LAN) and External (WAN) server URLs depending on availability.</li>
 <li><strong>Desktop Integration:</strong> Complete with a system tray menu, About dialog, Status visibility, and a comprehensive settings UI for configuring sync folders, API keys, and server addresses.</li>
+<li><strong>Wayland Compatibility:</strong> Tested natively on GNOME environments utilizing Wayland (requires AppIndicator support), ensuring modern Linux standards.</li>
 <li><strong>Concurrent Operations:</strong> Uses multi-threading (up to 10 workers) for fast batch-uploading.</li>
 <li><strong>Automated Album Creation:</strong> Inherits your local folder names and creates corresponding albums seamlessly on the Immich server (e.g. <code>~/Pictures/Vacation</code> routes directly to the "Vacation" album).</li>
 <li><strong>Secure Credential Storage:</strong> Safely stores the application API Key within the native system keyring (libsecret/KWallet).</li>
@@ -73,7 +74,8 @@
 </section>
 <section>
 <h2>Architecture &amp; Operation</h2>
-<p>The solution comprises a backend daemon written in Python that oversees a synchronization queue populated by <code>inotify</code> events. A separated graphical tray component allows the user to interact with the daemon without needing the terminal, built via <code>gobject-introspection</code> and standard Linux AppIndicator libraries. Its additive-only approach ensures zero deletion or modification of source files securely.</p>
+<p>The solution comprises a background daemon written in Python that oversees a synchronization queue populated by <code>inotify</code> events. A separated graphical tray component allows the user to interact with the daemon without needing the terminal, built via <code>gobject-introspection</code> and standard Linux AppIndicator libraries. Its additive-only approach ensures zero deletion or modification of source files securely.</p>
+<p>Because the app supports detecting the network state, users on laptops can roam between their LAN, where they connect directly with maximum bandwidth using an internal IP, and WAN connections to the Immich server when away, providing a fluid off-site backup functionality.</p>
 </section>
 <section class="usage-box">
 <h3>System Setup</h3>
