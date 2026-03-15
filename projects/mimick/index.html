@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mimick | Nick Cardoso</title>
+<meta name="description" content="A Rust-based GTK4 and Libadwaita Linux desktop sync app that uploads local media to an Immich server with retries, album mapping, and tray integration.">
+<meta name="keywords" content="Mimick, Immich, Rust, GTK4, Libadwaita, Linux, Flatpak, Sync, Nick Cardoso, portfolio project">
+<meta name="author" content="Nick Cardoso">
+<link rel="canonical" href="https://link.nickcardoso.com/projects/mimick">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://link.nickcardoso.com/projects/mimick">
+<meta property="og:title" content="Mimick | Nick Cardoso">
+<meta property="og:description" content="A Linux desktop sync app for Immich built in Rust with GTK4, background retries, startup catch-up scans, and system tray controls.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mimick | Nick Cardoso">
+<meta name="twitter:description" content="A Rust-powered GTK4 Linux sync app for Immich with Flatpak packaging, album mapping, retries, and system tray integration.">
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "SoftwareApplication",
+"name": "Mimick",
+"author": {
+"@type": "Person",
+"name": "Nick Cardoso",
+"url": "https://link.nickcardoso.com/"
+},
+"applicationCategory": "UtilityApplication",
+"operatingSystem": "Linux",
+"description": "A Linux desktop sync app built in Rust for uploading local media to an Immich server with retries, album mapping, and GTK4 desktop integration.",
+"softwareVersion": "6.0.0",
+"offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+},
+"codeRepository": "https://github.com/nicx17/mimick"
+}
+</script>
+<link rel="stylesheet" href="/css/project.css">
+</head>
+<body>
+<main class="project-container">
+<a href="/projects/" class="nav-back" aria-label="Return to projects page">&larr; Back to Projects</a>
+<article>
+<header>
+<h1>Mimick</h1>
+<div class="project-meta">
+<span><strong>Role:</strong> Engineering Student</span>
+<span><strong>Repository:</strong> <a href="https://github.com/nicx17/mimick" target="_blank" rel="noopener noreferrer">nicx17/mimick</a></span>
+<div class="tags">
+<span class="tag">Rust</span>
+<span class="tag">Linux</span>
+<span class="tag">GTK4</span>
+<span class="tag">Libadwaita</span>
+<span class="tag">Flatpak</span>
+</div>
+</div>
+</header>
+<section>
+<h2>Overview</h2>
+<p>Mimick is a Linux desktop sync client for Immich that watches local folders such as <code>~/Pictures</code> and <code>~/Videos</code>, uploads new media in the background, and gives the user a native GTK4 settings experience instead of a script-only workflow. It is designed as a one-way sync tool that stays out of the way day-to-day while still exposing the controls you need for album routing, startup behavior, and network targeting.</p>
+</section>
+<section>
+<h2>Key Features</h2>
+<ul>
+<li><strong>Live File Monitoring:</strong> Watches selected folders for new media and waits for file size stability before queueing uploads.</li>
+<li><strong>Immich-Compatible Deduplication:</strong> Computes SHA-1 checksums before upload to match the same duplicate detection strategy used by the Immich mobile clients.</li>
+<li><strong>Fast Parallel Uploading:</strong> Streams files directly from disk across 10 worker tasks, keeping memory pressure low even during larger batches.</li>
+<li><strong>Retry Persistence:</strong> Failed uploads are written to <code>~/.cache/mimick/retries.json</code> and replay automatically when the app is launched again.</li>
+<li><strong>Dual-URL Connectivity:</strong> Can switch between internal LAN and external WAN Immich endpoints based on what is reachable at the time.</li>
+<li><strong>Flexible Album Mapping:</strong> Lets each watched folder target an existing album, a custom album name, or an album derived from the local folder name.</li>
+<li><strong>Secure Secret Storage:</strong> Stores the Immich API key in the system keyring through <code>libsecret</code> instead of leaving credentials in plain text configuration.</li>
+</ul>
+</section>
+<section>
+<h2>Desktop Workflow</h2>
+<p>The current release is a Rust 6.0.0 application built around GTK4, Libadwaita, and a StatusNotifier tray flow for Linux desktops. The settings window handles watch-path selection, URL configuration, API key setup, and login autostart, while the background process keeps working even after the window is closed.</p>
+<ul>
+<li><strong>Startup Catch-Up:</strong> On launch, Mimick rescans watched folders and only queues media that is new, changed, or retargeted to a different album.</li>
+<li><strong>Clear Background Behavior:</strong> Closing the settings window hides the UI, while quitting from the tray or launcher fully stops the sync process.</li>
+<li><strong>Portal-Friendly Folder Access:</strong> Flatpak builds rely on selected-folder access instead of broad home-directory permissions, which fits modern Linux sandbox expectations better.</li>
+<li><strong>Autostart Support:</strong> Supports login startup through the desktop portal in Flatpak builds and through a native autostart entry outside Flatpak.</li>
+</ul>
+</section>
+<section class="usage-box">
+<h3>Installation &amp; Usage</h3>
+<p>Mimick is currently distributed as a beta Linux application with support for Immich v1.118 and newer. The recommended install path is the project's Flatpak repository, which keeps updates straightforward across distributions.</p>
+<p><code>flatpak remote-add --user --if-not-exists mimick-repo https://nicx17.github.io/mimick/mimick.flatpakrepo</code></p>
+<p><code>flatpak install --user mimick-repo io.github.nicx17.mimick</code></p>
+<p>For native builds, the repository also ships a standard Rust toolchain workflow using <code>cargo build --release</code>.</p>
+<p><strong>View Source and Releases:</strong> <a href="https://github.com/nicx17/mimick" target="_blank" rel="noopener noreferrer">nicx17/mimick</a></p>
+</section>
+</article>
+</main>
+</body>
+</html>
