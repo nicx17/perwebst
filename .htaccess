@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Redirect legacy project routes to their current canonical locations
+RewriteRule ^projects/immichsyncapp/?$ /projects/mimick/ [R=301,L]
+
 # 1. Enforce Trailing Slash for Directories via NPM
 # Check if requested URI is a directory without a trailing slash
 RewriteCond %{REQUEST_FILENAME} -d

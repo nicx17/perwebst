@@ -7,14 +7,17 @@
 <meta name="description" content="A Rust-based GTK4 and Libadwaita Linux desktop sync app that uploads local media to an Immich server with retries, album mapping, and tray integration.">
 <meta name="keywords" content="Mimick, Immich, Rust, GTK4, Libadwaita, Linux, Flatpak, Sync, Nick Cardoso, portfolio project">
 <meta name="author" content="Nick Cardoso">
-<link rel="canonical" href="https://link.nickcardoso.com/projects/mimick">
+<link rel="canonical" href="https://link.nickcardoso.com/projects/mimick/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://link.nickcardoso.com/projects/mimick">
+<meta property="og:url" content="https://link.nickcardoso.com/projects/mimick/">
 <meta property="og:title" content="Mimick | Nick Cardoso">
 <meta property="og:description" content="A Linux desktop sync app for Immich built in Rust with GTK4, background retries, startup catch-up scans, and system tray controls.">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://raw.githubusercontent.com/nicx17/mimick/main/src/assets/icon.png">
+<meta property="og:image:alt" content="Mimick application icon">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mimick | Nick Cardoso">
 <meta name="twitter:description" content="A Rust-powered GTK4 Linux sync app for Immich with Flatpak packaging, album mapping, retries, and system tray integration.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/nicx17/mimick/main/src/assets/icon.png">
 <script type="application/ld+json">
 {
 "@context": "https://schema.org",
@@ -28,7 +31,6 @@
 "applicationCategory": "UtilityApplication",
 "operatingSystem": "Linux",
 "description": "A Linux desktop sync app built in Rust for uploading local media to an Immich server with retries, album mapping, and GTK4 desktop integration.",
-"softwareVersion": "6.0.0",
 "offers": {
 "@type": "Offer",
 "price": "0",
@@ -75,7 +77,7 @@
 </section>
 <section>
 <h2>Desktop Workflow</h2>
-<p>The current release is a Rust 6.0.0 application built around GTK4, Libadwaita, and a StatusNotifier tray flow for Linux desktops. The settings window handles watch-path selection, URL configuration, API key setup, and login autostart, while the background process keeps working even after the window is closed.</p>
+<p>Mimick is a Rust application built around GTK4, Libadwaita, and a StatusNotifier tray flow for Linux desktops. The settings window handles watch-path selection, URL configuration, API key setup, and login autostart, while the background process keeps working even after the window is closed.</p>
 <ul>
 <li><strong>Startup Catch-Up:</strong> On launch, Mimick rescans watched folders and only queues media that is new, changed, or retargeted to a different album.</li>
 <li><strong>Clear Background Behavior:</strong> Closing the settings window hides the UI, while quitting from the tray or launcher fully stops the sync process.</li>
@@ -85,7 +87,7 @@
 </section>
 <section class="usage-box">
 <h3>Installation &amp; Usage</h3>
-<p>Mimick is currently distributed as a beta Linux application with support for Immich v1.118 and newer. The recommended install path is the project's Flatpak repository, which keeps updates straightforward across distributions.</p>
+<p>Mimick is currently distributed as a beta Linux application for modern Immich setups. The recommended install path is the project's Flatpak repository, which keeps updates straightforward across distributions.</p>
 <p><code>flatpak remote-add --user --if-not-exists mimick-repo https://nicx17.github.io/mimick/mimick.flatpakrepo</code></p>
 <p><code>flatpak install --user mimick-repo io.github.nicx17.mimick</code></p>
 <p>For native builds, the repository also ships a standard Rust toolchain workflow using <code>cargo build --release</code>.</p>
