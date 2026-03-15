@@ -3,40 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mimick | Nick Cardoso</title>
-<meta name="description" content="A daemon-based synchronization tool for uploading media files from a Linux desktop to an Immich server.">
-<meta name="keywords" content="Immich, Python, API, Automation, Sync, Backup, Linux, GTK4, Nick Cardoso, portfolio project">
-<meta name="author" content="Nick Cardoso">
-<link rel="canonical" href="https://link.nickcardoso.com/projects/immichsyncapp">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://link.nickcardoso.com/projects/immichsyncapp">
-<meta property="og:title" content="Mimick | Nick Cardoso">
-<meta property="og:description" content="A daemon-based synchronization tool for uploading media files from a Linux desktop to an Immich server with system tray integration.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Mimick | Nick Cardoso">
-<meta name="twitter:description" content="A daemon-based synchronization tool for uploading media files from a Linux desktop to an Immich server with system tray integration.">
-<script type="application/ld+json">
-{
-"@context": "https://schema.org",
-"@type": "SoftwareApplication",
-"name": "Mimick",
-"author": {
-"@type": "Person",
-"name": "Nick Cardoso",
-"url": "https://link.nickcardoso.com/"
-},
-"applicationCategory": "DeveloperApplication",
-"operatingSystem": "Linux",
-"description": "A daemon-based synchronization tool for uploading media files from a Linux desktop to an Immich server.",
-"softwareVersion": "2.0.1",
-"offers": {
-"@type": "Offer",
-"price": "0",
-"priceCurrency": "USD"
-},
-"codeRepository": "https://github.com/nicx17/mimick"
-}
-</script>
+<title>Mimick Has Moved | Nick Cardoso</title>
+<meta name="description" content="The Mimick project page now lives at /projects/mimick/.">
+<meta http-equiv="refresh" content="0; url=/projects/mimick/">
+<link rel="canonical" href="https://link.nickcardoso.com/projects/mimick">
 <link rel="stylesheet" href="/css/project.css">
 </head>
 <body>
@@ -45,51 +15,10 @@
 <article>
 <header>
 <h1>Mimick</h1>
-<div class="project-meta">
-<span><strong>Role:</strong> Engineering Student</span>
-<span><strong>Repository:</strong> <a href="https://github.com/nicx17/mimick" target="_blank" rel="noopener noreferrer">nicx17/mimick</a></span>
-<div class="tags">
-<span class="tag">Python</span>
-<span class="tag">Linux</span>
-<span class="tag">GTK4</span>
-<span class="tag">Immich API</span>
-</div>
-</div>
-<div style="text-align: center; margin-top: 2rem; margin-bottom: 1rem;">
-<img src="https://raw.githubusercontent.com/nicx17/mimick/main/src/assets/icon.png" alt="Mimick Logo" style="width: 200px; height: 200px; border-radius: 20%;">
-</div>
 </header>
 <section>
-<h2>Overview</h2>
-<p>A daemon-based synchronization tool for intelligently uploading media files from a Linux desktop setup to an Immich server. Operating seamlessly as a background service, it watches local directories for new files and supports deep system integration including a system tray icon, notifications, and graphical settings management.</p>
-</section>
-<section>
-<h2>Features</h2>
-<ul>
-<li><strong>File Monitoring:</strong> Utilizes <code>inotify</code> to immediately detect and queue new local files for upload.</li>
-<li><strong>Intelligent Connectivity:</strong> Automatically switches between Internal (LAN) and External (WAN) server URLs depending on availability using Captive Portal verification logic.</li>
-<li><strong>Desktop Integration:</strong> Complete with a system tray menu, About dialog, Status visibility, and a comprehensive settings UI for configuring sync folders, API keys, and server addresses.</li>
-<li><strong>Modern UI & Wayland Compatibility:</strong> Tested natively on GNOME environments utilizing Wayland, built with modern GTK4 standard libraries.</li>
-<li><strong>Concurrent Operations:</strong> Uses multi-threading (up to 10 workers) for fast batch-uploading.</li>
-<li><strong>Offline Reliability:</strong> Uploads that drop mid-flight or queue without a connection are serialized to a local cache and safely wait out offline statuses before resuming via background workers.</li>
-<li><strong>Automated Album Creation:</strong> Inherits your local folder names and creates corresponding albums seamlessly on the Immich server (e.g. <code>~/Pictures/Vacation</code> routes directly to the "Vacation" album).</li>
-<li><strong>Secure Credential Storage:</strong> Safely stores the application API Key within the native system keyring (libsecret/KWallet).</li>
-</ul>
-</section>
-<section>
-<h2>Architecture &amp; Operation</h2>
-<p>The solution is designed as a multi-threaded daemon with a safely decoupled UI process. Operations are split into specialized components ensuring rapid processing without sacrificing desktop stability.</p>
-<ul>
-<li><strong>File Monitor:</strong> Utilizes the <code>watchdog</code> library to hook into filesystem events (like <code>IN_CREATE</code> and <code>IN_MOVED_TO</code>). Crucially, it implements debouncing techniques to ensure files are fully written to disk before triggering, and immediately calculates SHA-1 checksums to support native Immich server-side deduplication.</li>
-<li><strong>Queue Manager:</strong> A thread-safe orchestrator receiving file tasks and distributing them across 10 daemon worker threads. Failed uploads are captured and persisted via a local JSON cache, standing ready to automatically resume upon network restoration even after a hard system reboot.</li>
-<li><strong>API Client:</strong> Encapsulates Immich server communication showcasing Intelligent Dual-URL support with failovers and captive portal verifications. Album creation uses strict thread-locking to prevent duplicate album records under simultaneous high-volume worker loads.</li>
-<li><strong>Decoupled UI:</strong> Communication between the daemon and graphical settings/tray app is handled efficiently via states tracked in cached JSONs limiting GTK/event-loop collisions, supplemented by <code>notify-send</code> for native OS desktop progress indicators.</li>
-</ul>
-</section>
-<section class="usage-box">
-<h3>System Setup</h3>
-<p>The app is tailored for Debian/Ubuntu, Fedora, and Arch-based systems and now ships as an easy to use AppImage. It supports Native Python environment installation and Systemd User Service persistence to automatically kickstart operations upon a user's local login.</p>
-<p><strong>View Source and Releases:</strong> <a href="https://github.com/nicx17/mimick" target="_blank" rel="noopener noreferrer">nicx17/mimick</a></p>
+<h2>Route Updated</h2>
+<p>This project page now lives at <a href="/projects/mimick/">/projects/mimick/</a>. If your browser does not redirect automatically, use that link to continue.</p>
 </section>
 </article>
 </main>
