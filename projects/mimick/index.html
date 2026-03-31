@@ -42,6 +42,7 @@
 </script>
 <link rel="stylesheet" href="/css/project.css">
 <link rel="stylesheet" href="/css/mimick.css">
+<script src="/js/mimick.js" defer></script>
 </head>
 <body>
 <main class="project-container">
@@ -236,43 +237,5 @@ flatpak install --user mimick-repo io.github.nicx17.mimick</code></pre>
 <p class="lightbox-caption"></p>
 </div>
 </dialog>
-<script>
-const lightbox = document.getElementById("screenshot-lightbox");
-const lightboxImage = lightbox?.querySelector(".lightbox-image");
-const lightboxCaption = lightbox?.querySelector(".lightbox-caption");
-const lightboxClose = lightbox?.querySelector(".lightbox-close");
-const screenshotTriggers = document.querySelectorAll(".screenshot-trigger");
-
-if (lightbox && lightboxImage && lightboxCaption && lightboxClose && screenshotTriggers.length) {
-  const openLightbox = (trigger) => {
-    lightboxImage.src = trigger.dataset.fullscreenImage || "";
-    lightboxImage.alt = trigger.dataset.fullscreenAlt || "";
-    lightboxCaption.textContent = trigger.dataset.fullscreenCaption || "";
-    lightbox.showModal();
-  };
-
-  const closeLightbox = () => {
-    lightbox.close();
-    lightboxImage.src = "";
-  };
-
-  screenshotTriggers.forEach((trigger) => {
-    trigger.addEventListener("click", () => openLightbox(trigger));
-  });
-
-  lightboxClose.addEventListener("click", closeLightbox);
-
-  lightbox.addEventListener("click", (event) => {
-    const frame = lightbox.querySelector(".lightbox-frame");
-    if (frame && !frame.contains(event.target)) {
-      closeLightbox();
-    }
-  });
-
-  lightbox.addEventListener("close", () => {
-    lightboxImage.src = "";
-  });
-}
-</script>
 </body>
 </html>
