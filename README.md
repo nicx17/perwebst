@@ -1,6 +1,6 @@
 # Nick Cardoso — Personal Portfolio & Infrastructure Logs
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/nicx17/pers?color=blue)](https://github.com/nicx17/pers/tags)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/nicx17/pers?color=blue)](https://github.com/nicx17/perwebst/tags)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Welcome to the source code for my personal portfolio and technical documentation site. This repository serves as the frontend hub linking to my various software engineering projects, hardware experiments, and self-hosted infrastructure logs. 
