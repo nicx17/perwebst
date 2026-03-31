@@ -22,6 +22,7 @@ jobs:
             --verbose
             --no-progress
             --config ./lychee.toml
+            --root-dir "${{ github.workspace }}"
             --accept 200,206,403,429
             './**/*.html'
             './**/*.md'
