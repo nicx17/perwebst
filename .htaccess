@@ -3,6 +3,10 @@ RewriteEngine On
 # Redirect legacy project routes to their current canonical locations
 RewriteRule ^projects/immichsyncapp/?$ /projects/mimick/ [R=301,L]
 
+# Reject unexpected hosts instead of reflecting them in redirects
+RewriteCond %{HTTP_HOST} !^(link\.nickcardoso\.com|immick\.hyclotron\.com)$ [NC]
+RewriteRule ^ - [F,L]
+
 # 1. Enforce Trailing Slash for Directories via NPM
 # Check if requested URI is a directory without a trailing slash
 RewriteCond %{REQUEST_FILENAME} -d
@@ -46,4 +50,11 @@ DirectoryIndex index.html
     <FilesMatch "\.(html|htm)$">
         Header set Cache-Control "max-age=3600, must-revalidate"
     </FilesMatch>
+
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'sha256-XNFHWEUgQe+3OgKDUmC2qqdp3b42tPB4JwiMu3tcHU4=' 'sha256-ZyzBS9/K/z56Smt/YEF7XKA3q0Y33jFvjx2pZX4GJ3Q=' 'sha256-tC6fBSyMmON5EvyIQiKH/jAM5Ja01IsmQhrMA2dPHe0=' 'sha256-b2wVtttYLxBjI0GER/F8/jieOhAXEbDv26u442RS6XE=' 'sha256-MBtZ7vG9U/IpB5pGgP3y3pzlxUx3Z6ij9zSO7AUWy7Y=' 'sha256-jMTwA3BMM4KppZfHKKfzd1w9g2TrlCwNvOJFblrtPEA=' 'sha256-TpYMOcUj1DnUnQRrq2suBZgFmg/Au7mI4bOPvJ08AdY='; style-src 'self'; upgrade-insecure-requests"
+    Header always set Permissions-Policy "camera=(), geolocation=(), microphone=()"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
 </IfModule>
