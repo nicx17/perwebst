@@ -20,7 +20,6 @@ import { homeLinks } from "../data/links";
         <a
           class="home-link"
           href={link.href}
-          data-astro-prefetch={link.external ? undefined : true}
           target={link.external ? "_blank" : undefined}
           rel={link.external ? "noopener noreferrer" : undefined}
         >
