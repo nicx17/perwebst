@@ -42,15 +42,8 @@
     return true;
   };
 
-  document.addEventListener("click", (event) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return;
-
-    const anchor = target.closest("a[href]");
+  const markNavigation = (anchor) => {
     if (!(anchor instanceof HTMLAnchorElement)) return;
-    if (!shouldHandle(anchor, event)) return;
-
-    event.preventDefault();
 
     try {
       sessionStorage.setItem(navFlag, "1");
@@ -59,10 +52,36 @@
     }
 
     root.classList.add("is-nav-exiting");
+  };
 
-    // Keep the delay short to preserve responsiveness while allowing fade-out.
-    globalThis.setTimeout(() => {
-      globalThis.location.href = anchor.href;
-    }, 165);
+  // Mark outgoing navigation as early as possible without delaying native navigation.
+  document.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const anchor = target.closest("a[href]");
+    if (!(anchor instanceof HTMLAnchorElement)) return;
+    if (!shouldHandle(anchor, event)) return;
+
+    markNavigation(anchor);
+  });
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const anchor = target.closest("a[href]");
+    if (!(anchor instanceof HTMLAnchorElement)) return;
+    if (!shouldHandle(anchor, event)) return;
+
+    markNavigation(anchor);
+  });
+
+  // Ensure restored pages from bfcache are visible immediately.
+  globalThis.addEventListener("pageshow", () => {
+    root.classList.remove("is-nav-loading");
+    root.classList.remove("is-nav-exiting");
   });
 })();
