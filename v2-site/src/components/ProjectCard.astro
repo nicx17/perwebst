@@ -1,0 +1,22 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+---
+
+<a class="project-card" href={project.data.canonicalPath} data-astro-prefetch>
+  <div class="project-card-title-row">
+    <h2>{project.data.title}</h2>
+    <span class="project-card-arrow" aria-hidden="true">-></span>
+  </div>
+  <p>{project.data.summary}</p>
+  <div class="tag-list project-tag-list">
+    {project.data.tags.map((tag) => (
+      <span class="tag">{tag}</span>
+    ))}
+  </div>
+</a>

@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { hardware, optimizationNotes, stackCards } from "../../data/about";
+---
+
+<BaseLayout
+  title="About This Site | Nick Cardoso"
+  description="Technical specifications and architecture details for Nick Cardoso's self-hosted portfolio."
+  canonicalPath="/about/"
+  shell={false}
+>
+  <header class="page-header">
+    <h1>System Architecture</h1>
+    <p class="subtitle">An overview of hardware, routing, and software powering this site.</p>
+  </header>
+
+  <section>
+    <h2>The Stack</h2>
+    <div class="project-grid">
+      {stackCards.map((item) => (
+        <article class="section-card">
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2>Hardware Specifications</h2>
+    <table class="data-table">
+      <caption>Hardware baseline for the production host.</caption>
+      <tbody>
+        {hardware.map(([key, value]) => (
+          <tr>
+            <th scope="row">{key}</th>
+            <td>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Performance and Optimizations</h2>
+    <table class="data-table">
+      <caption>Current optimizations and controls used in production.</caption>
+      <tbody>
+        {optimizationNotes.map(([key, value]) => (
+          <tr>
+            <th scope="row">{key}</th>
+            <td>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</BaseLayout>

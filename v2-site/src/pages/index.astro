@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { homeLinks } from "../data/links";
+---
+
+<BaseLayout
+  title="Nick Cardoso - Links"
+  description="Nick Cardoso's technical portfolio, infrastructure documentation, and project links."
+  canonicalPath="/"
+  shell={false}
+>
+  <section class="home-stage">
+    <header class="page-header home-hero">
+      <h1>Nick Cardoso</h1>
+      <p class="subtitle">Engineering and Photography</p>
+    </header>
+
+    <section class="home-links home-links-centered" aria-label="Primary links">
+      {homeLinks.map((link) => (
+        <a
+          class="home-link"
+          href={link.href}
+          data-astro-prefetch={link.external ? undefined : true}
+          target={link.external ? "_blank" : undefined}
+          rel={link.external ? "noopener noreferrer" : undefined}
+        >
+          {link.label}
+        </a>
+      ))}
+    </section>
+  </section>
+</BaseLayout>

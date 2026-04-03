@@ -1,0 +1,68 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NavBack from "../../components/NavBack.astro";
+
+const slug = Astro.params.slug ?? "";
+const expectedPath = `/projects/${slug}/`;
+const projects = await getCollection("projects");
+const project = projects.find((entry) => entry.data.canonicalPath === expectedPath);
+
+let Content;
+if (project) {
+  const rendered = await render(project);
+  Content = rendered.Content;
+} else {
+  Astro.response.status = 404;
+}
+---
+
+{
+  project && Content ? (
+    <BaseLayout
+      title={`${project.data.title} | Nick Cardoso`}
+      description={project.data.summary}
+      canonicalPath={project.data.canonicalPath}
+      shell={false}
+    >
+      <NavBack href="/projects/" label="<- Back to Projects" />
+
+      <article class="article project-detail-card">
+        <header class="project-detail-header">
+          <h1>{project.data.title}</h1>
+          <div class="meta-row">
+            <span><strong>Role:</strong> {project.data.role}</span>
+            <span>
+              <strong>Repository:</strong>
+              <a href={project.data.repository} target="_blank" rel="noopener noreferrer">{project.data.repositoryLabel}</a>
+            </span>
+          </div>
+          <div class="tag-list">
+            {project.data.tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        </header>
+
+        <section class="article-content project-detail-content">
+          <Content />
+        </section>
+      </article>
+    </BaseLayout>
+  ) : (
+    <BaseLayout
+      title="Project Not Found | Nick Cardoso"
+      description="The requested project page does not exist."
+      canonicalPath={expectedPath}
+      shell={false}
+    >
+      <NavBack href="/projects/" label="<- Back to Projects" />
+      <article class="article project-detail-card">
+        <header>
+          <h1>Project Not Found</h1>
+          <p class="subtitle projects-page-subtitle">The URL you requested does not match an available project.</p>
+        </header>
+      </article>
+    </BaseLayout>
+  )
+}
