@@ -14,7 +14,7 @@ const SECURITY_POLICY = [
   "media-src 'self'",
   "worker-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "style-src-attr 'none'",
+  "style-src-attr 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
   "script-src-elem 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
   "script-src-attr 'none'",
