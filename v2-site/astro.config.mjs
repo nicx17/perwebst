@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 import node from "@astrojs/node";
 
 export default defineConfig({
-  site: "https://link.nickcardoso.com",
+  site: "https://test.nickcardoso.com",
   output: "server",
   adapter: node({ mode: "standalone" }),
   trailingSlash: "always",
