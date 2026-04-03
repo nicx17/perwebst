@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://link.nickcardoso.com/sitemap-index.xml
+Sitemap: https://test.nickcardoso.com/sitemap-index.xml
