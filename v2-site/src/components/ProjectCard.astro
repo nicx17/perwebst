@@ -8,7 +8,7 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<a class="project-card" href={project.data.canonicalPath} data-astro-prefetch>
+<a class="project-card" href={project.data.canonicalPath}>
   <div class="project-card-title-row">
     <h2>{project.data.title}</h2>
     <span class="project-card-arrow" aria-hidden="true">-></span>
