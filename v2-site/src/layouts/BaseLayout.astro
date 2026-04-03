@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title: string;
@@ -36,8 +35,8 @@ const isActive = (href: string) => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script is:inline src="/js/theme-bootstrap.js"></script>
-    <ClientRouter />
+    <script is:inline src="/js/theme-bootstrap.js" data-cfasync="false"></script>
+    <script is:inline src="/js/page-transition.js" data-cfasync="false"></script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -57,8 +56,8 @@ const isActive = (href: string) => {
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <script is:inline src="/js/theme-toggle.js" defer></script>
-    <script is:inline src="/js/background-rotator.js" defer></script>
+    <script is:inline src="/js/theme-toggle.js" defer data-cfasync="false"></script>
+    <script is:inline src="/js/background-rotator.js" defer data-cfasync="false"></script>
   </head>
   <body>
     <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>

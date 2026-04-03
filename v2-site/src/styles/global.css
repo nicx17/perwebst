@@ -401,6 +401,22 @@ html[data-theme="midnight"] body::before {
   width: min(var(--page-max), 100% - 2rem);
   margin: 0 auto;
   padding: 1.4rem 0 3rem;
+  transition:
+    opacity 220ms var(--ease-sleek),
+    filter 220ms var(--ease-sleek),
+    transform 220ms var(--ease-sleek);
+}
+
+html.is-nav-loading .page-shell {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translate3d(0, 8px, 0);
+}
+
+html.is-nav-exiting .page-shell {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translate3d(0, 6px, 0);
 }
 
 .page-shell-plain {
