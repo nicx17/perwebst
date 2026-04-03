@@ -23,3 +23,15 @@ ehthumbs.db
 Thumbs.db
 projects/mimick/immick_plan.md
 .github/workflows/error_log_link.md
+docs/v2/deployment/caddy/Caddyfile.migration
+docs/v2/deployment/caddy/native-cloudflare-setup.md
+docs/v2/deployment/npm-export-2026-04-03.json
+docs/v2/adr/0001-v2-architecture-and-scope.md
+docs/v2/phase-1-scope-lock.md
+v2.md
+docs/v2/deployment/caddy/route-inventory.md
+v2-site/dist
+v2-site/node_modules
+v2-site/.astro
+sample.css
+docs/v2
