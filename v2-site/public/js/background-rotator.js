@@ -14,7 +14,6 @@
 	};
 
 	const storageKey = (theme) => `bg-rotation-${theme}`;
-	const sessionKey = (theme) => `bg-session-${theme}`;
 	const sceneKey = (theme) => `bg-scene-${theme}`;
 	let activeLoadToken = 0;
 
@@ -65,23 +64,6 @@
 		}
 	};
 
-	const readSessionIndex = (theme) => {
-		try {
-			const parsed = Number(sessionStorage.getItem(sessionKey(theme)));
-			return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
-		} catch {
-			return null;
-		}
-	};
-
-	const writeSessionIndex = (theme, index) => {
-		try {
-			sessionStorage.setItem(sessionKey(theme), String(index));
-		} catch {
-			// Ignore storage write failures and keep runtime behavior functional.
-		}
-	};
-
 	const readSessionScene = (theme) => {
 		try {
 			return sessionStorage.getItem(sceneKey(theme));
@@ -99,7 +81,7 @@
 	};
 
 	const applyBackground = (theme, index, options = {}) => {
-		const { progressive = true } = options;
+		const { progressive = true, useTinyPlaceholder = true } = options;
 		const list = listFor(theme);
 		const image = list[index % list.length] ?? list[0];
 		if (!image) {
@@ -115,8 +97,10 @@
 
 		writeSessionScene(theme, sceneValue);
 
-		const tinyImage = tinyPlaceholderPath(image);
-		root.style.setProperty("--scene-image", `url("${tinyImage}")`);
+		if (useTinyPlaceholder) {
+			const tinyImage = tinyPlaceholderPath(image);
+			root.style.setProperty("--scene-image", `url("${tinyImage}")`);
+		}
 
 		const loadToken = ++activeLoadToken;
 		const loader = new Image();
@@ -148,14 +132,11 @@
 	if (cachedScene) {
 		root.style.setProperty("--scene-image", cachedScene);
 	}
-	const sessionIndex = readSessionIndex(firstTheme);
-	if (sessionIndex === null) {
-		const nextIndex = advanceIndex(firstTheme);
-		writeSessionIndex(firstTheme, nextIndex);
-		applyBackground(firstTheme, nextIndex, { progressive: !cachedScene });
-	} else {
-		applyBackground(firstTheme, sessionIndex, { progressive: false });
-	}
+	const nextIndex = advanceIndex(firstTheme);
+	applyBackground(firstTheme, nextIndex, {
+		progressive: true,
+		useTinyPlaceholder: !cachedScene
+	});
 
 	document.addEventListener("themechange", (event) => {
 		const theme = event?.detail?.theme;
@@ -163,14 +144,7 @@
 			return;
 		}
 
-		const storedInSession = readSessionIndex(theme);
-		if (storedInSession !== null) {
-			applyBackground(theme, storedInSession, { progressive: false });
-			return;
-		}
-
 		const persistedIndex = readIndex(theme);
-		writeSessionIndex(theme, persistedIndex);
 		applyBackground(theme, persistedIndex, { progressive: false });
 	});
 })();
