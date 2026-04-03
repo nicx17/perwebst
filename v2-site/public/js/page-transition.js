@@ -1,29 +1,5 @@
 (() => {
   const root = document.documentElement;
-  const navFlag = "nav-transition-pending";
-
-  // If previous page marked a transition, start hidden and reveal smoothly.
-  try {
-    if (sessionStorage.getItem(navFlag) === "1") {
-      root.classList.add("is-nav-loading");
-      sessionStorage.removeItem(navFlag);
-    }
-  } catch {
-    // Ignore storage access failures in restricted browser modes.
-  }
-
-  const reveal = () => {
-    // Let the browser paint once, then animate in to avoid flash between pages.
-    globalThis.requestAnimationFrame(() => {
-      root.classList.remove("is-nav-loading");
-    });
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", reveal, { once: true });
-  } else {
-    reveal();
-  }
 
   const shouldHandle = (anchor, event) => {
     if (!anchor || event.defaultPrevented) return false;
@@ -44,13 +20,6 @@
 
   const markNavigation = (anchor) => {
     if (!(anchor instanceof HTMLAnchorElement)) return;
-
-    try {
-      sessionStorage.setItem(navFlag, "1");
-    } catch {
-      // Ignore storage access failures in restricted browser modes.
-    }
-
     root.classList.add("is-nav-exiting");
   };
 
@@ -81,7 +50,6 @@
 
   // Ensure restored pages from bfcache are visible immediately.
   globalThis.addEventListener("pageshow", () => {
-    root.classList.remove("is-nav-loading");
     root.classList.remove("is-nav-exiting");
   });
 })();
