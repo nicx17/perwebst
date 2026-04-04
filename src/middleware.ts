@@ -75,7 +75,7 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     "worker-src 'self'",
     "style-src 'self'",
     "style-src-elem 'self'",
-    "style-src-attr 'none'",
+    "style-src-attr 'unsafe-inline'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     `script-src-elem 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     "script-src-attr 'none'",
