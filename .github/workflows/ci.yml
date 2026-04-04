@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ORIGIN: https://link.nickcardoso.com
+      HOST: 127.0.0.1
+      PORT: 4393
     steps:
       - name: Checkout
         uses: actions/checkout@v4
