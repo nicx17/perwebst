@@ -10,8 +10,12 @@
       root.dataset.theme === "ivory" || root.dataset.theme === "midnight"
         ? root.dataset.theme
         : "ivory";
-    const cachedScene = sessionStorage.getItem(`bg-scene-${activeTheme}`);
-    if (cachedScene) {
+    const cacheKey = `bg-scene-${activeTheme}`;
+    const cachedScene = sessionStorage.getItem(cacheKey);
+    const isLegacyImageSet = typeof cachedScene === "string" && cachedScene.includes("image-set(");
+    if (isLegacyImageSet) {
+      sessionStorage.removeItem(cacheKey);
+    } else if (cachedScene) {
       root.style.setProperty("--scene-image", cachedScene);
     }
   } catch {

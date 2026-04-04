@@ -6,6 +6,9 @@ const projectRoot = process.cwd();
 const backgroundsRoot = path.join(projectRoot, "public", "backgrounds");
 const themeDirectories = ["light", "dark"];
 const sourceExtensions = new Set([".jpg", ".jpeg", ".png"]);
+const maxWidth = 2560;
+const maxHeight = 1600;
+const forceReencode = process.env.BG_FORCE === "1";
 
 const isSourceImage = (fileName) => {
 	const lower = fileName.toLowerCase();
@@ -44,23 +47,31 @@ const ensureOptimized = async (sourcePath) => {
 		isOutdated(sourcePath, outputs.tinyWebp)
 	]);
 
-	if (!needsWebp && !needsAvif && !needsTiny) {
+	if (!forceReencode && !needsWebp && !needsAvif && !needsTiny) {
 		return 0;
 	}
 
+	const basePipeline = () =>
+		sharp(sourcePath).resize({
+			width: maxWidth,
+			height: maxHeight,
+			fit: "inside",
+			withoutEnlargement: true
+		});
+
 	let wrote = 0;
-	if (needsWebp) {
-		await sharp(sourcePath).webp({ quality: 72, effort: 5 }).toFile(outputs.webp);
+	if (forceReencode || needsWebp) {
+		await basePipeline().webp({ quality: 60, effort: 6 }).toFile(outputs.webp);
 		wrote += 1;
 	}
-	if (needsAvif) {
-		await sharp(sourcePath).avif({ quality: 46, effort: 5 }).toFile(outputs.avif);
+	if (forceReencode || needsAvif) {
+		await basePipeline().avif({ quality: 36, effort: 6 }).toFile(outputs.avif);
 		wrote += 1;
 	}
-	if (needsTiny) {
+	if (forceReencode || needsTiny) {
 		await sharp(sourcePath)
 			.resize({ width: 72, withoutEnlargement: true })
-			.webp({ quality: 34, effort: 4 })
+			.webp({ quality: 30, effort: 5 })
 			.toFile(outputs.tinyWebp);
 		wrote += 1;
 	}
