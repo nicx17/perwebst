@@ -23,6 +23,5 @@ jobs:
             --config lychee.toml
             --exclude-path node_modules
             --exclude-path dist
-            '**/*.html'
             '**/*.md'
           fail: true

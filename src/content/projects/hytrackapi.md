@@ -11,7 +11,6 @@ tags:
   - Bcrypt
 order: 5
 featured: true
-liveUrl: https://assa.hyclotron.com/
 ---
 
 ## Product Snapshot
@@ -60,9 +59,6 @@ The service is optimized for low-resource deployments while handling mixed scrap
 
 ## Deployment Profile
 The project is designed for edge-friendly hosting (including Raspberry Pi class infrastructure) with straightforward reverse-proxy fronting.
-
-Public endpoint:
-https://assa.hyclotron.com/
 
 ## Why It Matters
 HyTrack API turns scraper-heavy logistics retrieval into an operational backend component with authentication, normalized output, and deployable controls, making it much easier to integrate tracking into apps, bots, and automation systems.

@@ -13,6 +13,8 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    env:
+      ORIGIN: https://link.nickcardoso.com
     permissions:
       actions: read
       contents: read

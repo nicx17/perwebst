@@ -10,6 +10,8 @@ jobs:
   typecheck-and-build:
     name: Typecheck & Build
     runs-on: ubuntu-latest
+    env:
+      ORIGIN: https://link.nickcardoso.com
     steps:
       - name: Checkout
         uses: actions/checkout@v4

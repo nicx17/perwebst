@@ -1,6 +1,6 @@
 # Nick Cardoso — Personal Portfolio
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://spdx.org/licenses/GPL-3.0-only.html)
 
 Source for my personal portfolio site. Links to software engineering projects, hardware experiments, and self-hosted infrastructure work.
 
@@ -77,6 +77,6 @@ See [`docs/deployment.md`](docs/deployment.md) for the PM2 setup guide, env vari
 
 ## License
 
-GPLv3 — see [GNU GPL v3.0](https://www.gnu.org/licenses/gpl-3.0).
+GPLv3 — see [GNU GPL v3.0](https://spdx.org/licenses/GPL-3.0-only.html).
 
 Developed by [Nick Cardoso](https://link.nickcardoso.com).
