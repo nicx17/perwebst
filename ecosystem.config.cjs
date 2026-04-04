@@ -1,7 +1,12 @@
 // PM2 ecosystem config for the Astro SSR server.
 // Copy .env.example to .env and fill in values before deploying.
 
-export default {
+const path = require("node:path");
+
+const appRoot = __dirname;
+const logDir = path.join(appRoot, "logs");
+
+module.exports = {
   apps: [
     {
       name: "pers",
@@ -9,7 +14,7 @@ export default {
       interpreter: "node",
       instances: 1,
       exec_mode: "fork",
-      cwd: "/home/nick/Documents/Github/pers",
+      cwd: appRoot,
 
       // Load .env from the project root
       env_file: ".env",
@@ -28,8 +33,8 @@ export default {
       max_restarts: 10,
 
       // Logging
-      out_file: "/home/nick/Documents/Github/pers/logs/out.log",
-      error_file: "/home/nick/Documents/Github/pers/logs/error.log",
+      out_file: path.join(logDir, "out.log"),
+      error_file: path.join(logDir, "error.log"),
       merge_logs: true,
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
     },
