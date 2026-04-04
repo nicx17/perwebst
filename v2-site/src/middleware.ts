@@ -1,30 +1,31 @@
 import { defineMiddleware } from "astro:middleware";
 
-const SECURITY_POLICY = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "frame-src 'none'",
-  "form-action 'self'",
-  "img-src 'self' data: https:",
-  "font-src 'self' data:",
-  "connect-src 'self' https://cloudflareinsights.com https://*.cloudflareinsights.com",
-  "manifest-src 'self'",
-  "media-src 'self'",
-  "worker-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "style-src-attr 'unsafe-inline'",
-  "script-src 'self' https://static.cloudflareinsights.com",
-  "script-src-elem 'self' https://static.cloudflareinsights.com",
-  "script-src-attr 'none'",
-  "upgrade-insecure-requests",
-  "block-all-mixed-content"
-].join("; ");
+const buildSecurityPolicy = (nonce: string) =>
+  [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "frame-src 'none'",
+    "form-action 'self'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://cloudflareinsights.com https://*.cloudflareinsights.com",
+    "manifest-src 'self'",
+    "media-src 'self'",
+    "worker-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "style-src-attr 'unsafe-inline'",
+    `script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com`,
+    `script-src-elem 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com`,
+    "script-src-attr 'none'",
+    "upgrade-insecure-requests",
+    "block-all-mixed-content"
+  ].join("; ");
 
-const setSecurityHeaders = (headers: Headers, protocol: string) => {
+const setSecurityHeaders = (headers: Headers, protocol: string, nonce: string) => {
   headers.delete("Content-Security-Policy-Report-Only");
-  headers.set("Content-Security-Policy", SECURITY_POLICY);
+  headers.set("Content-Security-Policy", buildSecurityPolicy(nonce));
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
@@ -76,11 +77,16 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
 };
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  const nonceBytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(nonceBytes);
+  const cspNonce = btoa(String.fromCharCode(...nonceBytes));
+  context.locals.cspNonce = cspNonce;
+
   const response = await next();
   const headers = new Headers(response.headers);
   const { pathname, protocol } = new URL(context.request.url);
 
-  setSecurityHeaders(headers, protocol);
+  setSecurityHeaders(headers, protocol, cspNonce);
   setCacheHeaders(headers, pathname);
 
   return new Response(response.body, {
