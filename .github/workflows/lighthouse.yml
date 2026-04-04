@@ -10,6 +10,8 @@ jobs:
   lighthouse:
     name: Lighthouse Audit
     runs-on: ubuntu-latest
+    env:
+      ORIGIN: https://link.nickcardoso.com
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,13 +28,27 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Start preview server
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4321 > /tmp/astro-preview.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4321/ > /dev/null; then
+              echo "Preview server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Preview server failed to start"
+          cat /tmp/astro-preview.log || true
+          exit 1
+
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
-            http://localhost:4321/
-            http://localhost:4321/about/
-            http://localhost:4321/projects/
+            http://127.0.0.1:4321/
+            http://127.0.0.1:4321/about/
+            http://127.0.0.1:4321/projects/
           uploadArtifacts: true
           temporaryPublicStorage: true
           budgetPath: .github/lighthouse-budget.json

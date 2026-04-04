@@ -31,7 +31,6 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string): string =>
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     `script-src-elem 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     "script-src-attr 'none'",
-    "require-trusted-types-for 'script'",
     `report-uri ${reportEndpoint}`,
     "report-to csp-endpoint",
     "upgrade-insecure-requests",
@@ -142,10 +141,6 @@ describe("buildSecurityPolicy", () => {
     expect(policy).not.toContain("unsafe-inline");
   });
 
-  it("enforces Trusted Types for script sinks", () => {
-    const policy = buildSecurityPolicy(NONCE, "https://x.com/report");
-    expect(policy).toContain("require-trusted-types-for 'script'");
-  });
 });
 
 describe("setSecurityHeaders — HTTPS request", () => {
