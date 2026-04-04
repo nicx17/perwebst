@@ -1,6 +1,7 @@
 (() => {
 	const root = document.documentElement;
-	const sceneKey = (theme) => `bg-scene-${theme}`;
+	const backgroundAssetVersion = "20260404hq";
+	const sceneKey = (theme) => `bg-scene-${backgroundAssetVersion}-${theme}`;
 	let activeLoadToken = 0;
 
 	const backgrounds = {
@@ -22,7 +23,11 @@
 
 	const tinyPlaceholderPath = (image) => `${basePathFor(image)}.tiny.webp`;
 
+	const avifPath = (image) => `${basePathFor(image)}.avif`;
+
 	const webpPath = (image) => `${basePathFor(image)}.webp`;
+
+	const withVersion = (assetPath) => `${assetPath}?v=${backgroundAssetVersion}`;
 
 	const readSessionScene = (theme) => {
 		try {
@@ -47,7 +52,7 @@
 			return;
 		}
 
-		const sceneValue = `url("${webpPath(image)}")`;
+		const sceneValue = `url("${withVersion(avifPath(image))}")`;
 		if (!progressive) {
 			root.style.setProperty("--scene-image", sceneValue);
 			writeSessionScene(theme, sceneValue);
@@ -56,13 +61,13 @@
 
 		if (useTinyPlaceholder) {
 			const tinyImage = tinyPlaceholderPath(image);
-			root.style.setProperty("--scene-image", `url("${tinyImage}")`);
+			root.style.setProperty("--scene-image", `url("${withVersion(tinyImage)}")`);
 		}
 
 		const loadToken = ++activeLoadToken;
 		const loader = new Image();
 		loader.decoding = "async";
-		loader.src = webpPath(image);
+		loader.src = withVersion(avifPath(image));
 
 		loader.onload = () => {
 			if (loadToken !== activeLoadToken) {
@@ -78,9 +83,29 @@
 				return;
 			}
 
-			const fallbackScene = `url("${image}")`;
-			root.style.setProperty("--scene-image", fallbackScene);
-			writeSessionScene(theme, fallbackScene);
+			const webpLoader = new Image();
+			webpLoader.decoding = "async";
+			webpLoader.src = withVersion(webpPath(image));
+
+			webpLoader.onload = () => {
+				if (loadToken !== activeLoadToken) {
+					return;
+				}
+
+				const webpScene = `url("${withVersion(webpPath(image))}")`;
+				root.style.setProperty("--scene-image", webpScene);
+				writeSessionScene(theme, webpScene);
+			};
+
+			webpLoader.onerror = () => {
+				if (loadToken !== activeLoadToken) {
+					return;
+				}
+
+				const fallbackScene = `url("${withVersion(image)}")`;
+				root.style.setProperty("--scene-image", fallbackScene);
+				writeSessionScene(theme, fallbackScene);
+			};
 		};
 	};
 

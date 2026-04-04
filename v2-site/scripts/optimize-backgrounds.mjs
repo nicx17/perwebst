@@ -6,8 +6,8 @@ const projectRoot = process.cwd();
 const backgroundsRoot = path.join(projectRoot, "public", "backgrounds");
 const themeDirectories = ["light", "dark"];
 const sourceExtensions = new Set([".jpg", ".jpeg", ".png"]);
-const maxWidth = 2560;
-const maxHeight = 1600;
+const maxWidth = 3200;
+const maxHeight = 2000;
 const forceReencode = process.env.BG_FORCE === "1";
 
 const isSourceImage = (fileName) => {
@@ -61,17 +61,17 @@ const ensureOptimized = async (sourcePath) => {
 
 	let wrote = 0;
 	if (forceReencode || needsWebp) {
-		await basePipeline().webp({ quality: 60, effort: 6 }).toFile(outputs.webp);
+		await basePipeline().webp({ quality: 72, effort: 6 }).toFile(outputs.webp);
 		wrote += 1;
 	}
 	if (forceReencode || needsAvif) {
-		await basePipeline().avif({ quality: 36, effort: 6 }).toFile(outputs.avif);
+		await basePipeline().avif({ quality: 48, effort: 6 }).toFile(outputs.avif);
 		wrote += 1;
 	}
 	if (forceReencode || needsTiny) {
 		await sharp(sourcePath)
 			.resize({ width: 72, withoutEnlargement: true })
-			.webp({ quality: 30, effort: 5 })
+			.webp({ quality: 36, effort: 5 })
 			.toFile(outputs.tinyWebp);
 		wrote += 1;
 	}
