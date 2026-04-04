@@ -24,12 +24,6 @@
 
 	const webpPath = (image) => `${basePathFor(image)}.webp`;
 
-	const imageSetFor = (image) => {
-		const basePath = basePathFor(image);
-		const mimeType = image.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
-		return `image-set(url("${basePath}.avif") type("image/avif"), url("${basePath}.webp") type("image/webp"), url("${image}") type("${mimeType}"))`;
-	};
-
 	const readSessionScene = (theme) => {
 		try {
 			return sessionStorage.getItem(sceneKey(theme));
@@ -53,7 +47,7 @@
 			return;
 		}
 
-		const sceneValue = imageSetFor(image);
+		const sceneValue = `url("${webpPath(image)}")`;
 		if (!progressive) {
 			root.style.setProperty("--scene-image", sceneValue);
 			writeSessionScene(theme, sceneValue);
@@ -90,17 +84,6 @@
 		};
 	};
 
-	const primeThemeImage = (theme) => {
-		const image = imageFor(theme);
-		if (!image) {
-			return;
-		}
-
-		const preload = new Image();
-		preload.decoding = "async";
-		preload.src = webpPath(image);
-	};
-
 	const firstTheme = currentTheme();
 	const cachedScene = readSessionScene(firstTheme);
 	if (cachedScene) {
@@ -111,13 +94,6 @@
 		progressive: true,
 		useTinyPlaceholder: !cachedScene
 	});
-
-	const otherTheme = firstTheme === "ivory" ? "midnight" : "ivory";
-	if (typeof globalThis.requestIdleCallback === "function") {
-		globalThis.requestIdleCallback(() => primeThemeImage(otherTheme), { timeout: 1200 });
-	} else {
-		globalThis.setTimeout(() => primeThemeImage(otherTheme), 500);
-	}
 
 	document.addEventListener("themechange", (event) => {
 		const theme = event?.detail?.theme;

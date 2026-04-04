@@ -15,8 +15,8 @@ const SECURITY_POLICY = [
   "worker-src 'self'",
   "style-src 'self' 'unsafe-inline'",
   "style-src-attr 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
-  "script-src-elem 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+  "script-src 'self' https://static.cloudflareinsights.com",
+  "script-src-elem 'self' https://static.cloudflareinsights.com",
   "script-src-attr 'none'",
   "upgrade-insecure-requests",
   "block-all-mixed-content"
@@ -53,7 +53,7 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
   }
 
   if (pathname.startsWith("/backgrounds/")) {
-    headers.set("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+    headers.set("Cache-Control", "public, max-age=2592000, stale-while-revalidate=604800");
     return;
   }
 
