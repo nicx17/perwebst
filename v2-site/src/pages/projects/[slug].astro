@@ -29,13 +29,40 @@ if (project) {
 
       <article class="article project-detail-card">
         <header class="project-detail-header">
-          <h1>{project.data.title}</h1>
+          <div class="project-detail-title-wrap">
+            <div class="project-detail-icon-box" aria-hidden="true">
+              {
+                project.data.icon ? (
+                  <img
+                    class="project-detail-icon"
+                    src={project.data.icon}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="project-detail-icon-fallback">{project.data.title.slice(0, 1)}</span>
+                )
+              }
+            </div>
+            <div>
+              <h1>{project.data.title}</h1>
+              <p class="subtitle projects-page-subtitle">{project.data.summary}</p>
+            </div>
+          </div>
           <div class="meta-row">
-            <span><strong>Role:</strong> {project.data.role}</span>
             <span>
               <strong>Repository:</strong>
               <a href={project.data.repository} target="_blank" rel="noopener noreferrer">{project.data.repositoryLabel}</a>
             </span>
+            {
+              project.data.liveUrl ? (
+                <span>
+                  <strong>Live:</strong>
+                  <a href={project.data.liveUrl} target="_blank" rel="noopener noreferrer">Open Project</a>
+                </span>
+              ) : null
+            }
           </div>
           <div class="tag-list">
             {project.data.tags.map((tag) => (

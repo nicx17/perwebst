@@ -105,9 +105,9 @@
     const activeTheme = readTheme();
     nextRoot.dataset.theme = activeTheme;
 
-    const activeScene = root.style.getPropertyValue("--scene-image");
-    if (activeScene) {
-      nextRoot.style.setProperty("--scene-image", activeScene);
+    const activeSceneQuality = root.dataset.sceneQuality;
+    if (activeSceneQuality) {
+      nextRoot.dataset.sceneQuality = activeSceneQuality;
     }
   };
 

@@ -1,7 +1,7 @@
 ---
 title: HyTrackV3
-summary: A self-hosted tracking engine that monitors emails for waybills and dispatches real-time status notifications.
-role: Engineering Student
+summary: Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.
+icon: /project-icons/hytrackv3.png
 repository: https://github.com/nicx17/HyTrackV3
 repositoryLabel: nicx17/HyTrackV3
 canonicalPath: /projects/hytrackv3/
@@ -14,30 +14,62 @@ order: 4
 featured: true
 ---
 
-## Overview
-HyTrackV3 is a self-hosted, headless tracking engine designed for users who want a centralized solution to monitor multiple shipments. Instead of manually checking tracking numbers across different courier websites, HyTrackV3 automatically extracts new tracking numbers from your inbox, tracks them in the background, and emails formatted updates when a package transit status changes.
+## Product Snapshot
+HyTrackV3 is a self-hostable shipment monitoring pipeline that turns inbox waybills into structured tracking intelligence. It continuously ingests new shipment IDs, routes each one through the right courier scraper, detects status deltas, and sends notifications only when meaningful changes occur.
 
-## Key Features
-- Automatic discovery: scans Gmail or Outlook inboxes for new Blue Dart and Delhivery tracking numbers.
-- Smart change detection: uses SHA-256 hashing to compare a shipment fingerprint against previous state.
-- Hybrid web scraper: uses requests and BeautifulSoup for static pages and headless Selenium for dynamic pages.
-- Notification flow: dispatches formatted email updates with tracking links and status progression.
+## Core Objective
+The system is built to reduce tracking noise while preserving visibility:
 
-## How It Works
-1. Ingestion: logs into IMAP and extracts candidate tracking IDs with regex patterns.
-2. Tracking: routes each waybill to the proper carrier scraper.
-3. Analysis: hashes latest event data and compares it to the stored state.
-4. Notification: sends email updates only when state changes.
+- no manual copy-paste checks across courier portals
+- no repeated "same status" notifications
+- durable local state that survives restarts
+- low-cost operation on home infrastructure
 
-## Database and State Management
-The system uses a lightweight SQLite table to avoid duplicate notifications and keep tracking state durable between runs.
+## End-to-End Processing Flow
+1. IMAP ingestion scans mailbox content for candidate waybill identifiers.
+2. Parsing and normalization clean extracted values and remove obvious invalid IDs.
+3. Courier routing chooses adapter logic based on ID pattern/rules.
+4. Scraper execution pulls raw status timelines from courier systems.
+5. Normalization converts output into a shared internal event model.
+6. State compare checks against previously stored snapshot/hash.
+7. Notification engine emits HTML email only on true state transition.
+8. Persistence layer updates local tracking records in SQLite.
 
-| Column | Type | Description |
-|---|---|---|
-| waybill | TEXT (PK) | Unique tracking number. |
-| courier | TEXT | Carrier identifier (BLUEDART or DELHIVERY). |
-| last_event_hash | TEXT | SHA-256 hash of last known shipment event. |
-| is_delivered | INTEGER | Boolean flag (0/1) to stop further checks. |
+## Courier Adapter Architecture
+HyTrackV3 intentionally uses mixed scraping paths:
 
-## Try It Out
-- Tracking email: notify@hyclotron.com
+- Blue Dart: request + BeautifulSoup path for static/parseable pages
+- Delhivery: Selenium headless path for dynamic JavaScript-heavy pages
+
+This is a practical tradeoff: keep static providers fast and lightweight, while preserving compatibility for rendered portals that cannot be parsed reliably from raw HTML alone.
+
+## State, Idempotency, and Noise Control
+SQLite is the local source of truth for:
+
+- shipment metadata
+- latest known event timeline snapshot
+- notification suppression state
+- delivered/completed markers
+
+The state-hash comparison model is central to reliability. It ensures scheduled runs remain idempotent and users are alerted only when something has actually changed.
+
+## Notification System Design
+HyTrackV3 sends readable HTML status updates designed for fast scanning. Instead of forwarding raw courier output, it presents normalized tracking progression so recipients can understand changes quickly.
+
+## Runtime and Deployment Model
+The project runs well in two common modes:
+
+- manual trigger for ad-hoc checks
+- cron/scheduled automation for continuous monitoring
+
+This makes it suitable for Raspberry Pi, NAS, or small Linux VM deployments without requiring dedicated cloud infrastructure.
+
+## Operational Strengths
+- multi-courier compatibility through adapter separation
+- change-only notifications for low alert fatigue
+- durable local DB for restart-safe tracking
+- scheduler-friendly architecture for unattended operation
+
+## Public Onboarding Route
+Repository docs include a hosted onboarding entrypoint via:
+notify@hyclotron.com
