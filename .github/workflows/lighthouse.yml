@@ -2,30 +2,37 @@ name: Lighthouse CI
 
 on:
   push:
+    branches: [main]
   pull_request:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    branches: [main]
 
 jobs:
   lighthouse:
+    name: Lighthouse Audit
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Start local server
-        run: |
-          python3 -m http.server 8080 >/tmp/pers-http.log 2>&1 &
-          sleep 2
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
-            http://127.0.0.1:8080/
-            http://127.0.0.1:8080/projects/
-            http://127.0.0.1:8080/projects/mimick/
+            http://localhost:4321/
+            http://localhost:4321/about/
+            http://localhost:4321/projects/
           uploadArtifacts: true
           temporaryPublicStorage: true
+          budgetPath: .github/lighthouse-budget.json

@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import ProjectCard from "../../components/ProjectCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout
+  title="Projects | Nick Cardoso"
+  description="A collection of software engineering projects, tools, and experiments by Nick Cardoso."
+  canonicalPath="/projects/"
+  shell={false}
+>
+  <header class="page-header projects-page-header">
+    <h1>Projects</h1>
+    <p class="subtitle projects-page-subtitle">A collection of tools, scripts, and software engineering experiments.</p>
+  </header>
+
+  <section class="project-grid projects-showcase">
+    {projects.map((project) => (
+      <ProjectCard project={project} />
+    ))}
+  </section>
+</BaseLayout>
