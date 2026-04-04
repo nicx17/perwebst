@@ -12,6 +12,7 @@ pers_backup/
 # Environment files
 .env
 .env.*
+!.env.example
 
 # OS generated files
 .DS_Store
@@ -21,5 +22,19 @@ pers_backup/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Astro build outputs
+dist
+node_modules
+.astro
+
+# Runtime logs (PM2)
+logs/
+
+# Local scratchpads and generated files
+v2.md
+links.md
+docs/v2
+sample.css
 projects/mimick/immick_plan.md
 .github/workflows/error_log_link.md

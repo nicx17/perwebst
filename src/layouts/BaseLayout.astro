@@ -1,0 +1,126 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  shell?: boolean;
+  theme?: "ivory" | "midnight";
+}
+
+const { title, description, canonicalPath, shell = true, theme } = Astro.props;
+const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() : undefined;
+const pathname = Astro.url.pathname;
+const pageUrl = new URL(pathname, Astro.site).toString();
+const ogImage = new URL("/backgrounds/flower-bg.jpg", Astro.site).toString();
+const cspNonce = typeof Astro.locals.cspNonce === "string" ? Astro.locals.cspNonce : undefined;
+
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/projects/", label: "Projects" },
+  { href: "/about/", label: "About" }
+];
+
+const isActive = (href: string) => {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  return pathname.startsWith(href);
+};
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline src="/js/theme-bootstrap.js" nonce={cspNonce} data-cfasync="false"></script>
+    <script is:inline src="/js/page-transition.js" nonce={cspNonce} defer data-cfasync="false"></script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content={theme === "midnight" ? "#02060d" : "#ece9e3"} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical ?? pageUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImage} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <script is:inline src="/js/theme-toggle.js" nonce={cspNonce} defer data-cfasync="false"></script>
+    <script is:inline src="/js/background-loader.js" nonce={cspNonce} defer data-cfasync="false"></script>
+  </head>
+  <body>
+    <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-two" aria-hidden="true"></div>
+    <main class:list={{ "page-shell": true, "page-shell-plain": !shell }}>
+      {
+        shell ? (
+          <section class="app-shell">
+            <header class="app-topbar">
+              <div class="app-controls">
+                <nav class="app-nav" aria-label="Primary">
+                  {navItems.map((item) => (
+                    <a
+                      class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      href={item.href}
+                      aria-current={isActive(item.href) ? "page" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+                <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+                  <span class="theme-toggle-label theme-toggle-label-ivory">Ivory</span>
+                  <span class="theme-toggle-label theme-toggle-label-midnight">Midnight</span>
+                  <span class="theme-toggle-thumb" aria-hidden="true"></span>
+                </button>
+              </div>
+            </header>
+
+            <section class="app-content">
+              <slot />
+            </section>
+          </section>
+        ) : (
+          <>
+            <header class="app-topbar app-topbar-plain">
+              <div class="app-controls">
+                <nav class="app-nav" aria-label="Primary">
+                  {navItems.map((item) => (
+                    <a
+                      class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      href={item.href}
+                      aria-current={isActive(item.href) ? "page" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+                <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+                  <span class="theme-toggle-label theme-toggle-label-ivory">Ivory</span>
+                  <span class="theme-toggle-label theme-toggle-label-midnight">Midnight</span>
+                  <span class="theme-toggle-thumb" aria-hidden="true"></span>
+                </button>
+              </div>
+            </header>
+
+            <section class="app-content app-content-plain">
+              <slot />
+            </section>
+          </>
+        )
+      }
+    </main>
+  </body>
+</html>

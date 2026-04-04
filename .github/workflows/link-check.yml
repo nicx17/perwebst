@@ -2,29 +2,27 @@ name: Link Check
 
 on:
   push:
-  pull_request:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    branches: [main]
+  schedule:
+    # Weekly on Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
 
 jobs:
-  links:
+  link-check:
+    name: Check Links
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Check links
+      - name: Run lychee
         uses: lycheeverse/lychee-action@v2
         with:
-          args: >-
-            --verbose
-            --no-progress
-            --config ./lychee.toml
-            --root-dir "${{ github.workspace }}"
-            --accept 200,206,403,429
-            './**/*.html'
-            './**/*.md'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          args: >
+            --config lychee.toml
+            --exclude-path node_modules
+            --exclude-path dist
+            '**/*.html'
+            '**/*.md'
+          fail: true
