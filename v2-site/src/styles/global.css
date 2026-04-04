@@ -33,7 +33,7 @@ html[data-theme="ivory"] {
   --page-max-plain: 1360px;
   --home-links-max: 1400px;
   --reading-max: 1080px;
-  --scene-image: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg");
+  --scene-image: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg?v=20260404hq");
   --downsampling-mode: boxcar;
   --downsampling-factor: 1;
   --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -78,7 +78,7 @@ html[data-theme="midnight"] {
   --card-sheen: rgba(205, 220, 240, 0.08);
   --grain-opacity: 0.045;
   --grid-line: rgba(198, 218, 244, 0.07);
-  --scene-image: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg");
+  --scene-image: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg?v=20260404hq");
   --downsampling-mode: boxcar;
   --downsampling-factor: 1;
   --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -119,7 +119,7 @@ html[data-theme="midnight"] {
     --card-sheen: rgba(205, 220, 240, 0.08);
     --grain-opacity: 0.045;
     --grid-line: rgba(198, 218, 244, 0.07);
-    --scene-image: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg");
+    --scene-image: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg?v=20260404hq");
     --downsampling-mode: boxcar;
     --downsampling-factor: 1;
     --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -1019,12 +1019,10 @@ header.page-header h1 {
   padding: 1.3rem 1.18rem 1.22rem;
   overflow: hidden;
   isolation: isolate;
-  filter: blur(0.65px);
   transform-origin: 50% 14%;
   animation: projectCardEnter 620ms var(--ease-sleek) both;
   transition:
     transform 380ms var(--ease-sleek),
-    filter 360ms var(--ease-sleek),
     border-color var(--motion-medium) ease,
     box-shadow 380ms var(--ease-sleek),
     background-color var(--motion-medium) ease;
@@ -1056,7 +1054,6 @@ header.page-header h1 {
 
 .projects-showcase .project-card:hover {
   transform: translateY(-10px) scale(1.014);
-  filter: blur(0);
   border-color: var(--button-border-strong);
   box-shadow:
     0 44px 82px -34px var(--shadow-main),
