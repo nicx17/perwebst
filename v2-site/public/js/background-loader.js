@@ -1,21 +1,12 @@
 (() => {
 	const root = document.documentElement;
-
-	const backgrounds = {
-		ivory: [
-
-			"/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg",
-			"/backgrounds/light/eve-lP_4h4oVO1E-unsplash.jpg"
-		],
-		midnight: [
-			"/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg",
-			"/backgrounds/dark/mohammed-kara-LpYWTqT4Ff0-unsplash.jpg"
-		]
-	};
-
-	const storageKey = (theme) => `bg-rotation-${theme}`;
 	const sceneKey = (theme) => `bg-scene-${theme}`;
 	let activeLoadToken = 0;
+
+	const backgrounds = {
+		ivory: "/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg",
+		midnight: "/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg"
+	};
 
 	const currentTheme = () => {
 		if (root.dataset.theme === "ivory" || root.dataset.theme === "midnight") {
@@ -25,7 +16,7 @@
 		return globalThis.matchMedia("(prefers-color-scheme: dark)").matches ? "midnight" : "ivory";
 	};
 
-	const listFor = (theme) => backgrounds[theme] ?? backgrounds.ivory;
+	const imageFor = (theme) => backgrounds[theme] ?? backgrounds.ivory;
 
 	const basePathFor = (image) => image.replace(/\.[^.]+$/, "");
 
@@ -37,31 +28,6 @@
 		const basePath = basePathFor(image);
 		const mimeType = image.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
 		return `image-set(url("${basePath}.avif") type("image/avif"), url("${basePath}.webp") type("image/webp"), url("${image}") type("${mimeType}"))`;
-	};
-
-	const readIndex = (theme) => {
-		try {
-			const parsed = Number(localStorage.getItem(storageKey(theme)));
-			return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
-		} catch {
-			return 0;
-		}
-	};
-
-	const advanceIndex = (theme) => {
-		const list = listFor(theme);
-		if (list.length === 0) {
-			return 0;
-		}
-
-		try {
-			const parsed = Number(localStorage.getItem(storageKey(theme)));
-			const next = Number.isInteger(parsed) && parsed >= 0 ? (parsed + 1) % list.length : 0;
-			localStorage.setItem(storageKey(theme), String(next));
-			return next;
-		} catch {
-			return 0;
-		}
 	};
 
 	const readSessionScene = (theme) => {
@@ -80,10 +46,9 @@
 		}
 	};
 
-	const applyBackground = (theme, index, options = {}) => {
+	const applyBackground = (theme, options = {}) => {
 		const { progressive = true, useTinyPlaceholder = true } = options;
-		const list = listFor(theme);
-		const image = list[index % list.length] ?? list[0];
+		const image = imageFor(theme);
 		if (!image) {
 			return;
 		}
@@ -94,8 +59,6 @@
 			writeSessionScene(theme, sceneValue);
 			return;
 		}
-
-		writeSessionScene(theme, sceneValue);
 
 		if (useTinyPlaceholder) {
 			const tinyImage = tinyPlaceholderPath(image);
@@ -127,16 +90,34 @@
 		};
 	};
 
+	const primeThemeImage = (theme) => {
+		const image = imageFor(theme);
+		if (!image) {
+			return;
+		}
+
+		const preload = new Image();
+		preload.decoding = "async";
+		preload.src = webpPath(image);
+	};
+
 	const firstTheme = currentTheme();
 	const cachedScene = readSessionScene(firstTheme);
 	if (cachedScene) {
 		root.style.setProperty("--scene-image", cachedScene);
 	}
-	const nextIndex = advanceIndex(firstTheme);
-	applyBackground(firstTheme, nextIndex, {
+
+	applyBackground(firstTheme, {
 		progressive: true,
 		useTinyPlaceholder: !cachedScene
 	});
+
+	const otherTheme = firstTheme === "ivory" ? "midnight" : "ivory";
+	if (typeof globalThis.requestIdleCallback === "function") {
+		globalThis.requestIdleCallback(() => primeThemeImage(otherTheme), { timeout: 1200 });
+	} else {
+		globalThis.setTimeout(() => primeThemeImage(otherTheme), 500);
+	}
 
 	document.addEventListener("themechange", (event) => {
 		const theme = event?.detail?.theme;
@@ -144,7 +125,13 @@
 			return;
 		}
 
-		const persistedIndex = readIndex(theme);
-		applyBackground(theme, persistedIndex, { progressive: false });
+		const cached = readSessionScene(theme);
+		if (cached) {
+			root.style.setProperty("--scene-image", cached);
+			applyBackground(theme, { progressive: true, useTinyPlaceholder: false });
+			return;
+		}
+
+		applyBackground(theme, { progressive: true, useTinyPlaceholder: true });
 	});
 })();

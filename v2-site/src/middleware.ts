@@ -23,6 +23,7 @@ const SECURITY_POLICY = [
 ].join("; ");
 
 const setSecurityHeaders = (headers: Headers, protocol: string) => {
+  headers.delete("Content-Security-Policy-Report-Only");
   headers.set("Content-Security-Policy", SECURITY_POLICY);
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
