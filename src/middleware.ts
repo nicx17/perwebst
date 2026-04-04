@@ -1,5 +1,64 @@
 import { defineMiddleware } from "astro:middleware";
 
+const ALLOWED_NODE_ENVS = new Set(["development", "test", "production"]);
+
+type RuntimeEnvMap = Record<string, string | undefined>;
+
+const runtimeEnv: RuntimeEnvMap =
+  (
+    globalThis as typeof globalThis & {
+      process?: { env?: RuntimeEnvMap };
+    }
+  ).process?.env ?? {};
+
+const parseOrigin = (value: string): URL => {
+  try {
+    return new URL(value);
+  } catch {
+    throw new Error(`Invalid ORIGIN: "${value}" is not a valid absolute URL.`);
+  }
+};
+
+const validateRuntimeEnv = () => {
+  const nodeEnv = (runtimeEnv.NODE_ENV ?? "development").trim();
+  if (!ALLOWED_NODE_ENVS.has(nodeEnv)) {
+    throw new Error(
+      `Invalid NODE_ENV: "${nodeEnv}". Expected one of development, test, production.`
+    );
+  }
+
+  const rawOrigin = runtimeEnv.ORIGIN?.trim();
+  if (rawOrigin) {
+    const parsedOrigin = parseOrigin(rawOrigin);
+    if (nodeEnv === "production" && parsedOrigin.protocol !== "https:") {
+      throw new Error(`Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`);
+    }
+  } else if (nodeEnv === "production") {
+    throw new Error("Missing ORIGIN: set ORIGIN in .env for production runtime.");
+  }
+
+  const rawHost = runtimeEnv.HOST?.trim();
+  if (!rawHost && nodeEnv === "production") {
+    throw new Error("Missing HOST: set HOST in .env for production runtime.");
+  }
+
+  const rawPort = runtimeEnv.PORT?.trim();
+  if (rawPort) {
+    const parsedPort = Number(rawPort);
+    if (!Number.isInteger(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
+      throw new Error(`Invalid PORT: "${rawPort}". Expected an integer between 1 and 65535.`);
+    }
+  } else if (nodeEnv === "production") {
+    throw new Error("Missing PORT: set PORT in .env for production runtime.");
+  }
+};
+
+validateRuntimeEnv();
+
+const trustedReportOrigin = runtimeEnv.ORIGIN?.trim()
+  ? parseOrigin(runtimeEnv.ORIGIN.trim()).origin
+  : undefined;
+
 const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
   [
     "default-src 'self'",
@@ -27,7 +86,7 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
   ].join("; ");
 
 const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) => {
-  const reportEndpoint = `${requestUrl.origin}/api/csp-report`;
+  const reportEndpoint = `${trustedReportOrigin ?? requestUrl.origin}/api/csp-report`;
   headers.delete("Content-Security-Policy-Report-Only");
   headers.set("Content-Security-Policy", buildSecurityPolicy(nonce, reportEndpoint));
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -100,7 +159,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const requestUrl = new URL(context.request.url);
   const { pathname } = requestUrl;
 
-  setSecurityHeaders(headers, requestUrl, cspNonce);
+  // In development Vite injects HMR scripts and style tags without nonces.
+  // Applying the strict nonce-based CSP would block them and break the dev UI.
+  // Security headers are only applied in production.
+  if (!import.meta.env.DEV) {
+    setSecurityHeaders(headers, requestUrl, cspNonce);
+  }
+
   setCacheHeaders(headers, pathname);
 
   return new Response(response.body, {
@@ -109,3 +174,4 @@ export const onRequest = defineMiddleware(async (context, next) => {
     headers
   });
 });
+

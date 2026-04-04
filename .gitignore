@@ -12,6 +12,7 @@ pers_backup/
 # Environment files
 .env
 .env.*
+!.env.example
 
 # OS generated files
 .DS_Store
@@ -21,18 +22,19 @@ pers_backup/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Astro build outputs
+dist
+node_modules
+.astro
+
+# Runtime logs (PM2)
+logs/
+
+# Local scratchpads and generated files
+v2.md
+links.md
+docs/v2
+sample.css
 projects/mimick/immick_plan.md
 .github/workflows/error_log_link.md
-
-v2.md
-docs/v2/deployment/caddy/route-inventory.md
-v2-site/dist
-v2-site/node_modules
-v2-site/.astro
-sample.css
-docs/v2
-v2-site/allowlist_documentation.md
-v2-site/lighthouse_Metrics.md
-v2-site/chrome_issues.md
-v2-site/documen.md
-links.md

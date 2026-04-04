@@ -1,0 +1,28 @@
+name: Link Check
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Weekly on Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  link-check:
+    name: Check Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --config lychee.toml
+            --exclude-path node_modules
+            --exclude-path dist
+            '**/*.html'
+            '**/*.md'
+          fail: true
