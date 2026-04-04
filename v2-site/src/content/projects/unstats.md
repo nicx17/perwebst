@@ -1,7 +1,7 @@
 ---
 title: Unstats
-summary: A Home Assistant custom integration that fetches Unsplash metrics through a privacy-preserving edge proxy.
-role: Engineering Student
+summary: Home Assistant integration for Unsplash account metrics with a privacy-preserving relay architecture.
+icon: /project-icons/unstats.png
 repository: https://github.com/nicx17/unstats
 repositoryLabel: nicx17/unstats
 canonicalPath: /projects/unstats/
@@ -14,25 +14,48 @@ order: 7
 featured: false
 ---
 
-## Overview
-Unstats is a Home Assistant custom integration that fetches Unsplash statistics natively while preserving user privacy through a relay architecture.
+## Product Snapshot
+Unstats is a Home Assistant integration that converts Unsplash profile analytics into first-class HA entities. Instead of ad-hoc scripts, it provides a native config-entry setup flow and stable periodic updates suitable for dashboarding and automation.
 
-## Key Features
-- Hourly refresh of core telemetry sensors.
-- Native Home Assistant integration and HACS install path.
-- Privacy-preserving relay design that keeps API credentials off client nodes.
+## What Problem It Solves
+Unsplash stats are useful personal telemetry, but the default path usually means manual checks or custom scripts. Unstats packages that into a maintainable integration with:
 
-## Telemetry Sensors
-- `sensor.unsplash_views`
-- `sensor.unsplash_downloads`
-- `sensor.unsplash_likes`
+- clean HA onboarding
+- predictable update behavior
+- metrics exposed as standard sensor entities
+- privacy-conscious credential boundary
 
-## Privacy Architecture
-1. Home Assistant sends only username data to edge relay.
-2. Relay appends protected Unsplash credentials server-side.
-3. Relay returns JSON result and does not persist requester telemetry.
+## Entity and Data Model
+The integration exposes total-increasing style sensors, including key profile metrics such as:
 
-## Installation
-1. Add custom HACS repository: `https://github.com/nicx17/unstats`
-2. Restart Home Assistant.
-3. Add integration in Settings > Devices and Services.
+- views
+- downloads
+
+Hourly polling is intentionally conservative to keep dashboards stable and avoid noisy state churn.
+
+## Privacy-Centered Relay Architecture
+Unstats separates user identity from upstream API credentials through a relay model:
+
+1. Home Assistant sends only username-level lookup input.
+2. Relay applies server-side Unsplash credentials.
+3. Relay returns minimal metric payload to HA.
+
+This reduces the risk of leaking sensitive API credentials into local home automation environments.
+
+## Home Assistant Integration Behavior
+Unstats aligns with HA integration conventions:
+
+- config-entry based setup through Devices and Services
+- lifecycle-aware entity creation/removal
+- HACS installation support with manual fallback path
+
+The result is an integration that behaves like native HA components rather than one-off custom automation code.
+
+## Operational Characteristics
+- low-maintenance refresh cadence
+- dashboard-friendly monotonic metrics
+- straightforward troubleshooting surface
+- practical for always-on HA deployments
+
+## Why This Project Is Distinct
+Unstats is a focused example of turning an external analytics source into home telemetry without overengineering. The architecture deliberately favors usability and safer credential boundaries, which is often the real blocker for personal integrations.

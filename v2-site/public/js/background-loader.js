@@ -1,7 +1,7 @@
 (() => {
 	const root = document.documentElement;
 	const backgroundAssetVersion = "20260404hq";
-	const sceneKey = (theme) => `bg-scene-${backgroundAssetVersion}-${theme}`;
+	const sceneQualityKey = (theme) => `bg-scene-quality-${backgroundAssetVersion}-${theme}`;
 	let activeLoadToken = 0;
 
 	const backgrounds = {
@@ -21,25 +21,36 @@
 
 	const basePathFor = (image) => image.replace(/\.[^.]+$/, "");
 
-	const tinyPlaceholderPath = (image) => `${basePathFor(image)}.tiny.webp`;
-
 	const avifPath = (image) => `${basePathFor(image)}.avif`;
 
 	const webpPath = (image) => `${basePathFor(image)}.webp`;
 
 	const withVersion = (assetPath) => `${assetPath}?v=${backgroundAssetVersion}`;
 
-	const readSessionScene = (theme) => {
+	const normalizeQuality = (value) => {
+		if (value === "tiny" || value === "avif" || value === "webp" || value === "default") {
+			return value;
+		}
+
+		return null;
+	};
+
+	const applySceneQuality = (value) => {
+		const normalized = normalizeQuality(value) ?? "default";
+		root.dataset.sceneQuality = normalized;
+	};
+
+	const readSessionSceneQuality = (theme) => {
 		try {
-			return sessionStorage.getItem(sceneKey(theme));
+			return normalizeQuality(sessionStorage.getItem(sceneQualityKey(theme)));
 		} catch {
 			return null;
 		}
 	};
 
-	const writeSessionScene = (theme, scene) => {
+	const writeSessionSceneQuality = (theme, quality) => {
 		try {
-			sessionStorage.setItem(sceneKey(theme), scene);
+			sessionStorage.setItem(sceneQualityKey(theme), quality);
 		} catch {
 			// Ignore storage write failures and keep runtime behavior functional.
 		}
@@ -52,16 +63,14 @@
 			return;
 		}
 
-		const sceneValue = `url("${withVersion(avifPath(image))}")`;
 		if (!progressive) {
-			root.style.setProperty("--scene-image", sceneValue);
-			writeSessionScene(theme, sceneValue);
+			applySceneQuality("default");
+			writeSessionSceneQuality(theme, "default");
 			return;
 		}
 
 		if (useTinyPlaceholder) {
-			const tinyImage = tinyPlaceholderPath(image);
-			root.style.setProperty("--scene-image", `url("${withVersion(tinyImage)}")`);
+			applySceneQuality("tiny");
 		}
 
 		const loadToken = ++activeLoadToken;
@@ -74,8 +83,8 @@
 				return;
 			}
 
-			root.style.setProperty("--scene-image", sceneValue);
-			writeSessionScene(theme, sceneValue);
+			applySceneQuality("avif");
+			writeSessionSceneQuality(theme, "avif");
 		};
 
 		loader.onerror = () => {
@@ -92,9 +101,8 @@
 					return;
 				}
 
-				const webpScene = `url("${withVersion(webpPath(image))}")`;
-				root.style.setProperty("--scene-image", webpScene);
-				writeSessionScene(theme, webpScene);
+				applySceneQuality("webp");
+				writeSessionSceneQuality(theme, "webp");
 			};
 
 			webpLoader.onerror = () => {
@@ -102,22 +110,21 @@
 					return;
 				}
 
-				const fallbackScene = `url("${withVersion(image)}")`;
-				root.style.setProperty("--scene-image", fallbackScene);
-				writeSessionScene(theme, fallbackScene);
+				applySceneQuality("default");
+				writeSessionSceneQuality(theme, "default");
 			};
 		};
 	};
 
 	const firstTheme = currentTheme();
-	const cachedScene = readSessionScene(firstTheme);
-	if (cachedScene) {
-		root.style.setProperty("--scene-image", cachedScene);
+	const cachedSceneQuality = readSessionSceneQuality(firstTheme);
+	if (cachedSceneQuality) {
+		applySceneQuality(cachedSceneQuality);
 	}
 
 	applyBackground(firstTheme, {
 		progressive: true,
-		useTinyPlaceholder: !cachedScene
+		useTinyPlaceholder: !cachedSceneQuality
 	});
 
 	document.addEventListener("themechange", (event) => {
@@ -126,9 +133,9 @@
 			return;
 		}
 
-		const cached = readSessionScene(theme);
-		if (cached) {
-			root.style.setProperty("--scene-image", cached);
+		const cachedQuality = readSessionSceneQuality(theme);
+		if (cachedQuality) {
+			applySceneQuality(cachedQuality);
 			applyBackground(theme, { progressive: true, useTinyPlaceholder: false });
 			return;
 		}

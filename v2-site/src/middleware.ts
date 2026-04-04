@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 
-const buildSecurityPolicy = (nonce: string) =>
+const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
   [
     "default-src 'self'",
     "base-uri 'self'",
@@ -8,24 +8,28 @@ const buildSecurityPolicy = (nonce: string) =>
     "frame-ancestors 'none'",
     "frame-src 'none'",
     "form-action 'self'",
-    "img-src 'self' data: https:",
+    "img-src 'self' data:",
     "font-src 'self' data:",
     "connect-src 'self' https://cloudflareinsights.com https://*.cloudflareinsights.com",
     "manifest-src 'self'",
     "media-src 'self'",
     "worker-src 'self'",
-    "style-src 'self' 'unsafe-inline'",
-    "style-src-attr 'unsafe-inline'",
-    `script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com`,
-    `script-src-elem 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com`,
+    "style-src 'self'",
+    "style-src-elem 'self'",
+    "style-src-attr 'none'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
+    `script-src-elem 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     "script-src-attr 'none'",
+    `report-uri ${reportEndpoint}`,
+    "report-to csp-endpoint",
     "upgrade-insecure-requests",
     "block-all-mixed-content"
   ].join("; ");
 
-const setSecurityHeaders = (headers: Headers, protocol: string, nonce: string) => {
+const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) => {
+  const reportEndpoint = `${requestUrl.origin}/api/csp-report`;
   headers.delete("Content-Security-Policy-Report-Only");
-  headers.set("Content-Security-Policy", buildSecurityPolicy(nonce));
+  headers.set("Content-Security-Policy", buildSecurityPolicy(nonce, reportEndpoint));
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
@@ -37,8 +41,17 @@ const setSecurityHeaders = (headers: Headers, protocol: string, nonce: string) =
   headers.set("Cross-Origin-Resource-Policy", "same-origin");
   headers.set("Origin-Agent-Cluster", "?1");
   headers.set("X-Permitted-Cross-Domain-Policies", "none");
+  headers.set("Reporting-Endpoints", `csp-endpoint="${reportEndpoint}"`);
+  headers.set(
+    "Report-To",
+    JSON.stringify({
+      group: "csp-endpoint",
+      max_age: 10886400,
+      endpoints: [{ url: reportEndpoint }]
+    })
+  );
 
-  if (protocol === "https:") {
+  if (requestUrl.protocol === "https:") {
     headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   }
 };
@@ -79,14 +92,15 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
 export const onRequest = defineMiddleware(async (context, next) => {
   const nonceBytes = new Uint8Array(16);
   globalThis.crypto.getRandomValues(nonceBytes);
-  const cspNonce = btoa(String.fromCharCode(...nonceBytes));
+  const cspNonce = btoa(String.fromCodePoint(...nonceBytes));
   context.locals.cspNonce = cspNonce;
 
   const response = await next();
   const headers = new Headers(response.headers);
-  const { pathname, protocol } = new URL(context.request.url);
+  const requestUrl = new URL(context.request.url);
+  const { pathname } = requestUrl;
 
-  setSecurityHeaders(headers, protocol, cspNonce);
+  setSecurityHeaders(headers, requestUrl, cspNonce);
   setCacheHeaders(headers, pathname);
 
   return new Response(response.body, {

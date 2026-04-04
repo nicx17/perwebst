@@ -2,6 +2,15 @@
   try {
     const root = document.documentElement;
     const backgroundAssetVersion = "20260404hq";
+    const sceneQualityKey = (theme) => `bg-scene-quality-${backgroundAssetVersion}-${theme}`;
+    const normalizeQuality = (value) => {
+      if (value === "tiny" || value === "avif" || value === "webp" || value === "default") {
+        return value;
+      }
+
+      return null;
+    };
+
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "ivory" || savedTheme === "midnight") {
       root.dataset.theme = savedTheme;
@@ -11,13 +20,10 @@
       root.dataset.theme === "ivory" || root.dataset.theme === "midnight"
         ? root.dataset.theme
         : "ivory";
-    const cacheKey = `bg-scene-${backgroundAssetVersion}-${activeTheme}`;
-    const cachedScene = sessionStorage.getItem(cacheKey);
-    const isLegacyImageSet = typeof cachedScene === "string" && cachedScene.includes("image-set(");
-    if (isLegacyImageSet) {
-      sessionStorage.removeItem(cacheKey);
-    } else if (cachedScene) {
-      root.style.setProperty("--scene-image", cachedScene);
+    const cacheKey = sceneQualityKey(activeTheme);
+    const cachedSceneQuality = normalizeQuality(sessionStorage.getItem(cacheKey));
+    if (cachedSceneQuality) {
+      root.dataset.sceneQuality = cachedSceneQuality;
     }
   } catch {
     // Ignore storage access failures in restricted browser modes.

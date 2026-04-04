@@ -9,9 +9,26 @@ const { project } = Astro.props;
 ---
 
 <a class="project-card" href={project.data.canonicalPath}>
-  <div class="project-card-title-row">
-    <h2>{project.data.title}</h2>
-    <span class="project-card-arrow" aria-hidden="true">-></span>
+  <div class="project-card-head">
+    <div class="project-card-icon-box" aria-hidden="true">
+      {
+        project.data.icon ? (
+          <img
+            class="project-card-icon"
+            src={project.data.icon}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span class="project-card-icon-fallback">{project.data.title.slice(0, 1)}</span>
+        )
+      }
+    </div>
+    <div class="project-card-title-row">
+      <h2>{project.data.title}</h2>
+      <span class="project-card-arrow" aria-hidden="true">-></span>
+    </div>
   </div>
   <p>{project.data.summary}</p>
   <div class="tag-list project-tag-list">
