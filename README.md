@@ -71,6 +71,11 @@ See [`docs/deployment.md`](docs/deployment.md) for the PM2 setup guide, env vari
 - HTML validated in CI with `html-validate`
 - Link integrity checked with `lychee` (config: `lychee.toml`)
 - Lighthouse CI audits on core routes
+- Strict modern web security implementation (`src/middleware.ts`):
+  - **Cross-Origin Isolation**: Enforced via `COOP` and `COEP: require-corp` to mitigate transient execution attacks.
+  - **XSS Prevention**: Nonce-based strict CSP paired with `require-trusted-types-for 'script'` to eliminate DOM XSS.
+  - **Fetch Metadata Validation**: Edge rejection of untrusted cross-site requests via `Sec-Fetch-*` header logic.
+  - **Transport & Telemetry**: Full HSTS enforcement, User-Agent Client Hints (`Accept-CH`), and comprehensive Reporting API endpoints for CSP violations.
 - No secrets in repo — environment loaded from `.env` at runtime, never committed
 
 ---
