@@ -78,7 +78,8 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     "style-src-attr 'unsafe-inline'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     `script-src-elem 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
-    "script-src-attr 'none'",
+    `script-src-attr 'none'`,
+    `require-trusted-types-for 'script'`,
     `report-uri ${reportEndpoint}`,
     "report-to csp-endpoint",
     "upgrade-insecure-requests",
@@ -97,7 +98,9 @@ const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) =>
   headers.set("X-XSS-Protection", "0");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), usb=(), payment=()");
   headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  headers.set("Cross-Origin-Embedder-Policy", "require-corp");
   headers.set("Cross-Origin-Resource-Policy", "same-origin");
+  headers.set("Accept-CH", "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform");
   headers.set("Origin-Agent-Cluster", "?1");
   headers.set("X-Permitted-Cross-Domain-Policies", "none");
   headers.set("Reporting-Endpoints", `csp-endpoint="${reportEndpoint}"`);
@@ -111,7 +114,7 @@ const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) =>
   );
 
   if (requestUrl.protocol === "https:") {
-    headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
 };
 
@@ -148,7 +151,26 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
   headers.set("Cache-Control", "public, max-age=0, must-revalidate");
 };
 
+const isCrossSiteRequestSafe = (request: Request): boolean => {
+  const site = request.headers.get("sec-fetch-site");
+  
+  if (!site || site === "same-origin" || site === "same-site" || site === "none") {
+    return true;
+  }
+
+  const isSafeNavigation =
+    request.method === "GET" &&
+    request.headers.get("sec-fetch-mode") === "navigate" &&
+    request.headers.get("sec-fetch-dest") === "document";
+
+  return isSafeNavigation;
+};
+
 export const onRequest = defineMiddleware(async (context, next) => {
+  if (!import.meta.env.DEV && !isCrossSiteRequestSafe(context.request)) {
+    return new Response("Forbidden Request Context", { status: 403 });
+  }
+
   const nonceBytes = new Uint8Array(16);
   globalThis.crypto.getRandomValues(nonceBytes);
   const cspNonce = btoa(String.fromCodePoint(...nonceBytes));
