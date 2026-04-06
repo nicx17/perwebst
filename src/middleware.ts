@@ -79,7 +79,6 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     `script-src-elem 'self' 'nonce-${nonce}' 'strict-dynamic' https://static.cloudflareinsights.com`,
     `script-src-attr 'none'`,
-    `require-trusted-types-for 'script'`,
     `report-uri ${reportEndpoint}`,
     "report-to csp-endpoint",
     "upgrade-insecure-requests",
