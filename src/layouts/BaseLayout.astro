@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-
+import { ClientRouter } from 'astro:transitions';
 interface Props {
   title: string;
   description?: string;
@@ -43,6 +43,20 @@ const isActive = (href: string) => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <ClientRouter />
+    <script is:inline nonce={cspNonce} data-cfasync="false">
+      if (globalThis.trustedTypes && globalThis.trustedTypes.createPolicy) {
+        try {
+          if (!globalThis.trustedTypes.defaultPolicy) {
+            globalThis.trustedTypes.createPolicy("default", {
+              createHTML: (string) => string,
+              createScript: (string) => string,
+              createScriptURL: (string) => string
+            });
+          }
+        } catch {}
+      }
+    </script>
     <script is:inline nonce={cspNonce} data-cfasync="false">
       (() => {
         try {
@@ -84,17 +98,17 @@ const isActive = (href: string) => {
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
     <script is:inline src="/js/theme-toggle.js" nonce={cspNonce} defer data-cfasync="false"></script>
-    <style is:inline set:html={`
+    <style is:inline nonce={cspNonce} set:html={`
       :root {
-        --scene-image-default-light: url("/backgrounds/light/${lightImage}.jpg");
-        --scene-image-tiny-light: url("/backgrounds/light/${lightImage}.tiny.webp");
-        --scene-image-webp-light: url("/backgrounds/light/${lightImage}.webp");
-        --scene-image-avif-light: url("/backgrounds/light/${lightImage}.avif");
+        --scene-image-default-light: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
+        --scene-image-tiny-light: url("/backgrounds/light/${lightImage}.tiny.webp?v=20260404hq");
+        --scene-image-webp-light: url("/backgrounds/light/${lightImage}.webp?v=20260404hq");
+        --scene-image-avif-light: url("/backgrounds/light/${lightImage}.avif?v=20260404hq");
 
-        --scene-image-default-dark: url("/backgrounds/dark/${darkImage}.jpg");
-        --scene-image-tiny-dark: url("/backgrounds/dark/${darkImage}.tiny.webp");
-        --scene-image-webp-dark: url("/backgrounds/dark/${darkImage}.webp");
-        --scene-image-avif-dark: url("/backgrounds/dark/${darkImage}.avif");
+        --scene-image-default-dark: url("/backgrounds/dark/${darkImage}.jpg?v=20260404hq");
+        --scene-image-tiny-dark: url("/backgrounds/dark/${darkImage}.tiny.webp?v=20260404hq");
+        --scene-image-webp-dark: url("/backgrounds/dark/${darkImage}.webp?v=20260404hq");
+        --scene-image-avif-dark: url("/backgrounds/dark/${darkImage}.avif?v=20260404hq");
       }
 
       html[data-theme="ivory"], html:not([data-theme]) {
@@ -135,6 +149,7 @@ const isActive = (href: string) => {
     <script is:inline src="/js/background-loader.js" nonce={cspNonce} defer data-cfasync="false"></script>
   </head>
   <body>
+    <div id="scene-bg" aria-hidden="true"></div>
     <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>
     <div class="ambient-orb ambient-orb-two" aria-hidden="true"></div>
     <main class:list={{ "page-shell": true, "page-shell-plain": !shell }}>
