@@ -59,6 +59,7 @@ const site = resolveSiteOrigin();
 
 export default defineConfig({
   site,
+  devToolbar: { enabled: false },
   output: "server",
   adapter: node({ mode: "standalone" }),
   trailingSlash: "always",

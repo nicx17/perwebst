@@ -86,16 +86,6 @@
     });
   };
 
-  const beginRouteTransition = () => {
-    root.classList.add("is-route-transitioning");
-  };
-
-  const endRouteTransition = () => {
-    globalThis.requestAnimationFrame(() => {
-      root.classList.remove("is-route-transitioning");
-    });
-  };
-
   const persistThemeAcrossSwap = (event) => {
     const nextRoot = event?.newDocument?.documentElement;
     if (!nextRoot) {
@@ -120,7 +110,5 @@
   }
 
   document.addEventListener("astro:before-swap", persistThemeAcrossSwap);
-  document.addEventListener("astro:before-preparation", beginRouteTransition);
   document.addEventListener("astro:page-load", bindToggle);
-  document.addEventListener("astro:page-load", endRouteTransition);
 })();

@@ -1,5 +1,7 @@
 (() => {
   const root = document.documentElement;
+  const NAV_EXIT_RESET_MS = 900;
+  let exitResetTimer = 0;
 
   const shouldHandle = (anchor, event) => {
     if (!anchor || event.defaultPrevented) return false;
@@ -21,21 +23,17 @@
   const markNavigation = (anchor) => {
     if (!(anchor instanceof HTMLAnchorElement)) return;
     root.classList.add("is-nav-exiting");
+
+    if (exitResetTimer) {
+      globalThis.clearTimeout(exitResetTimer);
+    }
+
+    // Guard against stale exit state when navigation is canceled or interrupted.
+    exitResetTimer = globalThis.setTimeout(() => {
+      root.classList.remove("is-nav-exiting");
+      exitResetTimer = 0;
+    }, NAV_EXIT_RESET_MS);
   };
-
-  // Mark outgoing navigation as early as possible without delaying native navigation.
-  document.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0) return;
-
-    const target = event.target;
-    if (!(target instanceof Element)) return;
-
-    const anchor = target.closest("a[href]");
-    if (!(anchor instanceof HTMLAnchorElement)) return;
-    if (!shouldHandle(anchor, event)) return;
-
-    markNavigation(anchor);
-  });
 
   document.addEventListener("click", (event) => {
     const target = event.target;
@@ -48,8 +46,27 @@
     markNavigation(anchor);
   });
 
+  const clearExitState = () => {
+    root.classList.remove("is-nav-exiting");
+    if (exitResetTimer) {
+      globalThis.clearTimeout(exitResetTimer);
+      exitResetTimer = 0;
+    }
+  };
+
   // Ensure restored pages from bfcache are visible immediately.
   globalThis.addEventListener("pageshow", () => {
-    root.classList.remove("is-nav-exiting");
+    clearExitState();
+  });
+
+  // Clean up in non-navigation interaction paths.
+  globalThis.addEventListener("pagehide", () => {
+    clearExitState();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      clearExitState();
+    }
   });
 })();

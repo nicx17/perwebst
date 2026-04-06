@@ -15,6 +15,11 @@ if (project) {
 } else {
   Astro.response.status = 404;
 }
+
+const repositoryHost = project ? new URL(project.data.repository).hostname.replace(/^www\./, "") : "";
+const liveHost = project?.data.liveUrl
+  ? new URL(project.data.liveUrl).hostname.replace(/^www\./, "")
+  : "";
 ---
 
 {
@@ -51,18 +56,34 @@ if (project) {
             </div>
           </div>
           <div class="meta-row">
-            <span>
-              <strong>Repository:</strong>
-              <a href={project.data.repository} target="_blank" rel="noopener noreferrer">{project.data.repositoryLabel}</a>
-            </span>
-            {
-              project.data.liveUrl ? (
-                <span>
-                  <strong>Live:</strong>
-                  <a href={project.data.liveUrl} target="_blank" rel="noopener noreferrer">Open Project</a>
-                </span>
-              ) : null
-            }
+            <div class="project-action-row" aria-label="Project actions">
+              <a
+                class="project-action-button project-action-primary"
+                href={project.data.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open source repository on ${repositoryHost}`}
+              >
+                View Source
+              </a>
+              {
+                project.data.liveUrl ? (
+                  <a
+                    class="project-action-button"
+                    href={project.data.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open live site at ${liveHost}`}
+                  >
+                    Visit Live Site
+                  </a>
+                ) : null
+              }
+            </div>
+            <div class="project-meta-row" aria-label="Project hosts">
+              <span class="project-meta-chip">{repositoryHost}</span>
+              {liveHost ? <span class="project-meta-chip">{liveHost}</span> : null}
+            </div>
           </div>
           <div class="tag-list">
             {project.data.tags.map((tag) => (
