@@ -64,7 +64,7 @@ const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string): v
     })
   );
   if (requestUrl.protocol === "https:") {
-    headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
 };
 
@@ -161,7 +161,7 @@ describe("setSecurityHeaders — HTTPS request", () => {
   });
 
   it("sets HSTS on HTTPS", () => {
-    expect(headers.get("Strict-Transport-Security")).toContain("max-age=63072000");
+    expect(headers.get("Strict-Transport-Security")).toContain("max-age=31536000");
     expect(headers.get("Strict-Transport-Security")).toContain("includeSubDomains");
     expect(headers.get("Strict-Transport-Security")).toContain("preload");
   });
