@@ -13,7 +13,14 @@ const { title, description, canonicalPath, shell = true, theme } = Astro.props;
 const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() : undefined;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
-const ogImage = new URL("/backgrounds/flower-bg.jpg", Astro.site).toString();
+
+const day = new Date().getDate();
+const isDay2 = day % 2 === 0;
+
+const lightImage = isDay2 ? "eve-lP_4h4oVO1E-unsplash" : "eve-jCBLFtjpXfw-unsplash";
+const darkImage = isDay2 ? "mohammed-kara-LpYWTqT4Ff0-unsplash" : "jan-kopriva-L-bVMhRb5cs-unsplash";
+
+const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
 const cspNonce = typeof Astro.locals.cspNonce === "string" ? Astro.locals.cspNonce : undefined;
 
 const navItems = [
@@ -36,7 +43,26 @@ const isActive = (href: string) => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script is:inline src="/js/theme-bootstrap.js" nonce={cspNonce} data-cfasync="false"></script>
+    <script is:inline nonce={cspNonce} data-cfasync="false">
+      (() => {
+        try {
+          const root = document.documentElement;
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "ivory" || savedTheme === "midnight") {
+            root.dataset.theme = savedTheme;
+          }
+
+          const activeTheme = root.dataset.theme === "ivory" || root.dataset.theme === "midnight" ? root.dataset.theme : "ivory";
+          const sceneQualityKey = (theme) => `bg-scene-quality-20260404hq-${theme}`;
+          const cachedSceneQuality = sessionStorage.getItem(sceneQualityKey(activeTheme));
+          if (cachedSceneQuality === "tiny" || cachedSceneQuality === "avif" || cachedSceneQuality === "webp" || cachedSceneQuality === "default") {
+            root.dataset.sceneQuality = cachedSceneQuality;
+          }
+        } catch {
+          /* Ignore storage access failures in restricted browser modes. */
+        }
+      })();
+    </script>
     <script is:inline src="/js/page-transition.js" nonce={cspNonce} defer data-cfasync="false"></script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -58,6 +84,54 @@ const isActive = (href: string) => {
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
     <script is:inline src="/js/theme-toggle.js" nonce={cspNonce} defer data-cfasync="false"></script>
+    <style is:inline set:html={`
+      :root {
+        --scene-image-default-light: url("/backgrounds/light/${lightImage}.jpg");
+        --scene-image-tiny-light: url("/backgrounds/light/${lightImage}.tiny.webp");
+        --scene-image-webp-light: url("/backgrounds/light/${lightImage}.webp");
+        --scene-image-avif-light: url("/backgrounds/light/${lightImage}.avif");
+
+        --scene-image-default-dark: url("/backgrounds/dark/${darkImage}.jpg");
+        --scene-image-tiny-dark: url("/backgrounds/dark/${darkImage}.tiny.webp");
+        --scene-image-webp-dark: url("/backgrounds/dark/${darkImage}.webp");
+        --scene-image-avif-dark: url("/backgrounds/dark/${darkImage}.avif");
+      }
+
+      html[data-theme="ivory"], html:not([data-theme]) {
+        --scene-image-default: var(--scene-image-default-light);
+        --scene-image-tiny: var(--scene-image-tiny-light);
+        --scene-image-webp: var(--scene-image-webp-light);
+        --scene-image-avif: var(--scene-image-avif-light);
+        --scene-image: var(--scene-image-default);
+      }
+      html[data-theme="midnight"] {
+        --scene-image-default: var(--scene-image-default-dark);
+        --scene-image-tiny: var(--scene-image-tiny-dark);
+        --scene-image-webp: var(--scene-image-webp-dark);
+        --scene-image-avif: var(--scene-image-avif-dark);
+        --scene-image: var(--scene-image-default);
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]) {
+          --scene-image-default: var(--scene-image-default-dark);
+          --scene-image-tiny: var(--scene-image-tiny-dark);
+          --scene-image-webp: var(--scene-image-webp-dark);
+          --scene-image-avif: var(--scene-image-avif-dark);
+          --scene-image: var(--scene-image-default);
+        }
+      }
+
+      html[data-scene-quality="tiny"] { --scene-image: var(--scene-image-tiny, var(--scene-image-default)); }
+      html[data-scene-quality="webp"] { --scene-image: var(--scene-image-webp, var(--scene-image-default)); }
+      html[data-scene-quality="avif"] { --scene-image: var(--scene-image-avif, var(--scene-image-default)); }
+      html[data-scene-quality="default"] { --scene-image: var(--scene-image-default); }
+    `}></style>
+    <script is:inline nonce={cspNonce} set:html={`
+      globalThis.__BACKGROUND_CONFIG = {
+        ivory: "/backgrounds/light/${lightImage}.jpg",
+        midnight: "/backgrounds/dark/${darkImage}.jpg"
+      };
+    `}></script>
     <script is:inline src="/js/background-loader.js" nonce={cspNonce} defer data-cfasync="false"></script>
   </head>
   <body>

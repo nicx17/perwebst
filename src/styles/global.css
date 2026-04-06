@@ -33,11 +33,6 @@ html[data-theme="ivory"] {
   --page-max-plain: 1360px;
   --home-links-max: 1400px;
   --reading-max: 1080px;
-  --scene-image-default: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg?v=20260404hq");
-  --scene-image-tiny: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.tiny.webp?v=20260404hq");
-  --scene-image-webp: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.webp?v=20260404hq");
-  --scene-image-avif: url("/backgrounds/light/eve-jCBLFtjpXfw-unsplash.avif?v=20260404hq");
-  --scene-image: var(--scene-image-default);
   --downsampling-mode: boxcar;
   --downsampling-factor: 1;
   --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -92,11 +87,6 @@ html[data-theme="midnight"] {
   --card-sheen: rgba(205, 220, 240, 0.08);
   --grain-opacity: 0.045;
   --grid-line: rgba(198, 218, 244, 0.07);
-  --scene-image-default: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg?v=20260404hq");
-  --scene-image-tiny: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.tiny.webp?v=20260404hq");
-  --scene-image-webp: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.webp?v=20260404hq");
-  --scene-image-avif: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.avif?v=20260404hq");
-  --scene-image: var(--scene-image-default);
   --downsampling-mode: boxcar;
   --downsampling-factor: 1;
   --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -137,12 +127,7 @@ html[data-theme="midnight"] {
     --card-sheen: rgba(205, 220, 240, 0.08);
     --grain-opacity: 0.045;
     --grid-line: rgba(198, 218, 244, 0.07);
-    --scene-image-default: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg?v=20260404hq");
-    --scene-image-tiny: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.tiny.webp?v=20260404hq");
-    --scene-image-webp: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.webp?v=20260404hq");
-    --scene-image-avif: url("/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.avif?v=20260404hq");
-    --scene-image: var(--scene-image-default);
-    --downsampling-mode: boxcar;
+              --downsampling-mode: boxcar;
     --downsampling-factor: 1;
     --downsampling-step: calc(var(--downsampling-factor) * 1px);
     --pixelize-enabled: 1;
@@ -154,21 +139,6 @@ html[data-theme="midnight"] {
   }
 }
 
-html[data-scene-quality="tiny"] {
-  --scene-image: var(--scene-image-tiny, var(--scene-image-default));
-}
-
-html[data-scene-quality="webp"] {
-  --scene-image: var(--scene-image-webp, var(--scene-image-default));
-}
-
-html[data-scene-quality="avif"] {
-  --scene-image: var(--scene-image-avif, var(--scene-image-default));
-}
-
-html[data-scene-quality="default"] {
-  --scene-image: var(--scene-image-default);
-}
 
 @keyframes fadeRise {
   from {
@@ -244,6 +214,7 @@ body,
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
   background-color: var(--bg-primary);
   background-image: var(--scene-image);
   background-position: center center;
@@ -272,7 +243,6 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   position: relative;
-  overflow-x: hidden;
   isolation: isolate;
   transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease;
 }
@@ -786,7 +756,7 @@ header.page-header h1 {
   color: var(--text-main);
   border-color: var(--button-border-strong);
   background: color-mix(in srgb, var(--button-bg-hover) 66%, transparent);
-  transform: translateY(-11px) scale(1.06);
+  transform: translateY(-8px) scale(1.12);
   box-shadow:
     0 46px 70px -26px var(--shadow-main),
     0 0 28px color-mix(in srgb, var(--ambient-a) 30%, transparent),
@@ -805,8 +775,8 @@ header.page-header h1 {
 }
 
 .home-link-icon {
-  width: 2.52rem;
-  height: 2.52rem;
+  width: 3.2rem;
+  height: 3.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -826,8 +796,8 @@ header.page-header h1 {
 }
 
 .home-link-icon svg {
-  width: 1.72rem;
-  height: 1.72rem;
+  width: 2.4rem;
+  height: 2.4rem;
   fill: currentColor;
   display: block;
   overflow: visible;
@@ -856,8 +826,8 @@ header.page-header h1 {
 }
 
 .home-link[data-icon="github"] .home-link-icon svg {
-  width: 1.62rem;
-  height: 1.62rem;
+  width: 2.25rem;
+  height: 2.25rem;
 }
 
 .home-link[data-icon="linkedin"] {
@@ -871,8 +841,8 @@ header.page-header h1 {
 }
 
 .home-link[data-icon="unsplash"] .home-link-icon svg {
-  width: 1.56rem;
-  height: 1.56rem;
+  width: 2.15rem;
+  height: 2.15rem;
 }
 
 .home-link[data-icon="instagram"] {
@@ -1686,3 +1656,5 @@ header.page-header h1 {
     text-align: center;
   }
 }
+
+
