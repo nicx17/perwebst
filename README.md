@@ -47,6 +47,22 @@ Open `http://localhost:4321/`.
 
 ---
 
+## Asset Optimization
+
+The site serves responsive background images automatically derived from high-res source files in `public/backgrounds/`. To dynamically generate the highly compressed WebP, next-gen AVIF, and micro-placeholder `.tiny.webp` variants needed for the frontend:
+
+```bash
+# Fast mode: optimizes only new or modified image files
+npm run optimize:backgrounds
+
+# Aggressive mode: forces a complete re-encode of all backgrounds (bypasses cache)
+BG_FORCE=1 npm run optimize:backgrounds
+```
+
+> **Note**: The optimizer heavily loads the CPU. The AVIF encoder limit is strictly bounded at `effort: 9` and WebP strictly at `effort: 6`. Pushing past these values will crash the underlying `sharp` library.
+
+---
+
 ## Projects
 
 - **[HyTrackV3](https://github.com/nicx17/HyTrackV3)** — Autonomous Python tracking engine with headless Selenium scraping, SHA-256 state hashing, and real-time shipment notifications.

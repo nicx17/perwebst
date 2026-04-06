@@ -4,7 +4,7 @@
 	const sceneQualityKey = (theme) => `bg-scene-quality-${backgroundAssetVersion}-${theme}`;
 	let activeLoadToken = 0;
 
-	const backgrounds = {
+	const backgrounds = globalThis.__BACKGROUND_CONFIG ?? {
 		ivory: "/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg",
 		midnight: "/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg"
 	};
