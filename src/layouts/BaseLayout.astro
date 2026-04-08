@@ -15,10 +15,49 @@ const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
 
 const day = new Date().getDate();
-const isDay2 = day % 2 === 0;
 
-const lightImage = isDay2 ? "eve-lP_4h4oVO1E-unsplash" : "eve-jCBLFtjpXfw-unsplash";
-const darkImage = isDay2 ? "mohammed-kara-LpYWTqT4Ff0-unsplash" : "jan-kopriva-L-bVMhRb5cs-unsplash";
+const lightImages: string[] = [
+  "antonius-harel-2rkqE7SgcE8-unsplash",
+  "antonius-harel-VbOjY42c6a4-unsplash",
+  "antonius-harel-WsaPcg512jE-unsplash",
+  "asi-mong-Gf5Q_5UF3vs-unsplash",
+  "dirk-lach--IZ8j4_xgQ8-unsplash",
+  "eve-9xY__xnwCy0-unsplash",
+  "eve-bKOpGRbHBGs-unsplash",
+  "eve-Fp96C-6Wd6o-unsplash",
+  "eve-jCBLFtjpXfw-unsplash",
+  "eve-lP_4h4oVO1E-unsplash",
+  "eve-lxepp3ZUxTs-unsplash",
+  "eve-WK9sTh1FiSs-unsplash",
+  "iklas-FeNrGgQ1Tu8-unsplash",
+  "iklas-OSoICiA8F4M-unsplash",
+  "iklas-xjSu2KbJlAg-unsplash",
+  "iklas-y9Ujplj3KIU-unsplash",
+  "rohit-choudhari-_E6sXQHsgQc-unsplash",
+  "sean-sinclair-C_NJKfnTR5A-unsplash",
+];
+
+const darkImages: string[] = [
+  "aedrian-salazar-kVENOffxjZg-unsplash",
+  "alexander-x-M4L2tlmqVus-unsplash",
+  "antonius-harel-4LY13pRPXSo-unsplash",
+  "antonius-harel-HaJoTW4ip-Y-unsplash",
+  "antonius-harel-MWzVeAb34P8-unsplash",
+  "antonius-harel-n-Tyeypj9hU-unsplash",
+  "antonius-harel-r1hj0fblqkY-unsplash",
+  "bill-hamway-24Uv4wRJ95A-unsplash",
+  "codioful-formerly-gradienta-1Ec-3-OuvPE-unsplash",
+  "codioful-formerly-gradienta-1nqc_X3IWMg-unsplash",
+  "codioful-formerly-gradienta-RiUKrRjZud0-unsplash",
+  "jan-kopriva-L-bVMhRb5cs-unsplash",
+  "lucrezia-carnelos-Sp6MXlY_2wc-unsplash",
+  "mohammed-kara-LpYWTqT4Ff0-unsplash",
+  "mohammed-kara--n9dcIoAIuE-unsplash",
+  "valentin-NT9QgSMddNg-unsplash",
+];
+
+const lightImage = lightImages[day % lightImages.length]!;
+const darkImage  = darkImages[day % darkImages.length]!;
 
 const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
 const cspNonce = typeof Astro.locals.cspNonce === "string" ? Astro.locals.cspNonce : undefined;
