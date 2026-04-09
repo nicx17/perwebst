@@ -70,7 +70,7 @@ describe("sitemap.xml", () => {
     const xml = buildSitemapXml(SITE, [...STATIC_ROUTES, ...PROJECT_ROUTES]);
     const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
     for (const loc of locs) {
-      expect(loc).toMatch(/^https:\/\/link\.nickcardoso\.com/);
+      expect(loc).toMatch(/^https:\/\/link\.nickcardoso\.com(?:\/|$)/);
     }
   });
 });
