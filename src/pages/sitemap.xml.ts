@@ -1,3 +1,6 @@
+/**
+ * Generates the primary sitemap.xml containing all static and dynamic project routes.
+ */
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 
@@ -5,6 +8,9 @@ const XML_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8"
 };
 
+/**
+ * GET handler to dynamically build and serve the XML sitemap.
+ */
 export const GET: APIRoute = async ({ site }) => {
   if (!site) {
     return new Response("Site URL is not configured.", { status: 500 });

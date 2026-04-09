@@ -1,3 +1,10 @@
+/**
+ * Background Optimization Script
+ * Processes raw background images into various optimized formats and sizes:
+ * - WebP: High compatibility, good compression.
+ * - AVIF: Modern format, superior compression and quality.
+ * - Tiny WebP: Extremely small placeholders for progressive loading.
+ */
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -10,6 +17,7 @@ const maxWidth = 3200;
 const maxHeight = 2000;
 const forceReencode = process.env.BG_FORCE === "1";
 
+/** Determines if a file is a valid source image (ignoring already-optimized 'tiny' derivatives). */
 const isSourceImage = (fileName) => {
 	const lower = fileName.toLowerCase();
 	const ext = path.extname(lower);
@@ -20,6 +28,7 @@ const isSourceImage = (fileName) => {
 	return !lower.endsWith(".tiny.jpg") && !lower.endsWith(".tiny.jpeg") && !lower.endsWith(".tiny.png");
 };
 
+/** Generates output filesystem paths for each derivative format. */
 const outputPathsFor = (sourcePath) => {
 	const ext = path.extname(sourcePath);
 	const base = sourcePath.slice(0, -ext.length);
@@ -30,6 +39,7 @@ const outputPathsFor = (sourcePath) => {
 	};
 };
 
+/** Checks if an output file is missing or older than the source file. */
 const isOutdated = async (sourcePath, outputPath) => {
 	try {
 		const [sourceStat, outputStat] = await Promise.all([fs.stat(sourcePath), fs.stat(outputPath)]);
@@ -39,6 +49,10 @@ const isOutdated = async (sourcePath, outputPath) => {
 	}
 };
 
+/**
+ * Orchestrates the optimization of a single source image.
+ * Uses incremental checks to skip processing if files are already up-to-date.
+ */
 const ensureOptimized = async (sourcePath) => {
 	const outputs = outputPathsFor(sourcePath);
 	const [needsWebp, needsAvif, needsTiny] = await Promise.all([
@@ -79,6 +93,7 @@ const ensureOptimized = async (sourcePath) => {
 	return wrote;
 };
 
+/** Primary entry point: crawls theme directories and processes all source imagery. */
 const main = async () => {
 	let totalGenerated = 0;
 	for (const themeDirectory of themeDirectories) {

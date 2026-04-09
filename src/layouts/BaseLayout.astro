@@ -1,11 +1,21 @@
 ---
+/**
+ * BaseLayout is the primary shell for all pages in the application.
+ * It handles the global HTML structure, theme management, background image rotation,
+ * and security header passthrough (nonces).
+ */
 import "../styles/global.css";
 import { ClientRouter } from 'astro:transitions';
 interface Props {
+  /** The page title used in the <title> tag and OG/Twitter metadata. */
   title: string;
+  /** A concise summary of the page for SEO and social sharing. */
   description?: string;
+  /** The absolute URL for the canonical link relation, if different from the current URL. */
   canonicalPath?: string;
+  /** Controls whether the standard app shell (topbar, navigation) is rendered. */
   shell?: boolean;
+  /** Explicitly overrides the theme (useful for landing pages or specific modes). */
   theme?: "ivory" | "midnight";
 }
 
@@ -14,8 +24,14 @@ const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() 
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
 
+/**
+ * Background selective logic based on the current day of the month.
+ * This ensures a variety of imagery across the month while remaining deterministic
+ * for SSR/Hydration consistency.
+ */
 const day = new Date().getDate();
 
+/** Pools of background images for light (ivory) and dark (midnight) themes. */
 const lightImages: string[] = [
   "antonius-harel-2rkqE7SgcE8-unsplash",
   "antonius-harel-VbOjY42c6a4-unsplash",
@@ -60,6 +76,8 @@ const lightImage = lightImages[day % lightImages.length]!;
 const darkImage  = darkImages[day % darkImages.length]!;
 
 const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
+
+/** Nonce provided by middleware for script/style authorization under CSP. */
 const cspNonce = typeof Astro.locals.cspNonce === "string" ? Astro.locals.cspNonce : undefined;
 
 const navItems = [
@@ -83,40 +101,14 @@ const isActive = (href: string) => {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <ClientRouter />
-    <script is:inline nonce={cspNonce} data-cfasync="false">
-      if (globalThis.trustedTypes && globalThis.trustedTypes.createPolicy) {
-        try {
-          if (!globalThis.trustedTypes.defaultPolicy) {
-            globalThis.trustedTypes.createPolicy("default", {
-              createHTML: (string) => string,
-              createScript: (string) => string,
-              createScriptURL: (string) => string
-            });
-          }
-        } catch {}
-      }
-    </script>
-    <script is:inline nonce={cspNonce} data-cfasync="false">
-      (() => {
-        try {
-          const root = document.documentElement;
-          const savedTheme = localStorage.getItem("theme");
-          if (savedTheme === "ivory" || savedTheme === "midnight") {
-            root.dataset.theme = savedTheme;
-          }
+    
+    <!-- Trusted Types configuration for modern browser security. -->
+    <script is:inline nonce={cspNonce}>if(globalThis.trustedTypes&&globalThis.trustedTypes.createPolicy){try{if(!globalThis.trustedTypes.defaultPolicy){globalThis.trustedTypes.createPolicy("default",{createHTML:s=>s,createScript:s=>s,createScriptURL:s=>s})}}catch{}}</script>
 
-          const activeTheme = root.dataset.theme === "ivory" || root.dataset.theme === "midnight" ? root.dataset.theme : "ivory";
-          const sceneQualityKey = (theme) => `bg-scene-quality-20260404hq-${theme}`;
-          const cachedSceneQuality = sessionStorage.getItem(sceneQualityKey(activeTheme));
-          if (cachedSceneQuality === "tiny" || cachedSceneQuality === "avif" || cachedSceneQuality === "webp" || cachedSceneQuality === "default") {
-            root.dataset.sceneQuality = cachedSceneQuality;
-          }
-        } catch {
-          /* Ignore storage access failures in restricted browser modes. */
-        }
-      })();
-    </script>
-    <script is:inline src="/js/page-transition.js" nonce={cspNonce} defer data-cfasync="false"></script>
+    <!-- Theme and quality-of-service (QoS) initialization.
+         Executed inline to prevent Flash of Unstyled Content (FOUC). -->
+    <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement,e=localStorage.getItem("theme");if(e==="ivory"||e==="midnight"){t.dataset.theme=e}const n=t.dataset.theme==="ivory"||t.dataset.theme==="midnight"?t.dataset.theme:"ivory",a=i=>`bg-scene-quality-20260404hq-${i}`,s=sessionStorage.getItem(a(n));if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
+    <script src="../scripts/page-transition.js"></script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -136,7 +128,11 @@ const isActive = (href: string) => {
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <script is:inline src="/js/theme-toggle.js" nonce={cspNonce} defer data-cfasync="false"></script>
+    <script src="../scripts/theme-toggle.js"></script>
+    
+    <!-- Dynamic CSS injection for background image variations.
+         Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
+         reactively based on client-side feature detection and loading state. -->
     <style is:inline nonce={cspNonce} set:html={`
       :root {
         --scene-image-default-light: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
@@ -179,13 +175,10 @@ const isActive = (href: string) => {
       html[data-scene-quality="avif"] { --scene-image: var(--scene-image-avif, var(--scene-image-default)); }
       html[data-scene-quality="default"] { --scene-image: var(--scene-image-default); }
     `}></style>
-    <script is:inline nonce={cspNonce} set:html={`
-      globalThis.__BACKGROUND_CONFIG = {
-        ivory: "/backgrounds/light/${lightImage}.jpg",
-        midnight: "/backgrounds/dark/${darkImage}.jpg"
-      };
-    `}></script>
-    <script is:inline src="/js/background-loader.js" nonce={cspNonce} defer data-cfasync="false"></script>
+
+    <!-- Expose the selected background config to the client-side background-loader.js -->
+    <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg",midnight:"/backgrounds/dark/${darkImage}.jpg"};`}></script>
+    <script src="../scripts/background-loader.js"></script>
   </head>
   <body>
     <div id="scene-bg" aria-hidden="true"></div>

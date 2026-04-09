@@ -1,9 +1,15 @@
+/**
+ * Defines the structure for primary navigation and social links.
+ */
 export interface HomeLink {
   label: string;
   href: string;
   external?: boolean;
 }
 
+/**
+ * The collection of links displayed on the homepage.
+ */
 export const homeLinks: HomeLink[] = [
   { label: "Projects", href: "/projects/" },
   { label: "GitHub", href: "https://github.com/nicx17", external: true },

@@ -1,7 +1,12 @@
 ---
+/**
+ * ProjectCard displays a summary of a project from the 'projects' collection.
+ * It features an icon (or fallback), title, summary, and a list of tags.
+ */
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
+  /** The project data object from Astro's Content Layer. */
   project: CollectionEntry<"projects">;
 }
 

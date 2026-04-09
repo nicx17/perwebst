@@ -1,3 +1,9 @@
+/**
+ * Astro configuration file.
+ * Handles site URL resolution (with environment variable support),
+ * server-side rendering (SSR) setup via Node.js adapter,
+ * and Vite-specific build optimizations.
+ */
 import { defineConfig } from "astro/config";
 import node from "@astrojs/node";
 import { readFileSync } from "node:fs";
@@ -5,8 +11,13 @@ import { resolve } from "node:path";
 
 const DEFAULT_ORIGIN = "https://link.nickcardoso.com";
 
+/** Normalizes a URL by removing trailing slashes. */
 const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, "");
 
+/**
+ * Fallback to reading ORIGIN from .env manually if process.env is not yet populated.
+ * This is useful during early build stages or specific CLI invocations.
+ */
 const readOriginFromDotEnv = () => {
   try {
     const dotEnv = readFileSync(resolve(process.cwd(), ".env"), "utf8");
@@ -29,6 +40,10 @@ const readOriginFromDotEnv = () => {
   }
 };
 
+/**
+ * Resolves the final site origin based on environment variables.
+ * Enforces HTTPS in production to ensure secure link generation and CSP compliance.
+ */
 const resolveSiteOrigin = () => {
   const nodeEnv = process.env.NODE_ENV ?? "development";
   const rawOrigin = normalizeOrigin(process.env.ORIGIN ?? readOriginFromDotEnv());
@@ -58,14 +73,19 @@ const resolveSiteOrigin = () => {
 const site = resolveSiteOrigin();
 
 export default defineConfig({
+  /** The base URL for the built site. */
   site,
   devToolbar: { enabled: false },
+  /** Hybrid/Server rendering mode. */
   output: "server",
+  /** Standalone Node.js server adapter. */
   adapter: node({ mode: "standalone" }),
+  /** Standardizes URLs to always have a trailing slash. */
   trailingSlash: "always",
   vite: {
     build: {
       rollupOptions: {
+        /** Custom warning handler to suppress known/expected noise from Astro internals. */
         onwarn(warning, defaultHandler) {
           const isKnownAstroWarning =
             warning.code === "UNUSED_EXTERNAL_IMPORT" &&

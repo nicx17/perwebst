@@ -1,7 +1,12 @@
+/**
+ * Configuration for Astro's Content Layer.
+ * Defines schemas and validation logic for project data.
+ */
 import { glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
 import * as z from "zod/v4";
 
+/** Custom Zod schema for validating HTTPS URLs. */
 const HTTPS_URL = z.url().refine((value) => {
   try {
     return new URL(value).protocol === "https:";
@@ -10,10 +15,15 @@ const HTTPS_URL = z.url().refine((value) => {
   }
 }, "must be an https URL");
 
+/** Custom Zod schema for validating project-specific canonical paths. */
 const PROJECT_CANONICAL_PATH = z
   .string()
   .regex(/^\/projects\/[a-z0-9-]+\/$/i, "must match /projects/<slug>/");
 
+/**
+ * Definition of the 'projects' collection.
+ * Uses Markdown files located in src/content/projects.
+ */
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/projects" }),
   schema: z.object({

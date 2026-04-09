@@ -1,8 +1,17 @@
 (() => {
+  /**
+   * Page Transition orchestrates a manual exit animation when navigating between pages.
+   * It targets standard links and applies a CSS class to the root element to trigger
+   * transitions defined in CSS (e.g., opacity or scale shifts).
+   */
   const root = document.documentElement;
   const NAV_EXIT_RESET_MS = 900;
   let exitResetTimer = 0;
 
+  /**
+   * Logic to determine if a click on an anchor should trigger an animated navigation.
+   * Filters out external links, downloads, hash links, and special key combinations (Cmd/Ctrl).
+   */
   const shouldHandle = (anchor, event) => {
     if (!anchor || event.defaultPrevented) return false;
     if (event.button !== 0) return false;
@@ -22,19 +31,27 @@
 
   const markNavigation = (anchor) => {
     if (!(anchor instanceof HTMLAnchorElement)) return;
+    
+    // Trigger the CSS exit animation.
     root.classList.add("is-nav-exiting");
 
     if (exitResetTimer) {
       globalThis.clearTimeout(exitResetTimer);
     }
 
-    // Guard against stale exit state when navigation is canceled or interrupted.
+    /**
+     * Stale State Guard:
+     * If navigation is canceled (e.g. 404, network error, or user stop),
+     * we must clear the 'is-nav-exiting' tag after a timeout so the UI doesn't 
+     * remain stuck in a transitioned-out/hidden state.
+     */
     exitResetTimer = globalThis.setTimeout(() => {
       root.classList.remove("is-nav-exiting");
       exitResetTimer = 0;
     }, NAV_EXIT_RESET_MS);
   };
 
+  /** Global click listener for progressive enhancement of link navigation. */
   document.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
@@ -54,16 +71,19 @@
     }
   };
 
-  // Ensure restored pages from bfcache are visible immediately.
+  // Restoration Handling:
+  // When a user goes "Back" or "Forward", the browser might restore a page 
+  // from the Back-Forward Cache (bfcache). We must ensure visibility is reset.
   globalThis.addEventListener("pageshow", () => {
     clearExitState();
   });
 
-  // Clean up in non-navigation interaction paths.
+  // Ensure state is clean before the page is hidden.
   globalThis.addEventListener("pagehide", () => {
     clearExitState();
   });
 
+  // Re-enable visibility if the user switches back to this tab.
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       clearExitState();
