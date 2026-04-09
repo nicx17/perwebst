@@ -61,11 +61,18 @@ const selectImage = (pool: string[], day: number): string => pool[day % pool.len
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** All valid calendar days returned by Date.getDate(). */
+/** 
+ * All valid calendar days returned by Date.getDate() for a maximum month length.
+ * Used to verify the rotator's coverage and deterministic properties.
+ */
 const CALENDAR_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Validates the integrity of the data pools.
+ * Ensures images are correctly named and formatted as expected by the build scripts.
+ */
 describe("lightImages pool", () => {
   it("contains 18 entries", () => {
     expect(lightImages).toHaveLength(18);
@@ -110,6 +117,10 @@ describe("darkImages pool", () => {
   });
 });
 
+/**
+ * Verifies the selection logic for the light theme pool.
+ * Focuses on range safety, deterministic output, and lack of immediate repeats.
+ */
 describe("selectImage — light pool", () => {
   it("returns a defined string for every calendar day (1-31)", () => {
     for (const day of CALENDAR_DAYS) {
@@ -139,6 +150,9 @@ describe("selectImage — light pool", () => {
   });
 });
 
+/**
+ * Verifies the selection logic for the dark theme pool.
+ */
 describe("selectImage — dark pool", () => {
   it("returns a defined string for every calendar day (1-31)", () => {
     for (const day of CALENDAR_DAYS) {
@@ -168,6 +182,11 @@ describe("selectImage — dark pool", () => {
   });
 });
 
+/**
+ * Validates that light and dark selection stay out of phase.
+ * This ensures that users see a unique pair of images across the month
+ * when they toggle themes.
+ */
 describe("independent pool cycling", () => {
   it("light and dark pools have different lengths so they cycle independently", () => {
     expect(lightImages.length).not.toBe(darkImages.length);

@@ -1,3 +1,6 @@
+/**
+ * Generates the master sitemap index pointing to the actual sitemap.xml.
+ */
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ site }) => {

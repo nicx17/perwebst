@@ -1,3 +1,6 @@
+/**
+ * Data for the 'About' page, including the technical stack and hardware specs.
+ */
 export const stackCards = [
   {
     title: "Edge and Routing",
@@ -9,6 +12,9 @@ export const stackCards = [
   }
 ];
 
+/**
+ * Hardware specifications for the physical origin server.
+ */
 export const hardware = [
   ["Machine", "Raspberry Pi 5"],
   ["Architecture", "64-bit ARM Cortex-A76 (Quad-core @ 2.4GHz)"],
@@ -17,6 +23,9 @@ export const hardware = [
   ["Operating System", "Debian / Raspberry Pi OS"]
 ] as const;
 
+/**
+ * Key architectural and performance optimization highlights.
+ */
 export const optimizationNotes = [
   ["Rendering", "Astro SSR with content-first pages and minimal client JavaScript."],
   ["Typography", "System font stack to reduce layout shift and external fetches."],
