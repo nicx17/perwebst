@@ -76,6 +76,8 @@ export default defineConfig({
   /** The base URL for the built site. */
   site,
   devToolbar: { enabled: false },
+  /** Keep client-side navigation, but disable automatic link prefetching. */
+  prefetch: false,
   /** Hybrid/Server rendering mode. */
   output: "server",
   /** Standalone Node.js server adapter. */
