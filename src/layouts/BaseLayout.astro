@@ -108,7 +108,9 @@ const isActive = (href: string) => {
     <!-- Theme and quality-of-service (QoS) initialization.
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
     <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement,e=localStorage.getItem("theme");if(e==="ivory"||e==="midnight"){t.dataset.theme=e}const n=t.dataset.theme==="ivory"||t.dataset.theme==="midnight"?t.dataset.theme:"ivory",a=i=>`bg-scene-quality-20260404hq-${i}`,s=sessionStorage.getItem(a(n));if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
-    <script src="../scripts/page-transition.js"></script>
+    <script>
+      import "../scripts/page-transition.js";
+    </script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -128,7 +130,9 @@ const isActive = (href: string) => {
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <script src="../scripts/theme-toggle.js"></script>
+    <script>
+      import "../scripts/theme-toggle.js";
+    </script>
     
     <!-- Dynamic CSS injection for background image variations.
          Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
@@ -178,7 +182,9 @@ const isActive = (href: string) => {
 
     <!-- Expose the selected background config to the client-side background-loader.js -->
     <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg",midnight:"/backgrounds/dark/${darkImage}.jpg"};`}></script>
-    <script src="../scripts/background-loader.js"></script>
+    <script>
+      import "../scripts/background-loader.js";
+    </script>
   </head>
   <body>
     <div id="scene-bg" aria-hidden="true"></div>
