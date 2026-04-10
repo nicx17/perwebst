@@ -1,8 +1,10 @@
 /**
  * Defines the structure for primary navigation and social links.
  */
+export type HomeLinkLabel = "Projects" | "GitHub" | "LinkedIn" | "Unsplash" | "Instagram";
+
 export interface HomeLink {
-  label: string;
+  label: HomeLinkLabel;
   href: string;
   external?: boolean;
 }

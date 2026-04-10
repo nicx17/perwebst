@@ -10,7 +10,7 @@ Source for my personal portfolio site. Links to software engineering projects, h
 
 ## Stack
 
-Astro 5 SSR with `@astrojs/node` standalone adapter, TypeScript strict mode, file-based typed content collections.
+Astro 6 SSR with `@astrojs/node` standalone adapter, TypeScript strict mode, file-based typed content collections.
 
 Served via PM2 managed Node process, behind Cloudflare.
 
