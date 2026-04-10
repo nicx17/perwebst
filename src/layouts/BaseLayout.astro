@@ -6,6 +6,7 @@
  */
 import "../styles/global.css";
 import { ClientRouter } from 'astro:transitions';
+import { getTopbarPersistKey } from "../utils/layout-shell";
 interface Props {
   /** The page title used in the <title> tag and OG/Twitter metadata. */
   title: string;
@@ -23,6 +24,7 @@ const { title, description, canonicalPath, shell = true, theme } = Astro.props;
 const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() : undefined;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
+const topbarPersistKey = getTopbarPersistKey(shell);
 
 /**
  * Background selective logic based on the current day of the month.
@@ -109,7 +111,10 @@ const isActive = (href: string) => {
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
     <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement,e=localStorage.getItem("theme");if(e==="ivory"||e==="midnight"){t.dataset.theme=e}const n=t.dataset.theme==="ivory"||t.dataset.theme==="midnight"?t.dataset.theme:"ivory",a=i=>`bg-scene-quality-20260404hq-${i}`,s=sessionStorage.getItem(a(n));if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
     <script>
-      import "../scripts/page-transition.js";
+      import "../scripts/page-transition.ts";
+    </script>
+    <script>
+      import "../scripts/nav-state.ts";
     </script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -131,7 +136,7 @@ const isActive = (href: string) => {
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
     <script>
-      import "../scripts/theme-toggle.js";
+      import "../scripts/theme-toggle.ts";
     </script>
     
     <!-- Dynamic CSS injection for background image variations.
@@ -180,26 +185,28 @@ const isActive = (href: string) => {
       html[data-scene-quality="default"] { --scene-image: var(--scene-image-default); }
     `}></style>
 
-    <!-- Expose the selected background config to the client-side background-loader.js -->
+    <!-- Expose the selected background config to the client-side background-loader.ts -->
     <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg",midnight:"/backgrounds/dark/${darkImage}.jpg"};`}></script>
     <script>
-      import "../scripts/background-loader.js";
+      import "../scripts/background-loader.ts";
     </script>
   </head>
   <body>
-    <div id="scene-bg" aria-hidden="true"></div>
-    <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>
-    <div class="ambient-orb ambient-orb-two" aria-hidden="true"></div>
+    <div id="scene-bg" aria-hidden="true" transition:persist="scene-bg"></div>
+    <div class="ambient-orb ambient-orb-one" aria-hidden="true" transition:persist="ambient-orb-one"></div>
+    <div class="ambient-orb ambient-orb-two" aria-hidden="true" transition:persist="ambient-orb-two"></div>
     <main class:list={{ "page-shell": true, "page-shell-plain": !shell }}>
       {
         shell ? (
           <section class="app-shell">
-            <header class="app-topbar">
+            <header class="app-topbar" transition:persist={topbarPersistKey}>
               <div class="app-controls">
                 <nav class="app-nav" aria-label="Primary">
                   {navItems.map((item) => (
                     <a
                       class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      data-nav-link
+                      data-nav-href={item.href}
                       href={item.href}
                       aria-current={isActive(item.href) ? "page" : undefined}
                     >
@@ -221,12 +228,14 @@ const isActive = (href: string) => {
           </section>
         ) : (
           <>
-            <header class="app-topbar app-topbar-plain">
+            <header class="app-topbar app-topbar-plain" transition:persist={topbarPersistKey}>
               <div class="app-controls">
                 <nav class="app-nav" aria-label="Primary">
                   {navItems.map((item) => (
                     <a
                       class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      data-nav-link
+                      data-nav-href={item.href}
                       href={item.href}
                       aria-current={isActive(item.href) ? "page" : undefined}
                     >

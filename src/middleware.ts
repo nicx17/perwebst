@@ -10,6 +10,7 @@ import { defineMiddleware } from "astro:middleware";
 const ALLOWED_NODE_ENVS = new Set(["development", "test", "production"]);
 
 type RuntimeEnvMap = Record<string, string | undefined>;
+type WithCspNonce = { cspNonce?: string };
 
 /**
  * Accesses the global process.env in a runtime-agnostic way.
@@ -70,6 +71,10 @@ const validateRuntimeEnv = () => {
   } else if (nodeEnv === "production") {
     throw new Error("Missing PORT: set PORT in .env for production runtime.");
   }
+};
+
+const setCspNonce = (locals: App.Locals, cspNonce: string) => {
+  (locals as App.Locals & WithCspNonce).cspNonce = cspNonce;
 };
 
 validateRuntimeEnv();
@@ -221,7 +226,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const cspNonce = btoa(String.fromCodePoint(...nonceBytes));
   
   // 3. Attach the nonce to locals so Astro components can access it.
-  context.locals.cspNonce = cspNonce;
+  setCspNonce(context.locals, cspNonce);
 
   // 4. Continue the request chain.
   const response = await next();
@@ -268,4 +273,3 @@ export const onRequest = defineMiddleware(async (context, next) => {
     headers
   });
 });
-

@@ -1,4 +1,8 @@
+import { isSiteTheme, SITE_THEMES, type SiteTheme } from "../types/client";
+
 (() => {
+  const THEME_STORAGE_KEY = "theme";
+
   /**
    * Theme Toggle manages the state and persistence of the site's ivory/midnight themes.
    * It ensures that theme changes are reflected across the UI, persisted to localStorage,
@@ -9,25 +13,25 @@
   }
   globalThis.__persThemeToggleInitialized = true;
 
-  const themes = new Set(["ivory", "midnight"]);
+  const themes = new Set<SiteTheme>(SITE_THEMES);
   const root = document.documentElement;
-  const switchingTimers = new WeakMap();
+  const switchingTimers = new WeakMap<HTMLElement, number>();
 
   /** Dispatches a cross-application event when the theme is updated. */
-  const emitThemeChange = (theme) => {
+  const emitThemeChange = (theme: SiteTheme) => {
     document.dispatchEvent(new CustomEvent("themechange", { detail: { theme } }));
   };
 
   /** Reads the current theme from the root element's dataset. */
-  const readTheme = () => {
+  const readTheme = (): SiteTheme => {
     const current = root.dataset.theme;
-    return current && themes.has(current) ? current : "ivory";
+    return isSiteTheme(current) && themes.has(current) ? current : "ivory";
   };
 
   /** Updates attributes on all toggle buttons to reflect the current state. */
   const updateToggleUI = () => {
     const activeTheme = readTheme();
-    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
       const nextTheme = activeTheme === "ivory" ? "midnight" : "ivory";
       button.dataset.themeState = activeTheme;
       button.setAttribute("aria-label", `Theme is ${activeTheme}. Switch to ${nextTheme}.`);
@@ -38,8 +42,8 @@
   /** Hydrates the application theme from localStorage on initial load. */
   const applySavedTheme = () => {
     try {
-      const saved = localStorage.getItem("theme");
-      if (saved && themes.has(saved)) {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (isSiteTheme(saved) && themes.has(saved)) {
         root.dataset.theme = saved;
       }
     } catch {
@@ -53,7 +57,7 @@
    * Toggles the theme, persists it, and manages the 'switching' state for CSS animations.
    */
   const toggleTheme = () => {
-    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
       const existingTimer = switchingTimers.get(button);
       if (existingTimer) {
         globalThis.clearTimeout(existingTimer);
@@ -72,7 +76,7 @@
     const nextTheme = readTheme() === "ivory" ? "midnight" : "ivory";
     root.dataset.theme = nextTheme;
     try {
-      localStorage.setItem("theme", nextTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     } catch {
       // Ignore localStorage failures in restricted browser modes.
     }
@@ -82,7 +86,7 @@
 
   /** Binds the toggle logic to any buttons found in the DOM. */
   const bindToggle = () => {
-    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
       if (button.dataset.themeBound === "true") {
         return;
       }
@@ -92,7 +96,7 @@
     });
     updateToggleUI();
 
-    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
       if (button.dataset.themeReady === "true") {
         return;
       }
@@ -105,8 +109,9 @@
    * Handlers for Astro's View Transitions to ensure the theme state is preserved
    * when the document body is replaced.
    */
-  const persistThemeAcrossSwap = (event) => {
-    const nextRoot = event?.newDocument?.documentElement;
+  const persistThemeAcrossSwap = (event: Event) => {
+    const swapEvent = event as Event & { newDocument?: Document };
+    const nextRoot = swapEvent.newDocument?.documentElement;
     if (!nextRoot) {
       return;
     }

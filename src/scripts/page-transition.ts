@@ -1,4 +1,9 @@
 (() => {
+  if (globalThis.__persPageTransitionInitialized) {
+    return;
+  }
+  globalThis.__persPageTransitionInitialized = true;
+
   /**
    * Page Transition orchestrates a manual exit animation when navigating between pages.
    * It targets standard links and applies a CSS class to the root element to trigger
@@ -12,7 +17,7 @@
    * Logic to determine if a click on an anchor should trigger an animated navigation.
    * Filters out external links, downloads, hash links, and special key combinations (Cmd/Ctrl).
    */
-  const shouldHandle = (anchor, event) => {
+  const shouldHandle = (anchor: HTMLAnchorElement | null, event: MouseEvent) => {
     if (!anchor || event.defaultPrevented) return false;
     if (event.button !== 0) return false;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
@@ -29,9 +34,7 @@
     return true;
   };
 
-  const markNavigation = (anchor) => {
-    if (!(anchor instanceof HTMLAnchorElement)) return;
-    
+  const markNavigation = (anchor: HTMLAnchorElement) => {
     // Trigger the CSS exit animation.
     root.classList.add("is-nav-exiting");
 
@@ -42,7 +45,7 @@
     /**
      * Stale State Guard:
      * If navigation is canceled (e.g. 404, network error, or user stop),
-     * we must clear the 'is-nav-exiting' tag after a timeout so the UI doesn't 
+     * we must clear the 'is-nav-exiting' tag after a timeout so the UI doesn't
      * remain stuck in a transitioned-out/hidden state.
      */
     exitResetTimer = globalThis.setTimeout(() => {
@@ -52,7 +55,7 @@
   };
 
   /** Global click listener for progressive enhancement of link navigation. */
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", (event: MouseEvent) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
 
@@ -89,4 +92,9 @@
       clearExitState();
     }
   });
+
+  // Astro client-side navigations can preserve shell elements across swaps.
+  // Clear the exit state as soon as the new page has been prepared and loaded.
+  document.addEventListener("astro:after-swap", clearExitState);
+  document.addEventListener("astro:page-load", clearExitState);
 })();

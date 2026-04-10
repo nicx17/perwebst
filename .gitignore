@@ -42,3 +42,4 @@ node_modules
 Web Security Documentation Analysis Report.md
 caddy_config
 .codex
+docs/architecture.md
