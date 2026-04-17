@@ -103,6 +103,29 @@ const darkImages: string[] = [
 const lightImage = lightImages[day % lightImages.length]!;
 const darkImage  = darkImages[day % darkImages.length]!;
 
+const getUnsplashData = (filename: string) => {
+  const clean = filename.replace('-unsplash', '').replace(/\(\d+\)$/, '');
+  const lastDash = clean.lastIndexOf('-');
+  
+  if (lastDash === -1) {
+    return {
+      url: `https://unsplash.com/photos/${clean}`,
+      author: 'Unknown'
+    };
+  }
+
+  const authorSlug = clean.slice(0, lastDash);
+  const authorName = authorSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  return {
+    url: `https://unsplash.com/photos/${clean}`,
+    author: authorName
+  };
+};
+
+const lightUnsplash = getUnsplashData(lightImage);
+const darkUnsplash = getUnsplashData(darkImage);
+
 const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
 
 /** Nonce provided by middleware for script/style authorization under CSP. */
@@ -284,5 +307,52 @@ const isActive = (href: string) => {
         )
       }
     </main>
+
+    <a href={lightUnsplash.url} class="bg-credit bg-credit-light" target="_blank" rel="noopener noreferrer">Background by {lightUnsplash.author}</a>
+    <a href={darkUnsplash.url} class="bg-credit bg-credit-dark" target="_blank" rel="noopener noreferrer">Background by {darkUnsplash.author}</a>
+
+    <style>
+      .bg-credit {
+        position: fixed;
+        bottom: 1.25rem;
+        left: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        z-index: 50;
+        opacity: 0.65;
+        transition: opacity var(--motion-medium) ease, color var(--motion-medium) ease, background-color var(--motion-medium) ease, border-color var(--motion-medium) ease;
+        padding: 0.45rem 0.85rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+      .bg-credit:hover {
+        opacity: 1;
+        color: var(--text-main);
+        background: var(--button-bg-hover);
+        border-color: var(--button-border-strong);
+      }
+      html[data-theme="ivory"] .bg-credit-dark,
+      html:not([data-theme]) .bg-credit-dark {
+        display: none;
+      }
+      html[data-theme="midnight"] .bg-credit-light {
+        display: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]) .bg-credit-light {
+          display: none;
+        }
+        html:not([data-theme]) .bg-credit-dark {
+          display: inline-flex;
+        }
+      }
+    </style>
   </body>
 </html>

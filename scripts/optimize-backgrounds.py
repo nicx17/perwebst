@@ -32,7 +32,7 @@ def is_source_image(file_name: str) -> bool:
     if ext not in source_extensions:
         return False
         
-    if lower.endswith(".tiny.jpg") or lower.endswith(".tiny.jpeg") or lower.endswith(".tiny.png"):
+    if lower.endswith((".tiny.jpg", ".tiny.jpeg", ".tiny.png")):
         return False
         
     return True
@@ -55,6 +55,28 @@ def is_outdated(source_path: Path, output_path: Path) -> bool:
     except FileNotFoundError:
         return True
 
+def save_webp(img: Image.Image, output_path: Path) -> None:
+    """Saves image in WebP format with high quality."""
+    img.save(output_path, format="WEBP", quality=72, method=6)
+
+def save_avif(img: Image.Image, output_path: Path) -> None:
+    """Saves image in AVIF format, falling back gracefully if advanced parameters aren't supported."""
+    try:
+        # `speed` kwarg might be supported depending on AVIF plugin
+        img.save(output_path, format="AVIF", quality=48, speed=6)
+    except (ValueError, TypeError, OSError):
+        try:
+            # Fallback without speed parameter
+            img.save(output_path, format="AVIF", quality=48)
+        except Exception as inner_e:
+            raise RuntimeError(f"Failed to save AVIF. Ensure pillow-heif or a suitable AVIF plugin is installed. Error: {inner_e}") from inner_e
+
+def save_tiny_webp(img: Image.Image, output_path: Path) -> None:
+    """Saves an extremely small thumbnail for progressive loading."""
+    tiny_img = img.copy()
+    tiny_img.thumbnail((72, tiny_img.height), Image.Resampling.LANCZOS)
+    tiny_img.save(output_path, format="WEBP", quality=36, method=5)
+
 def ensure_optimized(source_path: Path) -> int:
     """
     Orchestrates the optimization of a single source image.
@@ -62,45 +84,34 @@ def ensure_optimized(source_path: Path) -> int:
     """
     outputs = output_paths_for(source_path)
     
-    needs_webp = is_outdated(source_path, outputs["webp"])
-    needs_avif = is_outdated(source_path, outputs["avif"])
-    needs_tiny = is_outdated(source_path, outputs["tiny_webp"])
+    needs_webp = force_reencode or is_outdated(source_path, outputs["webp"])
+    needs_avif = force_reencode or is_outdated(source_path, outputs["avif"])
+    needs_tiny = force_reencode or is_outdated(source_path, outputs["tiny_webp"])
     
-    if not force_reencode and not needs_webp and not needs_avif and not needs_tiny:
+    if not needs_webp and not needs_avif and not needs_tiny:
         return 0
         
     wrote = 0
-    
     try:
         with Image.open(source_path) as img:
             # Convert paletted/grayscale images to RGBA/RGB to avoid issues when saving to WebP/AVIF
             if img.mode in ('P', 'PA'):
                 img = img.convert('RGBA')
 
-            if force_reencode or needs_webp or needs_avif:
+            if needs_webp or needs_avif:
                 base_img = img.copy()
                 base_img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
                 
-                if force_reencode or needs_webp:
-                    base_img.save(outputs["webp"], format="WEBP", quality=72, method=6)
+                if needs_webp:
+                    save_webp(base_img, outputs["webp"])
                     wrote += 1
                     
-                if force_reencode or needs_avif:
-                    try:
-                        # `speed` kwarg might be supported depending on AVIF plugin
-                        base_img.save(outputs["avif"], format="AVIF", quality=48, speed=6)
-                    except (ValueError, TypeError, OSError):
-                        try:
-                            # Fallback without speed parameter
-                            base_img.save(outputs["avif"], format="AVIF", quality=48)
-                        except Exception as inner_e:
-                            raise RuntimeError(f"Failed to save AVIF. Ensure pillow-heif or a suitable AVIF plugin is installed. Error: {inner_e}") from inner_e
+                if needs_avif:
+                    save_avif(base_img, outputs["avif"])
                     wrote += 1
                     
-            if force_reencode or needs_tiny:
-                tiny_img = img.copy()
-                tiny_img.thumbnail((72, tiny_img.height), Image.Resampling.LANCZOS)
-                tiny_img.save(outputs["tiny_webp"], format="WEBP", quality=36, method=5)
+            if needs_tiny:
+                save_tiny_webp(img, outputs["tiny_webp"])
                 wrote += 1
                 
     except Exception as e:
@@ -132,7 +143,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        import pillow_heif
+        import pillow_heif  # type: ignore
         pillow_heif.register_avif_opener()
     except ImportError:
         pass # Fallback to native Pillow if built with AVIF support
