@@ -44,3 +44,4 @@ caddy_config
 .codex
 docs/architecture.md
 __pycache__/
+.github/workflows/deploy.yml
