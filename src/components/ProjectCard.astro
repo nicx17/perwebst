@@ -13,7 +13,7 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<a class="project-card" href={project.data.canonicalPath}>
+<a class="project-card" href={project.data.canonicalPath} data-card-tilt>
   <div class="project-card-head">
     <div class="project-card-icon-box" aria-hidden="true">
       {
