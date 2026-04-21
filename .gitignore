@@ -45,3 +45,4 @@ caddy_config
 docs/architecture.md
 __pycache__/
 .github/workflows/deploy.yml
+/mimick_docs_cont
