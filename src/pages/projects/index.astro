@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import ProjectCard from "../../components/ProjectCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import NavBack from "../../components/NavBack.astro";
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -12,6 +13,8 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
   canonicalPath="/projects/"
   shell={false}
 >
+  <NavBack href="/" label="<- Home" />
+
   <header class="page-header projects-page-header">
     <h1>Projects</h1>
     <p class="subtitle projects-page-subtitle">A collection of tools, scripts, and software engineering experiments.</p>
