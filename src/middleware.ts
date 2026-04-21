@@ -10,7 +10,6 @@ import { defineMiddleware } from "astro:middleware";
 const ALLOWED_NODE_ENVS = new Set(["development", "test", "production"]);
 
 type RuntimeEnvMap = Record<string, string | undefined>;
-type WithCspNonce = { cspNonce?: string };
 
 /**
  * Accesses the global process.env in a runtime-agnostic way.
@@ -74,7 +73,7 @@ const validateRuntimeEnv = () => {
 };
 
 const setCspNonce = (locals: App.Locals, cspNonce: string) => {
-  (locals as App.Locals & WithCspNonce).cspNonce = cspNonce;
+  (locals as App.Locals & { cspNonce: string }).cspNonce = cspNonce;
 };
 
 validateRuntimeEnv();
@@ -252,7 +251,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     headers.get("Content-Type")?.includes("text/html")
   ) {
     const htmlText = await response.text();
-    const noncedHtml = htmlText.replace(
+    const noncedHtml = htmlText.replaceAll(
       /<script(?![^>]*\bnonce=)([^>]*)>/gi,
       (match, p1) => {
         // Exclude non-executable scripts like JSON data blocks
