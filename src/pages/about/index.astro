@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import NavBack from "../../components/NavBack.astro";
 import { hardware, optimizationNotes, stackCards } from "../../data/about";
 ---
 
@@ -9,14 +10,16 @@ import { hardware, optimizationNotes, stackCards } from "../../data/about";
   canonicalPath="/about/"
   shell={false}
 >
+  <NavBack href="/" label="<- Home" />
+
   <header class="page-header">
     <h1>System Architecture</h1>
     <p class="subtitle">An overview of hardware, routing, and software powering this site.</p>
   </header>
 
-  <section>
+  <section data-reveal>
     <h2>The Stack</h2>
-    <div class="project-grid">
+    <div class="project-grid" data-reveal-stagger>
       {stackCards.map((item) => (
         <article class="section-card">
           <h3>{item.title}</h3>
@@ -26,9 +29,9 @@ import { hardware, optimizationNotes, stackCards } from "../../data/about";
     </div>
   </section>
 
-  <section>
+  <section data-reveal>
     <h2>Hardware Specifications</h2>
-    <table class="data-table">
+    <table class="data-table" data-reveal-stagger>
       <caption>Hardware baseline for the production host.</caption>
       <tbody>
         {hardware.map(([key, value]) => (
@@ -41,9 +44,9 @@ import { hardware, optimizationNotes, stackCards } from "../../data/about";
     </table>
   </section>
 
-  <section>
+  <section data-reveal>
     <h2>Performance and Optimizations</h2>
-    <table class="data-table">
+    <table class="data-table" data-reveal-stagger>
       <caption>Current optimizations and controls used in production.</caption>
       <tbody>
         {optimizationNotes.map(([key, value]) => (
