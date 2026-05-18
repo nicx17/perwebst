@@ -15,7 +15,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.6",
+    "@astrojs/node": "^10.1.1",
     "astro": "^6.3.3"
   },
   "devDependencies": {
