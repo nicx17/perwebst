@@ -1168,6 +1168,16 @@ header.page-header h1 {
     background-color var(--motion-medium) ease;
 }
 
+/* Clamp grid summaries to keep cards compact and uniformly tall.
+   Full text still renders on each project's detail page. */
+.projects-showcase .project-card p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
 .projects-showcase .project-card::before {
   content: "";
   position: absolute;
