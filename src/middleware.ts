@@ -35,14 +35,13 @@ const parseOrigin = (value: string): URL => {
 };
 
 /**
- * Validates critical environment variables required for the application to run safely,
- * especially in production. Ensures ORIGIN, HOST, and PORT are correctly configured.
+ * Validates critical environment variables required for the application to run safely.
  */
 const validateRuntimeEnv = () => {
   const nodeEnv = (runtimeEnv.NODE_ENV ?? "development").trim();
   if (!ALLOWED_NODE_ENVS.has(nodeEnv)) {
     throw new Error(
-      `Invalid NODE_ENV: "${nodeEnv}". Expected one of development, test, production.`
+      `Invalid NODE_ENV: "${nodeEnv}". Expected one of development, test, production.`,
     );
   }
 
@@ -50,25 +49,10 @@ const validateRuntimeEnv = () => {
   if (rawOrigin) {
     const parsedOrigin = parseOrigin(rawOrigin);
     if (nodeEnv === "production" && parsedOrigin.protocol !== "https:") {
-      throw new Error(`Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`);
+      throw new Error(
+        `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`,
+      );
     }
-  } else if (nodeEnv === "production") {
-    throw new Error("Missing ORIGIN: set ORIGIN in .env for production runtime.");
-  }
-
-  const rawHost = runtimeEnv.HOST?.trim();
-  if (!rawHost && nodeEnv === "production") {
-    throw new Error("Missing HOST: set HOST in .env for production runtime.");
-  }
-
-  const rawPort = runtimeEnv.PORT?.trim();
-  if (rawPort) {
-    const parsedPort = Number(rawPort);
-    if (!Number.isInteger(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
-      throw new Error(`Invalid PORT: "${rawPort}". Expected an integer between 1 and 65535.`);
-    }
-  } else if (nodeEnv === "production") {
-    throw new Error("Missing PORT: set PORT in .env for production runtime.");
   }
 };
 
@@ -112,24 +96,34 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     `script-src-attr 'none'`,
     `report-uri ${reportEndpoint}`,
     "report-to csp-endpoint",
-    "upgrade-insecure-requests"
+    "upgrade-insecure-requests",
   ].join("; ");
 
 /**
  * Injects a suite of security headers into the response.
  * Includes CSP, HSTS, X-Frame-Options, and more to harden the application.
  */
-const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) => {
+const setSecurityHeaders = (
+  headers: Headers,
+  requestUrl: URL,
+  nonce: string,
+) => {
   const reportEndpoint = `${trustedReportOrigin ?? requestUrl.origin}/api/csp-report`;
   headers.delete("Content-Security-Policy-Report-Only");
-  headers.set("Content-Security-Policy", buildSecurityPolicy(nonce, reportEndpoint));
+  headers.set(
+    "Content-Security-Policy",
+    buildSecurityPolicy(nonce, reportEndpoint),
+  );
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
   headers.set("X-DNS-Prefetch-Control", "off");
   headers.set("X-Download-Options", "noopen");
   headers.set("X-XSS-Protection", "0");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), usb=(), payment=()");
+  headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), usb=(), payment=()",
+  );
   headers.set("Cross-Origin-Opener-Policy", "same-origin");
   headers.set("Cross-Origin-Embedder-Policy", "require-corp");
   headers.set("Cross-Origin-Resource-Policy", "same-origin");
@@ -142,12 +136,15 @@ const setSecurityHeaders = (headers: Headers, requestUrl: URL, nonce: string) =>
     JSON.stringify({
       group: "csp-endpoint",
       max_age: 10886400,
-      endpoints: [{ url: reportEndpoint }]
-    })
+      endpoints: [{ url: reportEndpoint }],
+    }),
   );
 
   if (requestUrl.protocol === "https:") {
-    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload",
+    );
   }
 };
 
@@ -169,22 +166,38 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
   }
 
   if (pathname.startsWith("/backgrounds/")) {
-    headers.set("Cache-Control", "public, max-age=2592000, stale-while-revalidate=604800");
+    headers.set(
+      "Cache-Control",
+      "public, max-age=2592000, stale-while-revalidate=604800",
+    );
     return;
   }
 
   if (/\.(?:avif|webp|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/i.test(pathname)) {
-    headers.set("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+    headers.set(
+      "Cache-Control",
+      "public, max-age=604800, stale-while-revalidate=86400",
+    );
     return;
   }
 
   if (pathname.startsWith("/js/")) {
-    headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=3600");
+    headers.set(
+      "Cache-Control",
+      "public, max-age=86400, stale-while-revalidate=3600",
+    );
     return;
   }
 
-  if (pathname.endsWith(".xml") || pathname.endsWith("robots.txt") || pathname.endsWith("site.webmanifest")) {
-    headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  if (
+    pathname.endsWith(".xml") ||
+    pathname.endsWith("robots.txt") ||
+    pathname.endsWith("site.webmanifest")
+  ) {
+    headers.set(
+      "Cache-Control",
+      "public, max-age=3600, stale-while-revalidate=86400",
+    );
     return;
   }
 
@@ -197,8 +210,13 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
  */
 const isCrossSiteRequestSafe = (request: Request): boolean => {
   const site = request.headers.get("sec-fetch-site");
-  
-  if (!site || site === "same-origin" || site === "same-site" || site === "none") {
+
+  if (
+    !site ||
+    site === "same-origin" ||
+    site === "same-site" ||
+    site === "none"
+  ) {
     return true;
   }
 
@@ -223,7 +241,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const nonceBytes = new Uint8Array(16);
   globalThis.crypto.getRandomValues(nonceBytes);
   const cspNonce = btoa(String.fromCodePoint(...nonceBytes));
-  
+
   // 3. Attach the nonce to locals so Astro components can access it.
   setCspNonce(context.locals, cspNonce);
 
@@ -259,7 +277,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           return match;
         }
         return `<script nonce="${cspNonce}"${p1}>`;
-      }
+      },
     );
     body = noncedHtml;
     // Remove the old Content-Length so the standard Response constructor calculates the new one
@@ -269,6 +287,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   return new Response(body, {
     status: response.status,
     statusText: response.statusText,
-    headers
+    headers,
   });
 });
