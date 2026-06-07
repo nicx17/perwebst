@@ -5,7 +5,7 @@
  * and Vite-specific build optimizations.
  */
 import { defineConfig } from "astro/config";
-import node from "@astrojs/node";
+import cloudflare from "@astrojs/cloudflare";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -28,7 +28,7 @@ const readOriginFromDotEnv = () => {
 
     const value = match[1].trim();
     if (
-      (value.startsWith("\"") && value.endsWith("\"")) ||
+      (value.startsWith('"') && value.endsWith('"')) ||
       (value.startsWith("'") && value.endsWith("'"))
     ) {
       return value.slice(1, -1).trim();
@@ -46,11 +46,15 @@ const readOriginFromDotEnv = () => {
  */
 const resolveSiteOrigin = () => {
   const nodeEnv = process.env.NODE_ENV ?? "development";
-  const rawOrigin = normalizeOrigin(process.env.ORIGIN ?? readOriginFromDotEnv());
+  const rawOrigin = normalizeOrigin(
+    process.env.ORIGIN ?? readOriginFromDotEnv(),
+  );
 
   if (!rawOrigin) {
     if (nodeEnv === "production") {
-      throw new Error("Missing ORIGIN: set ORIGIN in .env for production builds.");
+      throw new Error(
+        "Missing ORIGIN: set ORIGIN in .env for production builds.",
+      );
     }
 
     return DEFAULT_ORIGIN;
@@ -60,11 +64,15 @@ const resolveSiteOrigin = () => {
   try {
     parsed = new URL(rawOrigin);
   } catch {
-    throw new Error(`Invalid ORIGIN: "${rawOrigin}" is not a valid absolute URL.`);
+    throw new Error(
+      `Invalid ORIGIN: "${rawOrigin}" is not a valid absolute URL.`,
+    );
   }
 
   if (nodeEnv === "production" && parsed.protocol !== "https:") {
-    throw new Error(`Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`);
+    throw new Error(
+      `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`,
+    );
   }
 
   return parsed.origin;
@@ -80,8 +88,8 @@ export default defineConfig({
   prefetch: false,
   /** Hybrid/Server rendering mode. */
   output: "server",
-  /** Standalone Node.js server adapter. */
-  adapter: node({ mode: "standalone" }),
+  /** Cloudflare adapter. */
+  adapter: cloudflare(),
   /** Standardizes URLs to always have a trailing slash. */
   trailingSlash: "always",
   vite: {
@@ -99,8 +107,8 @@ export default defineConfig({
           }
 
           defaultHandler(warning);
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 });

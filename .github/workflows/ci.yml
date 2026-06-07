@@ -36,3 +36,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=pers-v2-site
