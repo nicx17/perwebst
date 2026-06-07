@@ -8,14 +8,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "start": "node --env-file=.env dist/server/entry.mjs",
     "check": "astro sync && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@astrojs/node": "^10.1.1",
+    "@astrojs/cloudflare": "^13.6.1",
     "astro": "^6.3.3"
   },
   "devDependencies": {
