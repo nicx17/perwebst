@@ -7,6 +7,7 @@
 import "../styles/global.css";
 import { ClientRouter } from 'astro:transitions';
 import { getTopbarPersistKey } from "../utils/layout-shell";
+import backgroundColorsData from "../data/background-colors.json";
 interface Props {
   /** The page title used in the <title> tag and OG/Twitter metadata. */
   title: string;
@@ -16,11 +17,9 @@ interface Props {
   canonicalPath?: string;
   /** Controls whether the standard app shell (topbar, navigation) is rendered. */
   shell?: boolean;
-  /** Explicitly overrides the theme (useful for landing pages or specific modes). */
-  theme?: "ivory" | "midnight";
 }
 
-const { title, description, canonicalPath, shell = true, theme } = Astro.props;
+const { title, description, canonicalPath, shell = true } = Astro.props;
 const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() : undefined;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
@@ -33,7 +32,7 @@ const topbarPersistKey = getTopbarPersistKey(shell);
  */
 const day = new Date().getDate();
 
-/** Pools of background images for light (ivory) and dark (midnight) themes. */
+/** Pool of background images for the ivory theme. */
 const lightImages: string[] = [
   "antonius-harel-2rkqE7SgcE8-unsplash",
   "antonius-harel-VbOjY42c6a4-unsplash",
@@ -67,46 +66,15 @@ const lightImages: string[] = [
   "sean-sinclair-C_NJKfnTR5A-unsplash",
 ];
 
-const darkImages: string[] = [
-  "aedrian-salazar-kVENOffxjZg-unsplash",
-  "alexander-x-KtUjim68XEc-unsplash",
-  "alexander-x-M4L2tlmqVus-unsplash",
-  "allec-gomes-ZGp6H2MQtu4-unsplash",
-  "andrey-soldatov-i4Q6JcbFABc-unsplash",
-  "antonius-harel-4LY13pRPXSo-unsplash",
-  "antonius-harel-HaJoTW4ip-Y-unsplash",
-  "antonius-harel-MWzVeAb34P8-unsplash",
-  "antonius-harel-n-Tyeypj9hU-unsplash",
-  "antonius-harel-r1hj0fblqkY-unsplash",
-  "bill-hamway-24Uv4wRJ95A-unsplash",
-  "bruno-martins-ElUbmfsgvV0-unsplash",
-  "codioful-formerly-gradienta-1Ec-3-OuvPE-unsplash",
-  "codioful-formerly-gradienta-1nqc_X3IWMg-unsplash(1)",
-  "codioful-formerly-gradienta-1nqc_X3IWMg-unsplash",
-  "codioful-formerly-gradienta-7E5kq_sW0Ew-unsplash",
-  "codioful-formerly-gradienta-LLhDtJXJvE0-unsplash",
-  "codioful-formerly-gradienta-RiUKrRjZud0-unsplash",
-  "codioful-formerly-gradienta-YH_-xFrG8fc-unsplash",
-  "jan-kopriva-L-bVMhRb5cs-unsplash",
-  "kunal-patil-8ZKlgI_G-mw-unsplash",
-  "lucrezia-carnelos-Sp6MXlY_2wc-unsplash",
-  "mohammed-kara--n9dcIoAIuE-unsplash",
-  "mohammed-kara-LpYWTqT4Ff0-unsplash",
-  "omid-armin-NeTAp5yme0A-unsplash",
-  "omid-armin-di2Kx4FwzFM-unsplash",
-  "ruido-98-ZmNVl-nFUaM-unsplash",
-  "ryunosuke-kikuno-lwvuKVgT4AU-unsplash",
-  "sandip-kalal-5feFTJcPa50-unsplash",
-  "valentin-NT9QgSMddNg-unsplash",
-];
-
 const lightImage = lightImages[day % lightImages.length]!;
-const darkImage  = darkImages[day % darkImages.length]!;
+
+const backgroundColors: Record<string, any> = backgroundColorsData;
+const lightColorData = backgroundColors[lightImage] || { dominant: "#ece9e3", average: "#ece9e3", luminance: 220, isDark: false };
 
 const getUnsplashData = (filename: string) => {
   const clean = filename.replace('-unsplash', '').replace(/\(\d+\)$/, '');
   const lastDash = clean.lastIndexOf('-');
-  
+
   if (lastDash === -1) {
     return {
       url: `https://unsplash.com/photos/${clean}`,
@@ -124,7 +92,6 @@ const getUnsplashData = (filename: string) => {
 };
 
 const lightUnsplash = getUnsplashData(lightImage);
-const darkUnsplash = getUnsplashData(darkImage);
 
 const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
 
@@ -147,18 +114,18 @@ const isActive = (href: string) => {
 ---
 
 <!doctype html>
-<html lang="en" data-theme={theme}>
+<html lang="en" data-theme="ivory">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <ClientRouter />
-    
+
     <!-- Trusted Types configuration for modern browser security. -->
     <script is:inline nonce={cspNonce}>if(globalThis.trustedTypes&&globalThis.trustedTypes.createPolicy){try{if(!globalThis.trustedTypes.defaultPolicy){globalThis.trustedTypes.createPolicy("default",{createHTML:s=>s,createScript:s=>s,createScriptURL:s=>s})}}catch{}}</script>
 
     <!-- Theme and quality-of-service (QoS) initialization.
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
-    <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement,e=localStorage.getItem("theme");if(e==="ivory"||e==="midnight"){t.dataset.theme=e}const n=t.dataset.theme==="ivory"||t.dataset.theme==="midnight"?t.dataset.theme:"ivory",a=i=>`bg-scene-quality-20260404hq-${i}`,s=sessionStorage.getItem(a(n));if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
+    <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement;t.dataset.theme="ivory";const s=sessionStorage.getItem("bg-scene-quality-20260404hq-ivory");if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
     <script>
       import "../scripts/page-transition.ts";
     </script>
@@ -179,7 +146,7 @@ const isActive = (href: string) => {
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content={theme === "midnight" ? "#02060d" : "#ece9e3"} />
+    <meta name="theme-color" content="#ece9e3" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
@@ -193,45 +160,21 @@ const isActive = (href: string) => {
     <script>
       import "../scripts/theme-toggle.ts";
     </script>
-    
+
     <!-- Dynamic CSS injection for background image variations.
          Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
          reactively based on client-side feature detection and loading state. -->
     <style is:inline nonce={cspNonce} set:html={`
       :root {
-        --scene-image-default-light: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
-        --scene-image-tiny-light: url("/backgrounds/light/${lightImage}.tiny.webp?v=20260404hq");
-        --scene-image-webp-light: url("/backgrounds/light/${lightImage}.webp?v=20260404hq");
-        --scene-image-avif-light: url("/backgrounds/light/${lightImage}.avif?v=20260404hq");
-
-        --scene-image-default-dark: url("/backgrounds/dark/${darkImage}.jpg?v=20260404hq");
-        --scene-image-tiny-dark: url("/backgrounds/dark/${darkImage}.tiny.webp?v=20260404hq");
-        --scene-image-webp-dark: url("/backgrounds/dark/${darkImage}.webp?v=20260404hq");
-        --scene-image-avif-dark: url("/backgrounds/dark/${darkImage}.avif?v=20260404hq");
-      }
-
-      html[data-theme="ivory"], html:not([data-theme]) {
-        --scene-image-default: var(--scene-image-default-light);
-        --scene-image-tiny: var(--scene-image-tiny-light);
-        --scene-image-webp: var(--scene-image-webp-light);
-        --scene-image-avif: var(--scene-image-avif-light);
+        --scene-image-default: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
+        --scene-image-tiny: url("/backgrounds/light/${lightImage}.tiny.webp?v=20260404hq");
+        --scene-image-webp: url("/backgrounds/light/${lightImage}.webp?v=20260404hq");
+        --scene-image-avif: url("/backgrounds/light/${lightImage}.avif?v=20260404hq");
         --scene-image: var(--scene-image-default);
-      }
-      html[data-theme="midnight"] {
-        --scene-image-default: var(--scene-image-default-dark);
-        --scene-image-tiny: var(--scene-image-tiny-dark);
-        --scene-image-webp: var(--scene-image-webp-dark);
-        --scene-image-avif: var(--scene-image-avif-dark);
-        --scene-image: var(--scene-image-default);
-      }
-      @media (prefers-color-scheme: dark) {
-        html:not([data-theme]) {
-          --scene-image-default: var(--scene-image-default-dark);
-          --scene-image-tiny: var(--scene-image-tiny-dark);
-          --scene-image-webp: var(--scene-image-webp-dark);
-          --scene-image-avif: var(--scene-image-avif-dark);
-          --scene-image: var(--scene-image-default);
-        }
+        --scene-color-dominant: ${lightColorData.dominant};
+        --scene-color-average: ${lightColorData.average};
+        --scene-luminance: ${lightColorData.luminance};
+        --scene-is-dark: ${lightColorData.isDark ? "1" : "0"};
       }
 
       html[data-scene-quality="tiny"] { --scene-image: var(--scene-image-tiny, var(--scene-image-default)); }
@@ -241,7 +184,7 @@ const isActive = (href: string) => {
     `}></style>
 
     <!-- Expose the selected background config to the client-side background-loader.ts -->
-    <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg",midnight:"/backgrounds/dark/${darkImage}.jpg"};`}></script>
+    <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg"};`}></script>
     <script>
       import "../scripts/background-loader.ts";
     </script>
@@ -269,11 +212,7 @@ const isActive = (href: string) => {
                     </a>
                   ))}
                 </nav>
-                <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
-                  <span class="theme-toggle-label theme-toggle-label-ivory">Ivory</span>
-                  <span class="theme-toggle-label theme-toggle-label-midnight">Midnight</span>
-                  <span class="theme-toggle-thumb" aria-hidden="true"></span>
-                </button>
+
               </div>
             </header>
 
@@ -298,11 +237,7 @@ const isActive = (href: string) => {
                     </a>
                   ))}
                 </nav>
-                <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
-                  <span class="theme-toggle-label theme-toggle-label-ivory">Ivory</span>
-                  <span class="theme-toggle-label theme-toggle-label-midnight">Midnight</span>
-                  <span class="theme-toggle-thumb" aria-hidden="true"></span>
-                </button>
+
               </div>
             </header>
 
@@ -314,8 +249,7 @@ const isActive = (href: string) => {
       }
     </main>
 
-    <a href={lightUnsplash.url} class="bg-credit bg-credit-light" target="_blank" rel="noopener noreferrer">Background by {lightUnsplash.author}</a>
-    <a href={darkUnsplash.url} class="bg-credit bg-credit-dark" target="_blank" rel="noopener noreferrer">Background by {darkUnsplash.author}</a>
+    <a href={lightUnsplash.url} class="bg-credit" target="_blank" rel="noopener noreferrer">Background by {lightUnsplash.author}</a>
 
     <style>
       .bg-credit {
@@ -343,21 +277,6 @@ const isActive = (href: string) => {
         color: var(--text-main);
         background: var(--button-bg-hover);
         border-color: var(--button-border-strong);
-      }
-      html[data-theme="ivory"] .bg-credit-dark,
-      html:not([data-theme]) .bg-credit-dark {
-        display: none;
-      }
-      html[data-theme="midnight"] .bg-credit-light {
-        display: none;
-      }
-      @media (prefers-color-scheme: dark) {
-        html:not([data-theme]) .bg-credit-light {
-          display: none;
-        }
-        html:not([data-theme]) .bg-credit-dark {
-          display: inline-flex;
-        }
       }
     </style>
   </body>

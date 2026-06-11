@@ -1,0 +1,362 @@
+{
+  "aedrian-salazar-kVENOffxjZg-unsplash": {
+    "average": "#311b26",
+    "dominant": "#0a0b0d",
+    "isDark": true,
+    "luminance": 34.832
+  },
+  "alexander-x-KtUjim68XEc-unsplash": {
+    "average": "#053081",
+    "dominant": "#000105",
+    "isDark": true,
+    "luminance": 44.377
+  },
+  "alexander-x-M4L2tlmqVus-unsplash": {
+    "average": "#566352",
+    "dominant": "#b6ab01",
+    "isDark": true,
+    "luminance": 93.175
+  },
+  "allec-gomes-ZGp6H2MQtu4-unsplash": {
+    "average": "#371707",
+    "dominant": "#000000",
+    "isDark": true,
+    "luminance": 30.744
+  },
+  "andrey-soldatov-i4Q6JcbFABc-unsplash": {
+    "average": "#341721",
+    "dominant": "#070713",
+    "isDark": true,
+    "luminance": 32.811
+  },
+  "antonius-harel-2rkqE7SgcE8-unsplash": {
+    "average": "#aeb4c9",
+    "dominant": "#f5e4d0",
+    "isDark": false,
+    "luminance": 180.6
+  },
+  "antonius-harel-4LY13pRPXSo-unsplash": {
+    "average": "#360e1d",
+    "dominant": "#070101",
+    "isDark": true,
+    "luminance": 27.67
+  },
+  "antonius-harel-HaJoTW4ip-Y-unsplash": {
+    "average": "#240110",
+    "dominant": "#120000",
+    "isDark": true,
+    "luminance": 13.175
+  },
+  "antonius-harel-MWzVeAb34P8-unsplash": {
+    "average": "#5a2042",
+    "dominant": "#041411",
+    "isDark": true,
+    "luminance": 53.218
+  },
+  "antonius-harel-VbOjY42c6a4-unsplash": {
+    "average": "#c6d0f0",
+    "dominant": "#ffffff",
+    "isDark": false,
+    "luminance": 208.658
+  },
+  "antonius-harel-WsaPcg512jE-unsplash": {
+    "average": "#e0ad9a",
+    "dominant": "#f3f1f2",
+    "isDark": false,
+    "luminance": 186.083
+  },
+  "antonius-harel-n-Tyeypj9hU-unsplash": {
+    "average": "#111e24",
+    "dominant": "#00181f",
+    "isDark": true,
+    "luminance": 26.797
+  },
+  "antonius-harel-r1hj0fblqkY-unsplash": {
+    "average": "#3a1c3a",
+    "dominant": "#000002",
+    "isDark": true,
+    "luminance": 40.39
+  },
+  "asi-mong-Gf5Q_5UF3vs-unsplash": {
+    "average": "#fb9875",
+    "dominant": "#fcdfba",
+    "isDark": false,
+    "luminance": 177.611
+  },
+  "asif-aether-TlHglbjfvqw-unsplash": {
+    "average": "#478c7a",
+    "dominant": "#663f22",
+    "isDark": true,
+    "luminance": 117.317
+  },
+  "bill-hamway-24Uv4wRJ95A-unsplash": {
+    "average": "#4d0a42",
+    "dominant": "#030106",
+    "isDark": true,
+    "luminance": 36.417
+  },
+  "bruno-martins-ElUbmfsgvV0-unsplash": {
+    "average": "#594e3f",
+    "dominant": "#020202",
+    "isDark": true,
+    "luminance": 79.579
+  },
+  "codioful-formerly-gradienta-1Ec-3-OuvPE-unsplash": {
+    "average": "#1d2c33",
+    "dominant": "#0a355f",
+    "isDark": true,
+    "luminance": 40.313
+  },
+  "codioful-formerly-gradienta-1nqc_X3IWMg-unsplash": {
+    "average": "#41504e",
+    "dominant": "#00000c",
+    "isDark": true,
+    "luminance": 75.287
+  },
+  "codioful-formerly-gradienta-1nqc_X3IWMg-unsplash(1)": {
+    "average": "#41504e",
+    "dominant": "#00000c",
+    "isDark": true,
+    "luminance": 75.287
+  },
+  "codioful-formerly-gradienta-7E5kq_sW0Ew-unsplash": {
+    "average": "#32013d",
+    "dominant": "#000000",
+    "isDark": true,
+    "luminance": 22.491
+  },
+  "codioful-formerly-gradienta-LLhDtJXJvE0-unsplash": {
+    "average": "#112e34",
+    "dominant": "#010417",
+    "isDark": true,
+    "luminance": 38.013
+  },
+  "codioful-formerly-gradienta-RiUKrRjZud0-unsplash": {
+    "average": "#3e4852",
+    "dominant": "#000522",
+    "isDark": true,
+    "luminance": 70.15
+  },
+  "codioful-formerly-gradienta-YH_-xFrG8fc-unsplash": {
+    "average": "#282d61",
+    "dominant": "#131454",
+    "isDark": true,
+    "luminance": 49.433
+  },
+  "dirk-lach--IZ8j4_xgQ8-unsplash": {
+    "average": "#d473eb",
+    "dominant": "#fdcbfc",
+    "isDark": false,
+    "luminance": 157.683
+  },
+  "dirk-lach-_uamwvb8UlI-unsplash": {
+    "average": "#fdc8bd",
+    "dominant": "#fdf4ed",
+    "isDark": false,
+    "luminance": 214.593
+  },
+  "eve-9xY__xnwCy0-unsplash": {
+    "average": "#bfd2e8",
+    "dominant": "#f5f8f6",
+    "isDark": false,
+    "luminance": 206.827
+  },
+  "eve-Fp96C-6Wd6o-unsplash": {
+    "average": "#c5cef6",
+    "dominant": "#f9f9f9",
+    "isDark": false,
+    "luminance": 207.869
+  },
+  "eve-WK9sTh1FiSs-unsplash": {
+    "average": "#f9c9c5",
+    "dominant": "#f9f9f9",
+    "isDark": false,
+    "luminance": 214.896
+  },
+  "eve-bKOpGRbHBGs-unsplash": {
+    "average": "#e7dadf",
+    "dominant": "#ecf0ee",
+    "isDark": false,
+    "luminance": 222.457
+  },
+  "eve-jCBLFtjpXfw-unsplash": {
+    "average": "#e5e7db",
+    "dominant": "#ebebeb",
+    "isDark": false,
+    "luminance": 229.034
+  },
+  "eve-lP_4h4oVO1E-unsplash": {
+    "average": "#d9cbd2",
+    "dominant": "#e5e5e5",
+    "isDark": false,
+    "luminance": 207.984
+  },
+  "eve-lxepp3ZUxTs-unsplash": {
+    "average": "#eaddea",
+    "dominant": "#e8edea",
+    "isDark": false,
+    "luminance": 226.369
+  },
+  "hassaan-here-bKfkhVRAJTQ-unsplash": {
+    "average": "#d4d2de",
+    "dominant": "#e3e3e3",
+    "isDark": false,
+    "luminance": 211.966
+  },
+  "iklas-FeNrGgQ1Tu8-unsplash": {
+    "average": "#b8b1db",
+    "dominant": "#e8e8e8",
+    "isDark": false,
+    "luminance": 183.881
+  },
+  "iklas-OSoICiA8F4M-unsplash": {
+    "average": "#aa8077",
+    "dominant": "#fb6239",
+    "isDark": false,
+    "luminance": 139.532
+  },
+  "iklas-xjSu2KbJlAg-unsplash": {
+    "average": "#dde5ba",
+    "dominant": "#f2f7fa",
+    "isDark": false,
+    "luminance": 221.706
+  },
+  "iklas-y9Ujplj3KIU-unsplash": {
+    "average": "#cad8e1",
+    "dominant": "#dad9de",
+    "isDark": false,
+    "luminance": 212.84
+  },
+  "jan-kopriva-L-bVMhRb5cs-unsplash": {
+    "average": "#47363f",
+    "dominant": "#0f0a08",
+    "isDark": true,
+    "luminance": 60.109
+  },
+  "kunal-patil-8ZKlgI_G-mw-unsplash": {
+    "average": "#44373d",
+    "dominant": "#010100",
+    "isDark": true,
+    "luminance": 59.571
+  },
+  "lucrezia-carnelos-Sp6MXlY_2wc-unsplash": {
+    "average": "#5e4661",
+    "dominant": "#22090d",
+    "isDark": true,
+    "luminance": 80.254
+  },
+  "mohammad-alizade-nIlwOYUbQEA-unsplash": {
+    "average": "#afcff4",
+    "dominant": "#9fc0ed",
+    "isDark": false,
+    "luminance": 201.65
+  },
+  "mohammed-kara--n9dcIoAIuE-unsplash": {
+    "average": "#3a7862",
+    "dominant": "#1f4e44",
+    "isDark": true,
+    "luminance": 98.954
+  },
+  "mohammed-kara-LpYWTqT4Ff0-unsplash": {
+    "average": "#52392f",
+    "dominant": "#121411",
+    "isDark": true,
+    "luminance": 63.335
+  },
+  "mymind-KnUX9qtR_4E-unsplash": {
+    "average": "#f3c089",
+    "dominant": "#eed3ae",
+    "isDark": false,
+    "luminance": 200.979
+  },
+  "omid-armin-NeTAp5yme0A-unsplash": {
+    "average": "#361908",
+    "dominant": "#13100b",
+    "isDark": true,
+    "luminance": 31.733
+  },
+  "omid-armin-Nsn9FY4JGMs-unsplash": {
+    "average": "#6f545a",
+    "dominant": "#001e0c",
+    "isDark": true,
+    "luminance": 92.757
+  },
+  "omid-armin-di2Kx4FwzFM-unsplash": {
+    "average": "#281f02",
+    "dominant": "#1a1501",
+    "isDark": true,
+    "luminance": 30.385
+  },
+  "plufow-le-studio-aE8Mx8-vQss-unsplash": {
+    "average": "#e8cfc0",
+    "dominant": "#fcddc8",
+    "isDark": false,
+    "luminance": 212.765
+  },
+  "radoslav-bali-Bp2sWPJGPHs-unsplash": {
+    "average": "#b1b2f5",
+    "dominant": "#e6ebee",
+    "isDark": false,
+    "luminance": 185.339
+  },
+  "radoslav-bali-rhnZzt9XblE-unsplash": {
+    "average": "#f4c1a3",
+    "dominant": "#f4eae8",
+    "isDark": false,
+    "luminance": 204.829
+  },
+  "rohit-choudhari-_E6sXQHsgQc-unsplash": {
+    "average": "#d1e5fc",
+    "dominant": "#eff6fc",
+    "isDark": false,
+    "luminance": 225.642
+  },
+  "ruido-98-ZmNVl-nFUaM-unsplash": {
+    "average": "#3d708c",
+    "dominant": "#ecf0fb",
+    "isDark": true,
+    "luminance": 99.943
+  },
+  "ryunosuke-kikuno-lwvuKVgT4AU-unsplash": {
+    "average": "#563b47",
+    "dominant": "#010100",
+    "isDark": true,
+    "luminance": 68.441
+  },
+  "sandip-kalal-5feFTJcPa50-unsplash": {
+    "average": "#3b1218",
+    "dominant": "#030303",
+    "isDark": true,
+    "luminance": 30.943
+  },
+  "sean-fahrenbruch-KUXkBy_Q0eA-unsplash": {
+    "average": "#c889f5",
+    "dominant": "#f5e7fe",
+    "isDark": false,
+    "luminance": 168.149
+  },
+  "sean-fahrenbruch-_07FxAO8oG0-unsplash": {
+    "average": "#948c77",
+    "dominant": "#e85631",
+    "isDark": false,
+    "luminance": 139.998
+  },
+  "sean-fahrenbruch-g95tsUeCohM-unsplash": {
+    "average": "#c084b4",
+    "dominant": "#f9d2d2",
+    "isDark": false,
+    "luminance": 155.412
+  },
+  "sean-sinclair-C_NJKfnTR5A-unsplash": {
+    "average": "#9a9e9e",
+    "dominant": "#008eb0",
+    "isDark": false,
+    "luminance": 156.804
+  },
+  "valentin-NT9QgSMddNg-unsplash": {
+    "average": "#3f080e",
+    "dominant": "#100607",
+    "isDark": true,
+    "luminance": 25.129
+  }
+}
