@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "optimize:backgrounds": "node scripts/optimize-backgrounds.mjs",
+    "optimize:backgrounds": "python3 scripts/optimize-backgrounds.py",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

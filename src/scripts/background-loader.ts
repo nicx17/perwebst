@@ -1,13 +1,14 @@
-import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client";
+import { type SceneQuality } from "../types/client";
 
 (() => {
   /**
-   * Background Loader orchestrates the progressive loading of theme-specific imagery.
-   * Strategy:
-   * 1. Initial display uses a 'tiny' 72px placeholder.
-   * 2. Asynchronously attempts to load the 'avif' high-quality version.
-   * 3. Falls back to 'webp' if avif fails or is unsupported.
-   * 4. Falls back to original 'jpg' as the final legacy recovery.
+   * Background Loader orchestrates the progressive loading of the ivory theme imagery.
+   *
+   * Progressive encoding strategy:
+   * 1. Immediately show a 72px 'tiny' placeholder (already blurred at CSS level).
+   * 2. Asynchronously load the best supported format (AVIF > WebP > JPG).
+   * 3. Once loaded, crossfade from the placeholder to the high-quality image
+   *    using a layered element approach for a smooth visual transition.
    */
   if (globalThis.__persBackgroundLoaderInitialized) {
     return;
@@ -16,29 +17,20 @@ import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client"
 
   const root = document.documentElement;
   const backgroundAssetVersion = "20260404hq";
-  const sceneQualityKey = (theme: SiteTheme) => `bg-scene-quality-${backgroundAssetVersion}-${theme}`;
+  const sceneQualityKey = `bg-scene-quality-${backgroundAssetVersion}-ivory`;
   let activeLoadToken = 0;
 
   const backgrounds = globalThis.__BACKGROUND_CONFIG ?? {
     ivory: "/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg",
-    midnight: "/backgrounds/dark/jan-kopriva-L-bVMhRb5cs-unsplash.jpg"
   };
 
-  const currentTheme = (): SiteTheme => {
-    if (isSiteTheme(root.dataset.theme)) {
-      return root.dataset.theme;
-    }
+  const image: string | undefined = backgrounds.ivory;
 
-    return globalThis.matchMedia("(prefers-color-scheme: dark)").matches ? "midnight" : "ivory";
-  };
+  const basePathFor = (img: string) => img.replace(/\.[^.]+$/, "");
 
-  const imageFor = (theme: SiteTheme): string | undefined => backgrounds[theme] ?? backgrounds.ivory;
+  const avifPath = (img: string) => `${basePathFor(img)}.avif`;
 
-  const basePathFor = (image: string) => image.replace(/\.[^.]+$/, "");
-
-  const avifPath = (image: string) => `${basePathFor(image)}.avif`;
-
-  const webpPath = (image: string) => `${basePathFor(image)}.webp`;
+  const webpPath = (img: string) => `${basePathFor(img)}.webp`;
 
   const withVersion = (assetPath: string) => `${assetPath}?v=${backgroundAssetVersion}`;
 
@@ -54,23 +46,92 @@ import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client"
     root.dataset.sceneQuality = normalizeQuality(value) ?? "default";
   };
 
-  const readSessionSceneQuality = (theme: SiteTheme) => {
+  const readSessionSceneQuality = () => {
     try {
-      return normalizeQuality(sessionStorage.getItem(sceneQualityKey(theme)));
+      return normalizeQuality(sessionStorage.getItem(sceneQualityKey));
     } catch {
       return null;
     }
   };
 
-  const writeSessionSceneQuality = (theme: SiteTheme, quality: SceneQuality) => {
+  const writeSessionSceneQuality = (quality: SceneQuality) => {
     try {
-      sessionStorage.setItem(sceneQualityKey(theme), quality);
+      sessionStorage.setItem(sceneQualityKey, quality);
     } catch {
       // Ignore storage write failures and keep runtime behavior functional.
     }
   };
 
-  const loadImage = (src: string, quality: SceneQuality, theme: SiteTheme, loadToken: number, onError: () => void) => {
+  /**
+   * Crossfades from the current background to a newly loaded high-quality image.
+   * Creates a temporary overlay element that fades in with the new image, then
+   * updates the CSS variable and removes the overlay for a seamless transition.
+   */
+  const crossfadeToImage = (imageSrc: string, quality: SceneQuality) => {
+    const sceneBg = document.getElementById("scene-bg");
+    if (!sceneBg) {
+      applySceneQuality(quality);
+      writeSessionSceneQuality(quality);
+      return;
+    }
+
+    // If the current quality is already high-res (not tiny), skip the animation
+    const currentQuality = normalizeQuality(root.dataset.sceneQuality ?? null);
+    if (currentQuality && currentQuality !== "tiny") {
+      applySceneQuality(quality);
+      writeSessionSceneQuality(quality);
+      return;
+    }
+
+    // Create a crossfade overlay that will hold the high-res image
+    const overlay = document.createElement("div");
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.style.cssText = [
+      "position: fixed",
+      "inset: 0",
+      "z-index: -2",
+      `background-image: url("${imageSrc}")`,
+      "background-position: center center",
+      "background-size: cover",
+      "background-repeat: no-repeat",
+      "opacity: 0",
+      "transition: opacity 600ms cubic-bezier(0.22, 0.61, 0.36, 1)",
+      "pointer-events: none",
+    ].join("; ");
+
+    sceneBg.parentElement?.insertBefore(overlay, sceneBg.nextSibling);
+
+    // Force a layout flush before triggering the transition
+    void overlay.offsetHeight;
+
+    overlay.style.opacity = "1";
+
+    const onTransitionDone = () => {
+      overlay.removeEventListener("transitionend", onTransitionDone);
+
+      // Update the CSS variable to point to the high-res image, then remove overlay
+      applySceneQuality(quality);
+      writeSessionSceneQuality(quality);
+
+      // Small delay to ensure the CSS variable has taken effect before removing overlay
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          overlay.remove();
+        });
+      });
+    };
+
+    overlay.addEventListener("transitionend", onTransitionDone);
+
+    // Safety timeout in case transitionend doesn't fire (e.g., reduced motion)
+    globalThis.setTimeout(() => {
+      if (overlay.parentElement) {
+        onTransitionDone();
+      }
+    }, 800);
+  };
+
+  const loadImage = (src: string, quality: SceneQuality, loadToken: number, onError: () => void) => {
     const loader = new Image();
     loader.decoding = "async";
     loader.src = src;
@@ -80,8 +141,7 @@ import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client"
         return;
       }
 
-      applySceneQuality(quality);
-      writeSessionSceneQuality(theme, quality);
+      crossfadeToImage(src, quality);
     };
 
     loader.onerror = () => {
@@ -94,18 +154,16 @@ import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client"
   };
 
   const applyBackground = (
-    theme: SiteTheme,
     options: { progressive?: boolean; useTinyPlaceholder?: boolean } = {}
   ) => {
     const { progressive = true, useTinyPlaceholder = true } = options;
-    const image = imageFor(theme);
     if (!image) {
       return;
     }
 
     if (!progressive) {
       applySceneQuality("default");
-      writeSessionSceneQuality(theme, "default");
+      writeSessionSceneQuality("default");
       return;
     }
 
@@ -114,37 +172,34 @@ import { isSiteTheme, type SceneQuality, type SiteTheme } from "../types/client"
     }
 
     const loadToken = ++activeLoadToken;
-    loadImage(withVersion(avifPath(image)), "avif", theme, loadToken, () => {
-      loadImage(withVersion(webpPath(image)), "webp", theme, loadToken, () => {
-        applySceneQuality("default");
-        writeSessionSceneQuality(theme, "default");
+    loadImage(withVersion(avifPath(image)), "avif", loadToken, () => {
+      loadImage(withVersion(webpPath(image)), "webp", loadToken, () => {
+        // Final fallback: crossfade to the original JPG
+        if (loadToken === activeLoadToken) {
+          crossfadeToImage(withVersion(image), "default");
+        }
       });
     });
   };
 
-  const syncThemeBackground = (theme: SiteTheme) => {
-    const cachedQuality = readSessionSceneQuality(theme);
-    if (cachedQuality) {
-      applySceneQuality(cachedQuality);
-      applyBackground(theme, { progressive: true, useTinyPlaceholder: false });
-      return;
-    }
-
-    applyBackground(theme, { progressive: true, useTinyPlaceholder: true });
-  };
-
-  const firstTheme = currentTheme();
-  const cachedSceneQuality = readSessionSceneQuality(firstTheme);
+  const cachedSceneQuality = readSessionSceneQuality();
   if (cachedSceneQuality) {
     applySceneQuality(cachedSceneQuality);
   }
 
-  applyBackground(firstTheme, {
+  applyBackground({
     progressive: true,
     useTinyPlaceholder: !cachedSceneQuality
   });
 
-  document.addEventListener("themechange", (event) => {
-    syncThemeBackground(event.detail.theme);
+  document.addEventListener("themechange", () => {
+    const cached = readSessionSceneQuality();
+    if (cached) {
+      applySceneQuality(cached);
+      applyBackground({ progressive: true, useTinyPlaceholder: false });
+      return;
+    }
+
+    applyBackground({ progressive: true, useTinyPlaceholder: true });
   });
 })();

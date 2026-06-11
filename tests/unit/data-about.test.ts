@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { stackCards, hardware, optimizationNotes } from "../../src/data/about.js";
+import { stackCards, pipeline, optimizationNotes } from "../../src/data/about.js";
 
 describe("stackCards", () => {
   it("is a non-empty array", () => {
@@ -14,23 +14,23 @@ describe("stackCards", () => {
   });
 });
 
-describe("hardware", () => {
+describe("pipeline", () => {
   it("is a non-empty tuple array", () => {
-    expect(hardware.length).toBeGreaterThan(0);
+    expect(pipeline.length).toBeGreaterThan(0);
   });
 
   it("every entry is a two-element tuple of non-empty strings", () => {
-    for (const row of hardware) {
+    for (const row of pipeline) {
       expect(row).toHaveLength(2);
       expect(row[0].trim().length).toBeGreaterThan(0);
       expect(row[1].trim().length).toBeGreaterThan(0);
     }
   });
 
-  it("includes Machine and Operating System entries", () => {
-    const labels = hardware.map(([label]) => label);
-    expect(labels).toContain("Machine");
-    expect(labels).toContain("Operating System");
+  it("includes Source Control and Deploy Target entries", () => {
+    const labels = pipeline.map(([label]) => label);
+    expect(labels).toContain("Source Control");
+    expect(labels).toContain("Deploy Target");
   });
 });
 
