@@ -3,11 +3,11 @@
  * ProjectCard displays a summary of a project from the 'projects' collection.
  * It features an icon (or fallback), title, summary, and a list of tags.
  */
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   /** The project data object from Astro's Content Layer. */
-  project: CollectionEntry<"projects">;
+  project: CollectionEntry<'projects'>;
 }
 
 const { project } = Astro.props;
@@ -26,19 +26,19 @@ const { project } = Astro.props;
             decoding="async"
           />
         ) : (
-          <span class="project-card-icon-fallback">{project.data.title.slice(0, 1)}</span>
+          <span class="project-card-icon-fallback">
+            {project.data.title.slice(0, 1)}
+          </span>
         )
       }
     </div>
     <div class="project-card-title-row">
       <h2>{project.data.title}</h2>
-      <span class="project-card-arrow" aria-hidden="true">-></span>
+      <span class="project-card-arrow" aria-hidden="true">{'->'}</span>
     </div>
   </div>
   <p>{project.data.summary}</p>
   <div class="tag-list project-tag-list">
-    {project.data.tags.map((tag) => (
-      <span class="tag">{tag}</span>
-    ))}
+    {project.data.tags.map((tag) => <span class="tag">{tag}</span>)}
   </div>
 </a>

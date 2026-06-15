@@ -11,13 +11,15 @@
   const root = document.documentElement;
 
   const applyIvory = () => {
-    root.dataset.theme = "ivory";
+    root.dataset.theme = 'ivory';
     try {
-      localStorage.setItem("theme", "ivory");
+      localStorage.setItem('theme', 'ivory');
     } catch {
       // Ignore localStorage failures in restricted browser modes.
     }
-    document.dispatchEvent(new CustomEvent("themechange", { detail: { theme: "ivory" } }));
+    document.dispatchEvent(
+      new CustomEvent('themechange', { detail: { theme: 'ivory' } })
+    );
   };
 
   applyIvory();
@@ -33,7 +35,7 @@
       return;
     }
 
-    nextRoot.dataset.theme = "ivory";
+    nextRoot.dataset.theme = 'ivory';
 
     const activeSceneQuality = root.dataset.sceneQuality;
     if (activeSceneQuality) {
@@ -41,5 +43,5 @@
     }
   };
 
-  document.addEventListener("astro:before-swap", persistThemeAcrossSwap);
+  document.addEventListener('astro:before-swap', persistThemeAcrossSwap);
 })();

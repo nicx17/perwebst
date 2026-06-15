@@ -15,9 +15,11 @@ featured: true
 ---
 
 ## Product Snapshot
+
 HyTrackV3 is a self-hostable shipment monitoring pipeline that turns inbox waybills into structured tracking intelligence. It continuously ingests new shipment IDs, routes each one through the right courier scraper, detects status deltas, and sends notifications only when meaningful changes occur.
 
 ## Core Objective
+
 The system is built to reduce tracking noise while preserving visibility:
 
 - no manual copy-paste checks across courier portals
@@ -26,6 +28,7 @@ The system is built to reduce tracking noise while preserving visibility:
 - low-cost operation on home infrastructure
 
 ## End-to-End Processing Flow
+
 1. IMAP ingestion scans mailbox content for candidate waybill identifiers.
 2. Parsing and normalization clean extracted values and remove obvious invalid IDs.
 3. Courier routing chooses adapter logic based on ID pattern/rules.
@@ -36,6 +39,7 @@ The system is built to reduce tracking noise while preserving visibility:
 8. Persistence layer updates local tracking records in SQLite.
 
 ## Courier Adapter Architecture
+
 HyTrackV3 intentionally uses mixed scraping paths:
 
 - Blue Dart: request + BeautifulSoup path for static/parseable pages
@@ -44,6 +48,7 @@ HyTrackV3 intentionally uses mixed scraping paths:
 This is a practical tradeoff: keep static providers fast and lightweight, while preserving compatibility for rendered portals that cannot be parsed reliably from raw HTML alone.
 
 ## State, Idempotency, and Noise Control
+
 SQLite is the local source of truth for:
 
 - shipment metadata
@@ -54,9 +59,11 @@ SQLite is the local source of truth for:
 The state-hash comparison model is central to reliability. It ensures scheduled runs remain idempotent and users are alerted only when something has actually changed.
 
 ## Notification System Design
+
 HyTrackV3 sends readable HTML status updates designed for fast scanning. Instead of forwarding raw courier output, it presents normalized tracking progression so recipients can understand changes quickly.
 
 ## Runtime and Deployment Model
+
 The project runs well in two common modes:
 
 - manual trigger for ad-hoc checks
@@ -65,11 +72,13 @@ The project runs well in two common modes:
 This makes it suitable for Raspberry Pi, NAS, or small Linux VM deployments without requiring dedicated cloud infrastructure.
 
 ## Operational Strengths
+
 - multi-courier compatibility through adapter separation
 - change-only notifications for low alert fatigue
 - durable local DB for restart-safe tracking
 - scheduler-friendly architecture for unattended operation
 
 ## Public Onboarding Route
+
 Repository docs include a hosted onboarding entrypoint via:
 notify@hyclotron.com

@@ -4,15 +4,15 @@
  * server-side rendering (SSR) setup via Node.js adapter,
  * and Vite-specific build optimizations.
  */
-import { defineConfig } from "astro/config";
-import cloudflare from "@astrojs/cloudflare";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { defineConfig } from 'astro/config';
+import cloudflare from '@astrojs/cloudflare';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const DEFAULT_ORIGIN = "https://link.nickcardoso.com";
+const DEFAULT_ORIGIN = 'https://link.nickcardoso.com';
 
 /** Normalizes a URL by removing trailing slashes. */
-const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, "");
+const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, '');
 
 /**
  * Fallback to reading ORIGIN from .env manually if process.env is not yet populated.
@@ -20,7 +20,7 @@ const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, "");
  */
 const readOriginFromDotEnv = () => {
   try {
-    const dotEnv = readFileSync(resolve(process.cwd(), ".env"), "utf8");
+    const dotEnv = readFileSync(resolve(process.cwd(), '.env'), 'utf8');
     const match = dotEnv.match(/^\s*ORIGIN\s*=\s*(.*)\s*$/m);
     if (!match) {
       return undefined;
@@ -45,15 +45,15 @@ const readOriginFromDotEnv = () => {
  * Enforces HTTPS in production to ensure secure link generation and CSP compliance.
  */
 const resolveSiteOrigin = () => {
-  const nodeEnv = process.env.NODE_ENV ?? "development";
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
   const rawOrigin = normalizeOrigin(
-    process.env.ORIGIN ?? readOriginFromDotEnv(),
+    process.env.ORIGIN ?? readOriginFromDotEnv()
   );
 
   if (!rawOrigin) {
-    if (nodeEnv === "production") {
+    if (nodeEnv === 'production') {
       throw new Error(
-        "Missing ORIGIN: set ORIGIN in .env for production builds.",
+        'Missing ORIGIN: set ORIGIN in .env for production builds.'
       );
     }
 
@@ -65,13 +65,13 @@ const resolveSiteOrigin = () => {
     parsed = new URL(rawOrigin);
   } catch {
     throw new Error(
-      `Invalid ORIGIN: "${rawOrigin}" is not a valid absolute URL.`,
+      `Invalid ORIGIN: "${rawOrigin}" is not a valid absolute URL.`
     );
   }
 
-  if (nodeEnv === "production" && parsed.protocol !== "https:") {
+  if (nodeEnv === 'production' && parsed.protocol !== 'https:') {
     throw new Error(
-      `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`,
+      `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`
     );
   }
 
@@ -87,20 +87,20 @@ export default defineConfig({
   /** Keep client-side navigation, but disable automatic link prefetching. */
   prefetch: false,
   /** Hybrid/Server rendering mode. */
-  output: "server",
+  output: 'server',
   /** Cloudflare adapter. */
   adapter: cloudflare(),
   /** Standardizes URLs to always have a trailing slash. */
-  trailingSlash: "always",
+  trailingSlash: 'always',
   vite: {
     build: {
       rollupOptions: {
         /** Custom warning handler to suppress known/expected noise from Astro internals. */
         onwarn(warning, defaultHandler) {
           const isKnownAstroWarning =
-            warning.code === "UNUSED_EXTERNAL_IMPORT" &&
-            warning.message.includes("@astrojs/internal-helpers/remote") &&
-            warning.message.includes("matchHostname");
+            warning.code === 'UNUSED_EXTERNAL_IMPORT' &&
+            warning.message.includes('@astrojs/internal-helpers/remote') &&
+            warning.message.includes('matchHostname');
 
           if (isKnownAstroWarning) {
             return;

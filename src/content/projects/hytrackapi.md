@@ -14,9 +14,11 @@ featured: true
 ---
 
 ## Product Snapshot
+
 HyTrack API is the service-layer evolution of the HyTrack ecosystem: a FastAPI microservice that exposes courier tracking through a single normalized contract. It is built for direct app/API consumption, rather than inbox-driven workflows.
 
 ## Problem and Scope
+
 Scraping courier portals directly from each client quickly becomes fragile and repetitive. HyTrack API centralizes that complexity behind one service boundary with:
 
 - authenticated API access
@@ -25,6 +27,7 @@ Scraping courier portals directly from each client quickly becomes fragile and r
 - basic abuse protection and key lifecycle management
 
 ## Service Architecture
+
 The core architecture is intentionally compact:
 
 - HTTP API layer: FastAPI request/response surface
@@ -34,6 +37,7 @@ The core architecture is intentionally compact:
 - Guard rails: rate limits, validation, and concurrency controls
 
 ## API Access Model
+
 HyTrack API uses a two-tier key strategy:
 
 1. privileged/master credential for administrative operations
@@ -42,12 +46,14 @@ HyTrack API uses a two-tier key strategy:
 Generated keys are hashed before storage, enabling practical key management without storing client credentials in plaintext.
 
 ## Courier Adapter Strategy
+
 - Blue Dart: direct endpoint and parse path for static content
 - Delhivery: Selenium headless route for dynamic rendered content
 
 This split is the same deliberate performance/compatibility tradeoff used in the broader HyTrack stack.
 
 ## Security Controls in Practice
+
 - `bcrypt` hashing for generated client keys
 - constant-time comparison for sensitive key checks
 - input validation on carrier + waybill parameters
@@ -55,10 +61,13 @@ This split is the same deliberate performance/compatibility tradeoff used in the
 - reverse-proxy/WAF compatible deployment guidance
 
 ## Reliability and Runtime Characteristics
+
 The service is optimized for low-resource deployments while handling mixed scraper workloads. Static carrier requests remain lightweight, while Selenium execution paths are guarded to avoid uncontrolled resource spikes.
 
 ## Deployment Profile
+
 The project is designed for edge-friendly hosting (including Raspberry Pi class infrastructure) with straightforward reverse-proxy fronting.
 
 ## Why It Matters
+
 HyTrack API turns scraper-heavy logistics retrieval into an operational backend component with authentication, normalized output, and deployable controls, making it much easier to integrate tracking into apps, bots, and automation systems.

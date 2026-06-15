@@ -17,15 +17,19 @@
    * Logic to determine if a click on an anchor should trigger an animated navigation.
    * Filters out external links, downloads, hash links, and special key combinations (Cmd/Ctrl).
    */
-  const shouldHandle = (anchor: HTMLAnchorElement | null, event: MouseEvent) => {
+  const shouldHandle = (
+    anchor: HTMLAnchorElement | null,
+    event: MouseEvent
+  ) => {
     if (!anchor || event.defaultPrevented) return false;
     if (event.button !== 0) return false;
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
-    if (anchor.target && anchor.target !== "_self") return false;
-    if (anchor.hasAttribute("download")) return false;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return false;
+    if (anchor.target && anchor.target !== '_self') return false;
+    if (anchor.hasAttribute('download')) return false;
 
-    const href = anchor.getAttribute("href");
-    if (!href || href.startsWith("#")) return false;
+    const href = anchor.getAttribute('href');
+    if (!href || href.startsWith('#')) return false;
 
     const url = new URL(anchor.href, globalThis.location.href);
     if (url.origin !== globalThis.location.origin) return false;
@@ -34,9 +38,9 @@
     return true;
   };
 
-  const markNavigation = (anchor: HTMLAnchorElement) => {
+  const markNavigation = () => {
     // Trigger the CSS exit animation.
-    root.classList.add("is-nav-exiting");
+    root.classList.add('is-nav-exiting');
 
     if (exitResetTimer) {
       globalThis.clearTimeout(exitResetTimer);
@@ -49,25 +53,25 @@
      * remain stuck in a transitioned-out/hidden state.
      */
     exitResetTimer = globalThis.setTimeout(() => {
-      root.classList.remove("is-nav-exiting");
+      root.classList.remove('is-nav-exiting');
       exitResetTimer = 0;
     }, NAV_EXIT_RESET_MS);
   };
 
   /** Global click listener for progressive enhancement of link navigation. */
-  document.addEventListener("click", (event: MouseEvent) => {
+  document.addEventListener('click', (event: MouseEvent) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
 
-    const anchor = target.closest("a[href]");
+    const anchor = target.closest('a[href]');
     if (!(anchor instanceof HTMLAnchorElement)) return;
     if (!shouldHandle(anchor, event)) return;
 
-    markNavigation(anchor);
+    markNavigation();
   });
 
   const clearExitState = () => {
-    root.classList.remove("is-nav-exiting");
+    root.classList.remove('is-nav-exiting');
     if (exitResetTimer) {
       globalThis.clearTimeout(exitResetTimer);
       exitResetTimer = 0;
@@ -75,19 +79,19 @@
   };
 
   // Restoration Handling:
-  // When a user goes "Back" or "Forward", the browser might restore a page 
+  // When a user goes "Back" or "Forward", the browser might restore a page
   // from the Back-Forward Cache (bfcache). We must ensure visibility is reset.
-  globalThis.addEventListener("pageshow", () => {
+  globalThis.addEventListener('pageshow', () => {
     clearExitState();
   });
 
   // Ensure state is clean before the page is hidden.
-  globalThis.addEventListener("pagehide", () => {
+  globalThis.addEventListener('pagehide', () => {
     clearExitState();
   });
 
   // Re-enable visibility if the user switches back to this tab.
-  document.addEventListener("visibilitychange", () => {
+  document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       clearExitState();
     }
@@ -95,6 +99,6 @@
 
   // Astro client-side navigations can preserve shell elements across swaps.
   // Clear the exit state as soon as the new page has been prepared and loaded.
-  document.addEventListener("astro:after-swap", clearExitState);
-  document.addEventListener("astro:page-load", clearExitState);
+  document.addEventListener('astro:after-swap', clearExitState);
+  document.addEventListener('astro:page-load', clearExitState);
 })();

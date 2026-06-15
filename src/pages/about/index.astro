@@ -1,7 +1,7 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import NavBack from "../../components/NavBack.astro";
-import { pipeline, optimizationNotes, stackCards } from "../../data/about";
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NavBack from '../../components/NavBack.astro';
+import { pipeline, optimizationNotes, stackCards } from '../../data/about';
 ---
 
 <BaseLayout
@@ -20,12 +20,14 @@ import { pipeline, optimizationNotes, stackCards } from "../../data/about";
   <section data-reveal>
     <h2>The Stack</h2>
     <div class="project-grid" data-reveal-stagger>
-      {stackCards.map((item) => (
-        <article class="section-card">
-          <h3>{item.title}</h3>
-          <p>{item.body}</p>
-        </article>
-      ))}
+      {
+        stackCards.map((item) => (
+          <article class="section-card">
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))
+      }
     </div>
   </section>
 
@@ -34,12 +36,14 @@ import { pipeline, optimizationNotes, stackCards } from "../../data/about";
     <table class="data-table" data-reveal-stagger>
       <caption>CI/CD stages from commit to production.</caption>
       <tbody>
-        {pipeline.map(([key, value]) => (
-          <tr>
-            <th scope="row">{key}</th>
-            <td>{value}</td>
-          </tr>
-        ))}
+        {
+          pipeline.map(([key, value]) => (
+            <tr>
+              <th scope="row">{key}</th>
+              <td>{value}</td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </section>
@@ -49,12 +53,14 @@ import { pipeline, optimizationNotes, stackCards } from "../../data/about";
     <table class="data-table" data-reveal-stagger>
       <caption>Architectural decisions and their rationale.</caption>
       <tbody>
-        {optimizationNotes.map(([key, value]) => (
-          <tr>
-            <th scope="row">{key}</th>
-            <td>{value}</td>
-          </tr>
-        ))}
+        {
+          optimizationNotes.map(([key, value]) => (
+            <tr>
+              <th scope="row">{key}</th>
+              <td>{value}</td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </section>

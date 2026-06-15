@@ -1,4 +1,4 @@
-import { type SceneQuality } from "../types/client";
+import { type SceneQuality } from '../types/client';
 
 (() => {
   /**
@@ -16,26 +16,32 @@ import { type SceneQuality } from "../types/client";
   globalThis.__persBackgroundLoaderInitialized = true;
 
   const root = document.documentElement;
-  const backgroundAssetVersion = "20260404hq";
+  const backgroundAssetVersion = '20260404hq';
   const sceneQualityKey = `bg-scene-quality-${backgroundAssetVersion}-ivory`;
   let activeLoadToken = 0;
 
   const backgrounds = globalThis.__BACKGROUND_CONFIG ?? {
-    ivory: "/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg",
+    ivory: '/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg',
   };
 
   const image: string | undefined = backgrounds.ivory;
 
-  const basePathFor = (img: string) => img.replace(/\.[^.]+$/, "");
+  const basePathFor = (img: string) => img.replace(/\.[^.]+$/, '');
 
   const avifPath = (img: string) => `${basePathFor(img)}.avif`;
 
   const webpPath = (img: string) => `${basePathFor(img)}.webp`;
 
-  const withVersion = (assetPath: string) => `${assetPath}?v=${backgroundAssetVersion}`;
+  const withVersion = (assetPath: string) =>
+    `${assetPath}?v=${backgroundAssetVersion}`;
 
   const normalizeQuality = (value: string | null): SceneQuality | null => {
-    if (value === "tiny" || value === "avif" || value === "webp" || value === "default") {
+    if (
+      value === 'tiny' ||
+      value === 'avif' ||
+      value === 'webp' ||
+      value === 'default'
+    ) {
       return value;
     }
 
@@ -43,7 +49,7 @@ import { type SceneQuality } from "../types/client";
   };
 
   const applySceneQuality = (value: string | null) => {
-    root.dataset.sceneQuality = normalizeQuality(value) ?? "default";
+    root.dataset.sceneQuality = normalizeQuality(value) ?? 'default';
   };
 
   const readSessionSceneQuality = () => {
@@ -68,7 +74,7 @@ import { type SceneQuality } from "../types/client";
    * updates the CSS variable and removes the overlay for a seamless transition.
    */
   const crossfadeToImage = (imageSrc: string, quality: SceneQuality) => {
-    const sceneBg = document.getElementById("scene-bg");
+    const sceneBg = document.getElementById('scene-bg');
     if (!sceneBg) {
       applySceneQuality(quality);
       writeSessionSceneQuality(quality);
@@ -77,37 +83,37 @@ import { type SceneQuality } from "../types/client";
 
     // If the current quality is already high-res (not tiny), skip the animation
     const currentQuality = normalizeQuality(root.dataset.sceneQuality ?? null);
-    if (currentQuality && currentQuality !== "tiny") {
+    if (currentQuality && currentQuality !== 'tiny') {
       applySceneQuality(quality);
       writeSessionSceneQuality(quality);
       return;
     }
 
     // Create a crossfade overlay that will hold the high-res image
-    const overlay = document.createElement("div");
-    overlay.setAttribute("aria-hidden", "true");
+    const overlay = document.createElement('div');
+    overlay.setAttribute('aria-hidden', 'true');
     overlay.style.cssText = [
-      "position: fixed",
-      "inset: 0",
-      "z-index: -2",
+      'position: fixed',
+      'inset: 0',
+      'z-index: -2',
       `background-image: url("${imageSrc}")`,
-      "background-position: center center",
-      "background-size: cover",
-      "background-repeat: no-repeat",
-      "opacity: 0",
-      "transition: opacity 600ms cubic-bezier(0.22, 0.61, 0.36, 1)",
-      "pointer-events: none",
-    ].join("; ");
+      'background-position: center center',
+      'background-size: cover',
+      'background-repeat: no-repeat',
+      'opacity: 0',
+      'transition: opacity 600ms cubic-bezier(0.22, 0.61, 0.36, 1)',
+      'pointer-events: none',
+    ].join('; ');
 
     sceneBg.parentElement?.insertBefore(overlay, sceneBg.nextSibling);
 
     // Force a layout flush before triggering the transition
     void overlay.offsetHeight;
 
-    overlay.style.opacity = "1";
+    overlay.style.opacity = '1';
 
     const onTransitionDone = () => {
-      overlay.removeEventListener("transitionend", onTransitionDone);
+      overlay.removeEventListener('transitionend', onTransitionDone);
 
       // Update the CSS variable to point to the high-res image, then remove overlay
       applySceneQuality(quality);
@@ -121,7 +127,7 @@ import { type SceneQuality } from "../types/client";
       });
     };
 
-    overlay.addEventListener("transitionend", onTransitionDone);
+    overlay.addEventListener('transitionend', onTransitionDone);
 
     // Safety timeout in case transitionend doesn't fire (e.g., reduced motion)
     globalThis.setTimeout(() => {
@@ -131,9 +137,14 @@ import { type SceneQuality } from "../types/client";
     }, 800);
   };
 
-  const loadImage = (src: string, quality: SceneQuality, loadToken: number, onError: () => void) => {
+  const loadImage = (
+    src: string,
+    quality: SceneQuality,
+    loadToken: number,
+    onError: () => void
+  ) => {
     const loader = new Image();
-    loader.decoding = "async";
+    loader.decoding = 'async';
     loader.src = src;
 
     loader.onload = () => {
@@ -162,21 +173,21 @@ import { type SceneQuality } from "../types/client";
     }
 
     if (!progressive) {
-      applySceneQuality("default");
-      writeSessionSceneQuality("default");
+      applySceneQuality('default');
+      writeSessionSceneQuality('default');
       return;
     }
 
     if (useTinyPlaceholder) {
-      applySceneQuality("tiny");
+      applySceneQuality('tiny');
     }
 
     const loadToken = ++activeLoadToken;
-    loadImage(withVersion(avifPath(image)), "avif", loadToken, () => {
-      loadImage(withVersion(webpPath(image)), "webp", loadToken, () => {
+    loadImage(withVersion(avifPath(image)), 'avif', loadToken, () => {
+      loadImage(withVersion(webpPath(image)), 'webp', loadToken, () => {
         // Final fallback: crossfade to the original JPG
         if (loadToken === activeLoadToken) {
-          crossfadeToImage(withVersion(image), "default");
+          crossfadeToImage(withVersion(image), 'default');
         }
       });
     });
@@ -189,10 +200,10 @@ import { type SceneQuality } from "../types/client";
 
   applyBackground({
     progressive: true,
-    useTinyPlaceholder: !cachedSceneQuality
+    useTinyPlaceholder: !cachedSceneQuality,
   });
 
-  document.addEventListener("themechange", () => {
+  document.addEventListener('themechange', () => {
     const cached = readSessionSceneQuality();
     if (cached) {
       applySceneQuality(cached);

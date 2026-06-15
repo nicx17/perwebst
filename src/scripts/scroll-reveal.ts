@@ -15,15 +15,15 @@
   if (globalThis.__persScrollRevealInitialized) return;
   globalThis.__persScrollRevealInitialized = true;
 
-  const REVEAL_CLASS = "is-revealed";
-  const ATTR_REVEAL = "data-reveal";
-  const ATTR_STAGGER = "data-reveal-stagger";
+  const REVEAL_CLASS = 'is-revealed';
+  const ATTR_REVEAL = 'data-reveal';
+  const ATTR_STAGGER = 'data-reveal-stagger';
   const STAGGER_BASE_MS = 65;
-  const ROOT_MARGIN = "0px 0px -60px 0px";
+  const ROOT_MARGIN = '0px 0px -60px 0px';
   const THRESHOLD = 0.08;
 
   const prefersReduced = globalThis.matchMedia?.(
-    "(prefers-reduced-motion: reduce)"
+    '(prefers-reduced-motion: reduce)'
   ).matches;
 
   const applyReveal = (el: Element) => {
@@ -99,11 +99,11 @@
   };
 
   // Run on initial load and after Astro client-side navigations
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initReveal, { once: true });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReveal, { once: true });
   } else {
     initReveal();
   }
 
-  document.addEventListener("astro:page-load", initReveal);
+  document.addEventListener('astro:page-load', initReveal);
 })();

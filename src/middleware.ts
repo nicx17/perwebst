@@ -5,9 +5,9 @@
  * 3. Cache control strategies for different asset types
  * 4. Cross-site request safety checks
  */
-import { defineMiddleware } from "astro:middleware";
+import { defineMiddleware } from 'astro:middleware';
 
-const ALLOWED_NODE_ENVS = new Set(["development", "test", "production"]);
+const ALLOWED_NODE_ENVS = new Set(['development', 'test', 'production']);
 
 type RuntimeEnvMap = Record<string, string | undefined>;
 
@@ -38,19 +38,19 @@ const parseOrigin = (value: string): URL => {
  * Validates critical environment variables required for the application to run safely.
  */
 const validateRuntimeEnv = () => {
-  const nodeEnv = (runtimeEnv.NODE_ENV ?? "development").trim();
+  const nodeEnv = (runtimeEnv.NODE_ENV ?? 'development').trim();
   if (!ALLOWED_NODE_ENVS.has(nodeEnv)) {
     throw new Error(
-      `Invalid NODE_ENV: "${nodeEnv}". Expected one of development, test, production.`,
+      `Invalid NODE_ENV: "${nodeEnv}". Expected one of development, test, production.`
     );
   }
 
   const rawOrigin = runtimeEnv.ORIGIN?.trim();
   if (rawOrigin) {
     const parsedOrigin = parseOrigin(rawOrigin);
-    if (nodeEnv === "production" && parsedOrigin.protocol !== "https:") {
+    if (nodeEnv === 'production' && parsedOrigin.protocol !== 'https:') {
       throw new Error(
-        `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`,
+        `Invalid ORIGIN: expected an https URL in production, got "${rawOrigin}".`
       );
     }
   }
@@ -95,9 +95,9 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     `script-src-elem 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'self'`,
     `script-src-attr 'none'`,
     `report-uri ${reportEndpoint}`,
-    "report-to csp-endpoint",
-    "upgrade-insecure-requests",
-  ].join("; ");
+    'report-to csp-endpoint',
+    'upgrade-insecure-requests',
+  ].join('; ');
 
 /**
  * Injects a suite of security headers into the response.
@@ -106,44 +106,44 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
 const setSecurityHeaders = (
   headers: Headers,
   requestUrl: URL,
-  nonce: string,
+  nonce: string
 ) => {
   const reportEndpoint = `${trustedReportOrigin ?? requestUrl.origin}/api/csp-report`;
-  headers.delete("Content-Security-Policy-Report-Only");
+  headers.delete('Content-Security-Policy-Report-Only');
   headers.set(
-    "Content-Security-Policy",
-    buildSecurityPolicy(nonce, reportEndpoint),
+    'Content-Security-Policy',
+    buildSecurityPolicy(nonce, reportEndpoint)
   );
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  headers.set("X-Content-Type-Options", "nosniff");
-  headers.set("X-Frame-Options", "DENY");
-  headers.set("X-DNS-Prefetch-Control", "off");
-  headers.set("X-Download-Options", "noopen");
-  headers.set("X-XSS-Protection", "0");
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('X-DNS-Prefetch-Control', 'off');
+  headers.set('X-Download-Options', 'noopen');
+  headers.set('X-XSS-Protection', '0');
   headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), usb=(), payment=()",
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), usb=(), payment=()'
   );
-  headers.set("Cross-Origin-Opener-Policy", "same-origin");
-  headers.set("Cross-Origin-Embedder-Policy", "require-corp");
-  headers.set("Cross-Origin-Resource-Policy", "same-origin");
-  headers.set("Accept-CH", "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform");
-  headers.set("Origin-Agent-Cluster", "?1");
-  headers.set("X-Permitted-Cross-Domain-Policies", "none");
-  headers.set("Reporting-Endpoints", `csp-endpoint="${reportEndpoint}"`);
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  headers.set('Accept-CH', 'Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform');
+  headers.set('Origin-Agent-Cluster', '?1');
+  headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+  headers.set('Reporting-Endpoints', `csp-endpoint="${reportEndpoint}"`);
   headers.set(
-    "Report-To",
+    'Report-To',
     JSON.stringify({
-      group: "csp-endpoint",
+      group: 'csp-endpoint',
       max_age: 10886400,
       endpoints: [{ url: reportEndpoint }],
-    }),
+    })
   );
 
-  if (requestUrl.protocol === "https:") {
+  if (requestUrl.protocol === 'https:') {
     headers.set(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains; preload",
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
     );
   }
 };
@@ -156,52 +156,52 @@ const setSecurityHeaders = (
  * - HTML/Dynamic Content: must-revalidate
  */
 const setCacheHeaders = (headers: Headers, pathname: string) => {
-  if (headers.has("Cache-Control")) {
+  if (headers.has('Cache-Control')) {
     return;
   }
 
-  if (pathname.startsWith("/_astro/")) {
-    headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  if (pathname.startsWith('/_astro/')) {
+    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     return;
   }
 
-  if (pathname.startsWith("/backgrounds/")) {
+  if (pathname.startsWith('/backgrounds/')) {
     headers.set(
-      "Cache-Control",
-      "public, max-age=2592000, stale-while-revalidate=604800",
+      'Cache-Control',
+      'public, max-age=2592000, stale-while-revalidate=604800'
     );
     return;
   }
 
   if (/\.(?:avif|webp|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/i.test(pathname)) {
     headers.set(
-      "Cache-Control",
-      "public, max-age=604800, stale-while-revalidate=86400",
+      'Cache-Control',
+      'public, max-age=604800, stale-while-revalidate=86400'
     );
     return;
   }
 
-  if (pathname.startsWith("/js/")) {
+  if (pathname.startsWith('/js/')) {
     headers.set(
-      "Cache-Control",
-      "public, max-age=86400, stale-while-revalidate=3600",
+      'Cache-Control',
+      'public, max-age=86400, stale-while-revalidate=3600'
     );
     return;
   }
 
   if (
-    pathname.endsWith(".xml") ||
-    pathname.endsWith("robots.txt") ||
-    pathname.endsWith("site.webmanifest")
+    pathname.endsWith('.xml') ||
+    pathname.endsWith('robots.txt') ||
+    pathname.endsWith('site.webmanifest')
   ) {
     headers.set(
-      "Cache-Control",
-      "public, max-age=3600, stale-while-revalidate=86400",
+      'Cache-Control',
+      'public, max-age=3600, stale-while-revalidate=86400'
     );
     return;
   }
 
-  headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
 };
 
 /**
@@ -209,21 +209,21 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
  * Blocks potentially malicious cross-site POSTs/navigations while allowing standard GET-based entry.
  */
 const isCrossSiteRequestSafe = (request: Request): boolean => {
-  const site = request.headers.get("sec-fetch-site");
+  const site = request.headers.get('sec-fetch-site');
 
   if (
     !site ||
-    site === "same-origin" ||
-    site === "same-site" ||
-    site === "none"
+    site === 'same-origin' ||
+    site === 'same-site' ||
+    site === 'none'
   ) {
     return true;
   }
 
   const isSafeNavigation =
-    request.method === "GET" &&
-    request.headers.get("sec-fetch-mode") === "navigate" &&
-    request.headers.get("sec-fetch-dest") === "document";
+    request.method === 'GET' &&
+    request.headers.get('sec-fetch-mode') === 'navigate' &&
+    request.headers.get('sec-fetch-dest') === 'document';
 
   return isSafeNavigation;
 };
@@ -234,7 +234,7 @@ const isCrossSiteRequestSafe = (request: Request): boolean => {
 export const onRequest = defineMiddleware(async (context, next) => {
   // 1. Security check for cross-site requests in production.
   if (!import.meta.env.DEV && !isCrossSiteRequestSafe(context.request)) {
-    return new Response("Forbidden Request Context", { status: 403 });
+    return new Response('Forbidden Request Context', { status: 403 });
   }
 
   // 2. Generate a secure nonce for CSP.
@@ -266,7 +266,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // This is required because 'strict-dynamic' drops whitelist sources and mandates nonces everywhere.
   if (
     !import.meta.env.DEV &&
-    headers.get("Content-Type")?.includes("text/html")
+    headers.get('Content-Type')?.includes('text/html')
   ) {
     const htmlText = await response.text();
     const noncedHtml = htmlText.replaceAll(
@@ -277,11 +277,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
           return match;
         }
         return `<script nonce="${cspNonce}"${p1}>`;
-      },
+      }
     );
     body = noncedHtml;
     // Remove the old Content-Length so the standard Response constructor calculates the new one
-    headers.delete("Content-Length");
+    headers.delete('Content-Length');
   }
 
   return new Response(body, {

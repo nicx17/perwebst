@@ -1,12 +1,14 @@
 ---
-import { getCollection, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import NavBack from "../../components/NavBack.astro";
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NavBack from '../../components/NavBack.astro';
 
-const slug = Astro.params.slug ?? "";
+const slug = Astro.params.slug ?? '';
 const expectedPath = `/projects/${slug}/`;
-const projects = await getCollection("projects");
-const project = projects.find((entry) => entry.data.canonicalPath === expectedPath);
+const projects = await getCollection('projects');
+const project = projects.find(
+  (entry) => entry.data.canonicalPath === expectedPath
+);
 
 let Content;
 if (project) {
@@ -16,10 +18,12 @@ if (project) {
   Astro.response.status = 404;
 }
 
-const repositoryHost = project ? new URL(project.data.repository).hostname.replace(/^www\./, "") : "";
+const repositoryHost = project
+  ? new URL(project.data.repository).hostname.replace(/^www\./, '')
+  : '';
 const liveHost = project?.data.liveUrl
-  ? new URL(project.data.liveUrl).hostname.replace(/^www\./, "")
-  : "";
+  ? new URL(project.data.liveUrl).hostname.replace(/^www\./, '')
+  : '';
 ---
 
 {
@@ -36,23 +40,25 @@ const liveHost = project?.data.liveUrl
         <header class="project-detail-header">
           <div class="project-detail-title-wrap">
             <div class="project-detail-icon-box" aria-hidden="true">
-              {
-                project.data.icon ? (
-                  <img
-                    class="project-detail-icon"
-                    src={project.data.icon}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <span class="project-detail-icon-fallback">{project.data.title.slice(0, 1)}</span>
-                )
-              }
+              {project.data.icon ? (
+                <img
+                  class="project-detail-icon"
+                  src={project.data.icon}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <span class="project-detail-icon-fallback">
+                  {project.data.title.slice(0, 1)}
+                </span>
+              )}
             </div>
             <div>
               <h1>{project.data.title}</h1>
-              <p class="subtitle projects-page-subtitle">{project.data.summary}</p>
+              <p class="subtitle projects-page-subtitle">
+                {project.data.summary}
+              </p>
             </div>
           </div>
           <div class="meta-row">
@@ -66,23 +72,23 @@ const liveHost = project?.data.liveUrl
               >
                 View Source
               </a>
-              {
-                project.data.liveUrl ? (
-                  <a
-                    class="project-action-button"
-                    href={project.data.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Open live site at ${liveHost}`}
-                  >
-                    Visit Live Site
-                  </a>
-                ) : null
-              }
+              {project.data.liveUrl ? (
+                <a
+                  class="project-action-button"
+                  href={project.data.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open live site at ${liveHost}`}
+                >
+                  Visit Live Site
+                </a>
+              ) : null}
             </div>
             <div class="project-meta-row" aria-label="Project hosts">
               <span class="project-meta-chip">{repositoryHost}</span>
-              {liveHost ? <span class="project-meta-chip">{liveHost}</span> : null}
+              {liveHost ? (
+                <span class="project-meta-chip">{liveHost}</span>
+              ) : null}
             </div>
           </div>
           <div class="tag-list">
@@ -108,7 +114,9 @@ const liveHost = project?.data.liveUrl
       <article class="article project-detail-card">
         <header>
           <h1>Project Not Found</h1>
-          <p class="subtitle projects-page-subtitle">The URL you requested does not match an available project.</p>
+          <p class="subtitle projects-page-subtitle">
+            The URL you requested does not match an available project.
+          </p>
         </header>
       </article>
     </BaseLayout>

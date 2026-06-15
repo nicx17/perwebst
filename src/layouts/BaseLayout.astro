@@ -4,10 +4,11 @@
  * It handles the global HTML structure, theme management, background image rotation,
  * and security header passthrough (nonces).
  */
-import "../styles/global.css";
+import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
-import { getTopbarPersistKey } from "../utils/layout-shell";
-import backgroundColorsData from "../data/background-colors.json";
+import { getTopbarPersistKey } from '../utils/layout-shell';
+import backgroundColorsData from '../data/background-colors.json';
+import type { BackgroundColor } from '../types/client';
 interface Props {
   /** The page title used in the <title> tag and OG/Twitter metadata. */
   title: string;
@@ -20,7 +21,9 @@ interface Props {
 }
 
 const { title, description, canonicalPath, shell = true } = Astro.props;
-const canonical = canonicalPath ? new URL(canonicalPath, Astro.site).toString() : undefined;
+const canonical = canonicalPath
+  ? new URL(canonicalPath, Astro.site).toString()
+  : undefined;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
 const topbarPersistKey = getTopbarPersistKey(shell);
@@ -34,42 +37,44 @@ const day = new Date().getDate();
 
 /** Pool of background images for the ivory theme. */
 const lightImages: string[] = [
-  "antonius-harel-2rkqE7SgcE8-unsplash",
-  "antonius-harel-VbOjY42c6a4-unsplash",
-  "antonius-harel-WsaPcg512jE-unsplash",
-  "asi-mong-Gf5Q_5UF3vs-unsplash",
-  "asif-aether-TlHglbjfvqw-unsplash",
-  "dirk-lach--IZ8j4_xgQ8-unsplash",
-  "dirk-lach-_uamwvb8UlI-unsplash",
-  "eve-9xY__xnwCy0-unsplash",
-  "eve-Fp96C-6Wd6o-unsplash",
-  "eve-WK9sTh1FiSs-unsplash",
-  "eve-bKOpGRbHBGs-unsplash",
-  "eve-jCBLFtjpXfw-unsplash",
-  "eve-lP_4h4oVO1E-unsplash",
-  "eve-lxepp3ZUxTs-unsplash",
-  "hassaan-here-bKfkhVRAJTQ-unsplash",
-  "iklas-FeNrGgQ1Tu8-unsplash",
-  "iklas-OSoICiA8F4M-unsplash",
-  "iklas-xjSu2KbJlAg-unsplash",
-  "iklas-y9Ujplj3KIU-unsplash",
-  "mohammad-alizade-nIlwOYUbQEA-unsplash",
-  "mymind-KnUX9qtR_4E-unsplash",
-  "omid-armin-Nsn9FY4JGMs-unsplash",
-  "plufow-le-studio-aE8Mx8-vQss-unsplash",
-  "radoslav-bali-Bp2sWPJGPHs-unsplash",
-  "radoslav-bali-rhnZzt9XblE-unsplash",
-  "rohit-choudhari-_E6sXQHsgQc-unsplash",
-  "sean-fahrenbruch-KUXkBy_Q0eA-unsplash",
-  "sean-fahrenbruch-_07FxAO8oG0-unsplash",
-  "sean-fahrenbruch-g95tsUeCohM-unsplash",
-  "sean-sinclair-C_NJKfnTR5A-unsplash",
+  'antonius-harel-2rkqE7SgcE8-unsplash',
+  'antonius-harel-VbOjY42c6a4-unsplash',
+  'antonius-harel-WsaPcg512jE-unsplash',
+  'asi-mong-Gf5Q_5UF3vs-unsplash',
+  'dirk-lach-_uamwvb8UlI-unsplash',
+  'eve-9xY__xnwCy0-unsplash',
+  'eve-Fp96C-6Wd6o-unsplash',
+  'eve-WK9sTh1FiSs-unsplash',
+  'eve-bKOpGRbHBGs-unsplash',
+  'eve-jCBLFtjpXfw-unsplash',
+  'eve-lP_4h4oVO1E-unsplash',
+  'eve-lxepp3ZUxTs-unsplash',
+  'hassaan-here-bKfkhVRAJTQ-unsplash',
+  'iklas-FeNrGgQ1Tu8-unsplash',
+  'iklas-xjSu2KbJlAg-unsplash',
+  'iklas-y9Ujplj3KIU-unsplash',
+  'mohammad-alizade-nIlwOYUbQEA-unsplash',
+  'mymind-KnUX9qtR_4E-unsplash',
+  'plufow-le-studio-aE8Mx8-vQss-unsplash',
+  'radoslav-bali-Bp2sWPJGPHs-unsplash',
+  'radoslav-bali-rhnZzt9XblE-unsplash',
+  'rohit-choudhari-_E6sXQHsgQc-unsplash',
+  'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
+  'sean-fahrenbruch-_07FxAO8oG0-unsplash',
+  'sean-fahrenbruch-g95tsUeCohM-unsplash',
+  'sean-sinclair-C_NJKfnTR5A-unsplash',
 ];
 
 const lightImage = lightImages[day % lightImages.length]!;
 
-const backgroundColors: Record<string, any> = backgroundColorsData;
-const lightColorData = backgroundColors[lightImage] || { dominant: "#ece9e3", average: "#ece9e3", luminance: 220, isDark: false };
+const backgroundColors: Record<string, BackgroundColor> =
+  backgroundColorsData as Record<string, BackgroundColor>;
+const lightColorData = backgroundColors[lightImage] || {
+  dominant: '#ece9e3',
+  average: '#ece9e3',
+  luminance: 220,
+  isDark: false,
+};
 
 const getUnsplashData = (filename: string) => {
   const clean = filename.replace('-unsplash', '').replace(/\(\d+\)$/, '');
@@ -78,35 +83,42 @@ const getUnsplashData = (filename: string) => {
   if (lastDash === -1) {
     return {
       url: `https://unsplash.com/photos/${clean}`,
-      author: 'Unknown'
+      author: 'Unknown',
     };
   }
 
   const authorSlug = clean.slice(0, lastDash);
-  const authorName = authorSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const authorName = authorSlug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 
   return {
     url: `https://unsplash.com/photos/${clean}`,
-    author: authorName
+    author: authorName,
   };
 };
 
 const lightUnsplash = getUnsplashData(lightImage);
 
-const ogImage = new URL(`/backgrounds/light/${lightImage}.jpg`, Astro.site).toString();
+const ogImage = new URL(
+  `/backgrounds/light/${lightImage}.jpg`,
+  Astro.site
+).toString();
 
 /** Nonce provided by middleware for script/style authorization under CSP. */
-const cspNonce = typeof Astro.locals.cspNonce === "string" ? Astro.locals.cspNonce : undefined;
+const cspNonce =
+  typeof Astro.locals.cspNonce === 'string' ? Astro.locals.cspNonce : undefined;
 
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/projects/", label: "Projects" },
-  { href: "/about/", label: "About" }
+  { href: '/', label: 'Home' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/about/', label: 'About' },
 ];
 
 const isActive = (href: string) => {
-  if (href === "/") {
-    return pathname === "/";
+  if (href === '/') {
+    return pathname === '/';
   }
 
   return pathname.startsWith(href);
@@ -121,22 +133,45 @@ const isActive = (href: string) => {
     <ClientRouter />
 
     <!-- Trusted Types configuration for modern browser security. -->
-    <script is:inline nonce={cspNonce}>if(globalThis.trustedTypes&&globalThis.trustedTypes.createPolicy){try{if(!globalThis.trustedTypes.defaultPolicy){globalThis.trustedTypes.createPolicy("default",{createHTML:s=>s,createScript:s=>s,createScriptURL:s=>s})}}catch{}}</script>
+    <script is:inline nonce={cspNonce}>
+      if (globalThis.trustedTypes && globalThis.trustedTypes.createPolicy) {
+        try {
+          if (!globalThis.trustedTypes.defaultPolicy) {
+            globalThis.trustedTypes.createPolicy('default', {
+              createHTML: (s) => s,
+              createScript: (s) => s,
+              createScriptURL: (s) => s,
+            });
+          }
+        } catch {}
+      }
+    </script>
 
     <!-- Theme and quality-of-service (QoS) initialization.
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
-    <script is:inline nonce={cspNonce}>(()=>{try{const t=document.documentElement;t.dataset.theme="ivory";const s=sessionStorage.getItem("bg-scene-quality-20260404hq-ivory");if(s==="tiny"||s==="avif"||s==="webp"||s==="default"){t.dataset.sceneQuality=s}}catch{}})();</script>
-    <script>
-      import "../scripts/page-transition.ts";
+    <script is:inline nonce={cspNonce}>
+      (() => {
+        try {
+          const t = document.documentElement;
+          t.dataset.theme = 'ivory';
+          const s = sessionStorage.getItem('bg-scene-quality-20260404hq-ivory');
+          if (s === 'tiny' || s === 'avif' || s === 'webp' || s === 'default') {
+            t.dataset.sceneQuality = s;
+          }
+        } catch {}
+      })();
     </script>
     <script>
-      import "../scripts/nav-state.ts";
+      import '../scripts/page-transition.ts';
     </script>
     <script>
-      import "../scripts/scroll-reveal.ts";
+      import '../scripts/nav-state.ts';
     </script>
     <script>
-      import "../scripts/card-tilt.ts";
+      import '../scripts/scroll-reveal.ts';
+    </script>
+    <script>
+      import '../scripts/card-tilt.ts';
     </script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -158,13 +193,16 @@ const isActive = (href: string) => {
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
     <script>
-      import "../scripts/theme-toggle.ts";
+      import '../scripts/theme-toggle.ts';
     </script>
 
     <!-- Dynamic CSS injection for background image variations.
          Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
          reactively based on client-side feature detection and loading state. -->
-    <style is:inline nonce={cspNonce} set:html={`
+    <style
+      is:inline
+      nonce={cspNonce}
+      set:html={`
       :root {
         --scene-image-default: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
         --scene-image-tiny: url("/backgrounds/light/${lightImage}.tiny.webp?v=20260404hq");
@@ -174,26 +212,41 @@ const isActive = (href: string) => {
         --scene-color-dominant: ${lightColorData.dominant};
         --scene-color-average: ${lightColorData.average};
         --scene-luminance: ${lightColorData.luminance};
-        --scene-is-dark: ${lightColorData.isDark ? "1" : "0"};
+        --scene-is-dark: ${lightColorData.isDark ? '1' : '0'};
       }
 
       html[data-scene-quality="tiny"] { --scene-image: var(--scene-image-tiny, var(--scene-image-default)); }
       html[data-scene-quality="webp"] { --scene-image: var(--scene-image-webp, var(--scene-image-default)); }
       html[data-scene-quality="avif"] { --scene-image: var(--scene-image-avif, var(--scene-image-default)); }
       html[data-scene-quality="default"] { --scene-image: var(--scene-image-default); }
-    `}></style>
+    `}
+    ></style>
 
     <!-- Expose the selected background config to the client-side background-loader.ts -->
-    <script is:inline nonce={cspNonce} set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg"};`}></script>
+    <script
+      is:inline
+      nonce={cspNonce}
+      set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg"};`}
+    />
     <script>
-      import "../scripts/background-loader.ts";
+      import '../scripts/background-loader.ts';
     </script>
   </head>
   <body>
     <div id="scene-bg" aria-hidden="true" transition:persist="scene-bg"></div>
-    <div class="ambient-orb ambient-orb-one" aria-hidden="true" transition:persist="ambient-orb-one"></div>
-    <div class="ambient-orb ambient-orb-two" aria-hidden="true" transition:persist="ambient-orb-two"></div>
-    <main class:list={{ "page-shell": true, "page-shell-plain": !shell }}>
+    <div
+      class="ambient-orb ambient-orb-one"
+      aria-hidden="true"
+      transition:persist="ambient-orb-one"
+    >
+    </div>
+    <div
+      class="ambient-orb ambient-orb-two"
+      aria-hidden="true"
+      transition:persist="ambient-orb-two"
+    >
+    </div>
+    <main class:list={{ 'page-shell': true, 'page-shell-plain': !shell }}>
       {
         shell ? (
           <section class="app-shell">
@@ -202,17 +255,19 @@ const isActive = (href: string) => {
                 <nav class="app-nav" aria-label="Primary">
                   {navItems.map((item) => (
                     <a
-                      class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      class:list={{
+                        'app-tab': true,
+                        'is-active': isActive(item.href),
+                      }}
                       data-nav-link
                       data-nav-href={item.href}
                       href={item.href}
-                      aria-current={isActive(item.href) ? "page" : undefined}
+                      aria-current={isActive(item.href) ? 'page' : undefined}
                     >
                       {item.label}
                     </a>
                   ))}
                 </nav>
-
               </div>
             </header>
 
@@ -222,22 +277,27 @@ const isActive = (href: string) => {
           </section>
         ) : (
           <>
-            <header class="app-topbar app-topbar-plain" transition:persist={topbarPersistKey}>
+            <header
+              class="app-topbar app-topbar-plain"
+              transition:persist={topbarPersistKey}
+            >
               <div class="app-controls">
                 <nav class="app-nav" aria-label="Primary">
                   {navItems.map((item) => (
                     <a
-                      class:list={{ "app-tab": true, "is-active": isActive(item.href) }}
+                      class:list={{
+                        'app-tab': true,
+                        'is-active': isActive(item.href),
+                      }}
                       data-nav-link
                       data-nav-href={item.href}
                       href={item.href}
-                      aria-current={isActive(item.href) ? "page" : undefined}
+                      aria-current={isActive(item.href) ? 'page' : undefined}
                     >
                       {item.label}
                     </a>
                   ))}
                 </nav>
-
               </div>
             </header>
 
@@ -249,7 +309,12 @@ const isActive = (href: string) => {
       }
     </main>
 
-    <a href={lightUnsplash.url} class="bg-credit" target="_blank" rel="noopener noreferrer">Background by {lightUnsplash.author}</a>
+    <a
+      href={lightUnsplash.url}
+      class="bg-credit"
+      target="_blank"
+      rel="noopener noreferrer">Background by {lightUnsplash.author}</a
+    >
 
     <style>
       .bg-credit {
@@ -260,11 +325,15 @@ const isActive = (href: string) => {
         align-items: center;
         font-size: 0.75rem;
         font-weight: 500;
-        color: var(--text-muted);
+        color: var(--text-main);
         text-decoration: none;
         z-index: 50;
-        opacity: 0.65;
-        transition: opacity var(--motion-medium) ease, color var(--motion-medium) ease, background-color var(--motion-medium) ease, border-color var(--motion-medium) ease;
+        opacity: 0.85;
+        transition:
+          opacity var(--motion-medium) ease,
+          color var(--motion-medium) ease,
+          background-color var(--motion-medium) ease,
+          border-color var(--motion-medium) ease;
         padding: 0.45rem 0.85rem;
         background: var(--glass-bg);
         backdrop-filter: blur(8px);

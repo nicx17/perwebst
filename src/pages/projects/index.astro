@@ -1,10 +1,12 @@
 ---
-import { getCollection } from "astro:content";
-import ProjectCard from "../../components/ProjectCard.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import NavBack from "../../components/NavBack.astro";
+import { getCollection } from 'astro:content';
+import ProjectCard from '../../components/ProjectCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NavBack from '../../components/NavBack.astro';
 
-const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+);
 ---
 
 <BaseLayout
@@ -17,12 +19,12 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
 
   <header class="page-header projects-page-header">
     <h1>Projects</h1>
-    <p class="subtitle projects-page-subtitle">A collection of tools, scripts, and software engineering experiments.</p>
+    <p class="subtitle projects-page-subtitle">
+      A collection of tools, scripts, and software engineering experiments.
+    </p>
   </header>
 
   <section class="project-grid projects-showcase">
-    {projects.map((project) => (
-      <ProjectCard project={project} />
-    ))}
+    {projects.map((project) => <ProjectCard project={project} />)}
   </section>
 </BaseLayout>

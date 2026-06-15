@@ -1,4 +1,4 @@
-2from PIL import Image
+from PIL import Image
 
 
 def analyze_color2(img: Image.Image) -> dict:

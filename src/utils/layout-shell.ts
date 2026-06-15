@@ -4,4 +4,4 @@
  * the wrong header DOM when navigating between pages with different shells.
  */
 export const getTopbarPersistKey = (shell: boolean): string =>
-  shell ? "site-topbar-shell" : "site-topbar-plain";
+  shell ? 'site-topbar-shell' : 'site-topbar-plain';

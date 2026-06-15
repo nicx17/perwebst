@@ -3,20 +3,20 @@
  * Validates that the Zod schema used in content.config.ts accepts
  * valid project entries and rejects malformed ones.
  */
-import { describe, it, expect } from "vitest";
-import * as z from "zod/v4";
+import { describe, it, expect } from 'vitest';
+import * as z from 'zod/v4';
 
 const HTTPS_URL = z.url().refine((value) => {
   try {
-    return new URL(value).protocol === "https:";
+    return new URL(value).protocol === 'https:';
   } catch {
     return false;
   }
-}, "must be an https URL");
+}, 'must be an https URL');
 
 const PROJECT_CANONICAL_PATH = z
   .string()
-  .regex(/^\/projects\/[a-z0-9-]+\/$/i, "must match /projects/<slug>/");
+  .regex(/^\/projects\/[a-z0-9-]+\/$/i, 'must match /projects/<slug>/');
 
 // Replicate the schema from src/content.config.ts
 const projectSchema = z.object({
@@ -35,99 +35,102 @@ const projectSchema = z.object({
 type Project = z.infer<typeof projectSchema>;
 
 const validProject: Project = {
-  title: "TestProject",
-  summary: "A test project.",
-  repository: "https://github.com/nicx17/test",
-  repositoryLabel: "nicx17/test",
-  canonicalPath: "/projects/test/",
-  tags: ["TypeScript", "Node"],
+  title: 'TestProject',
+  summary: 'A test project.',
+  repository: 'https://github.com/nicx17/test',
+  repositoryLabel: 'nicx17/test',
+  canonicalPath: '/projects/test/',
+  tags: ['TypeScript', 'Node'],
   order: 1,
   featured: false,
 };
 
-describe("project content schema", () => {
-  it("accepts a fully valid project entry", () => {
+describe('project content schema', () => {
+  it('accepts a fully valid project entry', () => {
     expect(() => projectSchema.parse(validProject)).not.toThrow();
   });
 
-  it("icon is optional — parses without it", () => {
-    const { icon, ...withoutIcon } = validProject as any;
+  it('icon is optional — parses without it', () => {
+    const { icon: _, ...withoutIcon } = validProject;
     expect(() => projectSchema.parse(withoutIcon)).not.toThrow();
   });
 
-  it("liveUrl is optional — parses without it", () => {
-    const { liveUrl, ...withoutLive } = validProject as any;
+  it('liveUrl is optional — parses without it', () => {
+    const { liveUrl: _, ...withoutLive } = validProject;
     expect(() => projectSchema.parse(withoutLive)).not.toThrow();
   });
 
-  it("accepts a valid liveUrl URL", () => {
-    const withLive = { ...validProject, liveUrl: "https://example.com" };
+  it('accepts a valid liveUrl URL', () => {
+    const withLive = { ...validProject, liveUrl: 'https://example.com' };
     expect(() => projectSchema.parse(withLive)).not.toThrow();
   });
 
-  it("rejects an invalid repository URL (not a URL)", () => {
-    const bad = { ...validProject, repository: "not-a-url" };
+  it('rejects an invalid repository URL (not a URL)', () => {
+    const bad = { ...validProject, repository: 'not-a-url' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("rejects non-https repository URLs", () => {
-    const bad = { ...validProject, repository: "javascript:alert(1)" };
+  it('rejects non-https repository URLs', () => {
+    const bad = { ...validProject, repository: 'javascript:alert(1)' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("rejects a missing title", () => {
-    const { title, ...noTitle } = validProject as any;
+  it('rejects a missing title', () => {
+    const { title: _, ...noTitle } = validProject as any;
     expect(() => projectSchema.parse(noTitle)).toThrow();
   });
 
-  it("rejects a missing summary", () => {
-    const { summary, ...noSummary } = validProject as any;
+  it('rejects a missing summary', () => {
+    const { summary: _, ...noSummary } = validProject as any;
     expect(() => projectSchema.parse(noSummary)).toThrow();
   });
 
-  it("rejects a non-array tags field", () => {
-    const bad = { ...validProject, tags: "typescript" };
+  it('rejects a non-array tags field', () => {
+    const bad = { ...validProject, tags: 'typescript' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("rejects a non-number order field", () => {
-    const bad = { ...validProject, order: "first" };
+  it('rejects a non-number order field', () => {
+    const bad = { ...validProject, order: 'first' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("featured defaults to false when not provided", () => {
-    const { featured, ...noFeatured } = validProject as any;
+  it('featured defaults to false when not provided', () => {
+    const { featured: _, ...noFeatured } = validProject as any;
     const result = projectSchema.parse(noFeatured);
     expect(result.featured).toBe(false);
   });
 
-  it("accepts featured: true", () => {
+  it('accepts featured: true', () => {
     const result = projectSchema.parse({ ...validProject, featured: true });
     expect(result.featured).toBe(true);
   });
 
-  it("rejects an invalid liveUrl", () => {
-    const bad = { ...validProject, liveUrl: "not-a-url" };
+  it('rejects an invalid liveUrl', () => {
+    const bad = { ...validProject, liveUrl: 'not-a-url' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("rejects non-https liveUrl values", () => {
-    const bad = { ...validProject, liveUrl: "data:text/plain,hello" };
+  it('rejects non-https liveUrl values', () => {
+    const bad = { ...validProject, liveUrl: 'data:text/plain,hello' } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("tags array can be empty", () => {
+  it('tags array can be empty', () => {
     const result = projectSchema.parse({ ...validProject, tags: [] });
     expect(result.tags).toEqual([]);
   });
 
-  it("canonicalPath must be a project route string", () => {
-    const bad = { ...validProject, canonicalPath: 42 };
+  it('canonicalPath must be a project route string', () => {
+    const bad = { ...validProject, canonicalPath: 42 } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 
-  it("rejects canonicalPath values outside /projects/<slug>/", () => {
-    const bad = { ...validProject, canonicalPath: "https://example.com" };
+  it('rejects canonicalPath values outside /projects/<slug>/', () => {
+    const bad = {
+      ...validProject,
+      canonicalPath: 'https://example.com',
+    } as any;
     expect(() => projectSchema.parse(bad)).toThrow();
   });
 });
