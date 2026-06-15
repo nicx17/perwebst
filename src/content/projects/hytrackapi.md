@@ -1,6 +1,7 @@
 ---
 title: HyTrack API
 summary: Hardened FastAPI microservice for courier status scraping with key management, rate limiting, and edge-ready deployment.
+icon: /project-icons/hytrackapi.jpg
 repository: https://github.com/nicx17/hytrackapi
 repositoryLabel: nicx17/hytrackapi
 canonicalPath: /projects/hytrackapi/
@@ -71,3 +72,7 @@ The project is designed for edge-friendly hosting (including Raspberry Pi class 
 ## Why It Matters
 
 HyTrack API turns scraper-heavy logistics retrieval into an operational backend component with authentication, normalized output, and deployable controls, making it much easier to integrate tracking into apps, bots, and automation systems.
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/illustrations/inF_jEltsEk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Illustration</a> by <a href="https://unsplash.com/@pixeliota/illustrations?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Pixeliota</a> on <a href="https://unsplash.com/illustrations?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

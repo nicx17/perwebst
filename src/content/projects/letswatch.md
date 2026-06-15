@@ -1,6 +1,7 @@
 ---
 title: LetsWatch
 summary: Lightweight self-hosted watchlist and release-tracking web app focused on clean UX and low-overhead deployment.
+icon: /project-icons/letswatch.svg
 repository: https://github.com/nicx17/letswatch
 repositoryLabel: nicx17/letswatch
 canonicalPath: /projects/letswatch/
@@ -49,3 +50,7 @@ Live page: https://letswatch.hyclotron.com/
 ## Why It Matters
 
 LetsWatch demonstrates how a focused, single-purpose app can deliver a polished day-to-day experience while staying operationally simple and easy to host.
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/photos/_B2A99CU0bA?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Icon</a> by <a href="https://unsplash.com/@compagnons?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Compagnons</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

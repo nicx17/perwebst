@@ -1,6 +1,7 @@
 ---
 title: ImmichSync
 summary: Python-based folder-to-Immich sync automation with route fallback, deduplication, and album-aware uploads.
+icon: /project-icons/immichsync.svg
 repository: https://github.com/nicx17/ImmichSync
 repositoryLabel: nicx17/ImmichSync
 canonicalPath: /projects/immichsync/
@@ -78,3 +79,7 @@ python uploader_v1.py
 ## Why This Project Is Valuable
 
 ImmichSync demonstrates how a single-purpose script can still be production-practical: clear state handling, safe retries, network flexibility, and operator-friendly logs without requiring a heavy framework.
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/photos/6oIuHh8JUds?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Icon</a> by <a href="https://unsplash.com/@wwllaaddaa?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vladimir Nikolic</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

@@ -75,3 +75,7 @@ Before soldering, button lines and input characteristics must be validated direc
 ## Why This Project Stands Out
 
 InfinityX combines embedded hardware work, electrical probing, firmware configuration, and smart-home automation design in one compact build. It is not just an ESPHome demo; it is a practical retrofit pattern for turning offline consumer hardware into reliable local smart devices.
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/illustrations/green-and-blue-abstract-wavy-layers-RHKQVF1DJwE?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Illustration</a> by <a href="https://unsplash.com/@pixeliota/illustrations?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Pixeliota</a> on <a href="https://unsplash.com/illustrations?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

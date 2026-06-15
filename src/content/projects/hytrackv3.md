@@ -1,7 +1,7 @@
 ---
 title: HyTrackV3
 summary: Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.
-icon: /project-icons/hytrackv3.png
+icon: /project-icons/hytrackv3.svg
 repository: https://github.com/nicx17/HyTrackV3
 repositoryLabel: nicx17/HyTrackV3
 canonicalPath: /projects/hytrackv3/
@@ -82,3 +82,7 @@ This makes it suitable for Raspberry Pi, NAS, or small Linux VM deployments with
 
 Repository docs include a hosted onboarding entrypoint via:
 notify@hyclotron.com
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/photos/JWjiKcnSKXk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Icon</a> by <a href="https://unsplash.com/@roundicons?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Round Icons</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

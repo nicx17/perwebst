@@ -1,6 +1,7 @@
 ---
 title: MultiWave
 summary: Wireless dual-node cable tester for RJ45, RJ11, and BNC diagnostics with multiple validation modes.
+icon: /project-icons/multiwave.svg
 repository: https://github.com/nicx17/MultiWave
 repositoryLabel: nicx17/MultiWave
 canonicalPath: /projects/multiwave/
@@ -86,3 +87,7 @@ MultiWave firmware coordinates pin drive/read cycles, RF message exchange, and d
 ## Why This Build Is Significant
 
 MultiWave is a full-stack hardware project in the real sense: embedded firmware, RF transport design, electrical interface mapping, device UX, and power/enclosure engineering all had to align for reliable on-site operation.
+
+<div class="attribution-badge">
+  <a href="https://unsplash.com/photos/diVL2mzeuUo?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Icon</a> by <a href="https://unsplash.com/@publicdomainvectors?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Public Domain Vectors</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</div>

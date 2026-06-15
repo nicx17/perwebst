@@ -890,8 +890,8 @@ header.page-header h1 {
   color: var(--text-muted);
 }
 
-.projects-showcase {
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+.project-grid.projects-showcase {
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 1.15rem;
   align-items: stretch;
 }
@@ -926,7 +926,7 @@ header.page-header h1 {
   box-shadow:
     0 24px 54px -34px var(--shadow-main),
     inset 0 1px 0 color-mix(in srgb, var(--card-sheen) 78%, transparent);
-  padding: 1.3rem 1.18rem 1.22rem;
+  padding: 1.6rem 1.5rem 1.5rem;
   overflow: hidden;
   isolation: isolate;
   transform-origin: 50% 14%;
@@ -943,8 +943,8 @@ header.page-header h1 {
 .projects-showcase .project-card p {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
   overflow: hidden;
 }
 
@@ -1636,4 +1636,53 @@ header.page-header h1 {
     width: min(44vw, 11.5rem);
     text-align: center;
   }
+}
+
+.attribution-badge {
+  display: inline-block;
+  text-align: center;
+  position: relative;
+  background-color: var(--button-bg);
+  border: 1px solid var(--button-border);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-top: 1.5rem;
+  line-height: 1.4;
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.attribution-badge:hover {
+  background-color: var(--button-bg-hover);
+  border-color: var(--button-border-strong);
+}
+
+.attribution-badge a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.attribution-badge a:hover {
+  text-decoration: underline;
+}
+
+.attribution-badge a:first-of-type {
+  position: static;
+}
+
+.attribution-badge a:first-of-type::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.attribution-badge a:not(:first-of-type) {
+  position: relative;
+  z-index: 2;
 }
