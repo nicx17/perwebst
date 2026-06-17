@@ -1,0 +1,125 @@
+---
+title: InfinityX
+summary: ESPHome-powered hardware mod that turns a Bluetooth speaker into a Home Assistant controllable device.
+icon: /project-icons/infinityx.png
+repository: https://github.com/nicx17/InfinityX
+repositoryLabel: nicx17/InfinityX
+canonicalPath: /projects/infinityx/
+tags:
+  - ESPHome
+  - Home Assistant
+  - ESP32
+  - Hardware
+order: 7
+featured: false
+---
+
+import FeatureGrid from '../../components/project/FeatureGrid.astro';
+import FeatureItem from '../../components/project/FeatureItem.astro';
+import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
+
+# ESPHome Infinity Speaker Controller
+
+[![ESPHome](https://img.shields.io/badge/ESPHome-E2055C?style=for-the-badge&logo=esphome&logoColor=white)](https://esphome.io/)
+[![Home Assistant](https://img.shields.io/badge/Home_Assistant-41BDF5?style=for-the-badge&logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-lightgreen.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
+
+This project integrates an ESP32 microcontroller directly inside an Infinity Bluetooth speaker (or similar device) to bring it into Home Assistant. By wiring the ESP32 directly to the speaker's physical Play/Pause, Power, and Volume buttons, the microcontroller mimics physical button presses.
+
+Power for the ESP32 is drawn directly from the Bluetooth speaker's internal circuitry, making it a fully self-contained smart integration without needing an external power supply.
+
+## Features
+
+<FeatureGrid>
+  <FeatureItem title="Direct Hardware Integration">
+    ESP32 mimics physical button presses.
+  </FeatureItem>
+  <FeatureItem title="Self-Powered">
+    Draws power directly from the speaker.
+  </FeatureItem>
+  <FeatureItem title="Power Control">
+    Short and Long Press mimicking via GPIO output.
+  </FeatureItem>
+  <FeatureItem title="Playback Control">
+    Play/Pause mimicking via GPIO output.
+  </FeatureItem>
+  <FeatureItem title="Volume Control">
+    Volume Up/Down mimicking via GPIO output.
+  </FeatureItem>
+  <FeatureItem title="Status Sensor">
+    Reads speaker power state to report back to Home Assistant.
+  </FeatureItem>
+</FeatureGrid>
+> [!CAUTION]
+> **Always probe your specific hardware first!**
+> Not all Bluetooth speakers use the same button logic (e.g., active low vs. active high, different voltage levels). You must use a multimeter to probe your speaker's physical buttons and power lines before connecting the ESP32 to ensure compatibility and prevent hardware damage. Revise the GPIO configurations in `esphome-web.yaml` as necessary based on your findings.
+
+## Requirements
+
+- ESP32 microcontroller
+- ESPHome (v2025.9.0 or newer)
+- Home Assistant
+- Soldering equipment (to connect ESP32 to speaker button pads and power)
+
+## Installation & Configuration
+
+1. Clone this repository or download the files.
+2. Copy `secrets.yaml.example` to `secrets.yaml` and enter your WiFi credentials.
+
+   ```bash
+   cp secrets.yaml.example secrets.yaml
+   ```
+
+3. Edit the `secrets.yaml` file to include your actual WiFi SSID and password.
+4. Modify the `substitutions` block at the top of `esphome-web.yaml` if you want to change the device name or friendly name.
+5. Compile and upload the configuration to your ESP32 device using the ESPHome dashboard or CLI:
+
+   ```bash
+   esphome run esphome-web.yaml
+   ```
+
+## Home Assistant Integration
+
+This project is built to be seamlessly integrated directly into Home Assistant using the native **ESPHome Integration**.
+
+1. **Auto-Discovery:** Once your ESP32 flashes and connects to your local Wi-Fi, the built-in `api:` component broadcasts its presence via mDNS on your network.
+2. **Add to HA:** Open Home Assistant. You should see a notification under **Settings > Devices & Services** saying a new device has been discovered.
+3. **Configure:** Click **Configure** on the discovered ESPHome device. If it isn't automatically discovered, you can add it manually by clicking **Add Integration**, searching for "ESPHome", and entering the IP address of the ESP32.
+4. **Done!** The virtual buttons (Power, Play, Volume Up/Down) and the speaker power status sensor will immediately appear as entities in Home Assistant, ready to be added to dashboards or used in automations.
+
+### Dashboard Examples
+
+Here is how the speaker controls look when added to a Home Assistant dashboard!
+_(You can find the exact YAML for the standalone speaker card in `dashboard_config.yaml`)_
+
+**Standalone Speaker Controls:**
+![Standalone Controls](https://raw.githubusercontent.com/nicx17/InfinityX/main/dashboard-controls.png)
+
+**Full Dashboard View:**
+![Full Dashboard](https://raw.githubusercontent.com/nicx17/InfinityX/main/dashboard-full.png)
+
+## Hardware Configuration & Wiring
+
+Outputs (Active Low, Open Drain) - Connect to the corresponding button pads on the speaker's PCB:
+
+- GPIO16: PWR (Power button)
+- GPIO17: PP (Play/Pause button)
+- GPIO18: VOLU (Volume + button)
+- GPIO19: VOLD (Volume - button)
+
+Inputs:
+
+- GPIO34: Speaker Power Status (Connect to a point on the PCB that goes high when the speaker is on)
+
+Power:
+
+- ESP32 3.3V/5V In: Connect to an appropriate stable voltage source inside the speaker.
+- ESP32 GND: Connect to the speaker's common ground.
+
+## Security and Privacy
+
+To keep your credentials secure, this repository uses a `secrets.yaml` file. This file is ignored by `.gitignore` so your WiFi passwords will not be accidentally uploaded to GitHub. Always use the `secrets.yaml.example` file to show others what variables are required.
+
+## License
+
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.

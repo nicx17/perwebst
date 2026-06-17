@@ -123,6 +123,8 @@ const isActive = (href: string) => {
 
   return pathname.startsWith(href);
 };
+
+const currentYear = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -316,11 +318,15 @@ const isActive = (href: string) => {
       rel="noopener noreferrer">Background by {lightUnsplash.author}</a
     >
 
+    <div class="site-footer">
+      &copy; {currentYear} Nick Cardoso
+    </div>
+
     <style>
-      .bg-credit {
+      .bg-credit,
+      .site-footer {
         position: fixed;
         bottom: 1.25rem;
-        left: 1.25rem;
         display: inline-flex;
         align-items: center;
         font-size: 0.75rem;
@@ -341,7 +347,14 @@ const isActive = (href: string) => {
         border: 1px solid var(--border-color);
         border-radius: 8px;
       }
-      .bg-credit:hover {
+      .bg-credit {
+        left: 1.25rem;
+      }
+      .site-footer {
+        right: 1.25rem;
+      }
+      .bg-credit:hover,
+      .site-footer:hover {
         opacity: 1;
         color: var(--text-main);
         background: var(--button-bg-hover);

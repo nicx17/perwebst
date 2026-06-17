@@ -1,0 +1,52 @@
+---
+interface Props {
+  title?: string;
+  image: string;
+  alt: string;
+}
+
+const { title = 'Architecture', image, alt } = Astro.props;
+---
+
+<div class="architecture-section">
+  <h2 class="is-revealed">{title}</h2>
+  <div class="architecture-image-wrap">
+    <img
+      src={image}
+      alt={alt}
+      class="architecture-image"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  <div class="architecture-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .architecture-section {
+    margin: 3rem 0;
+  }
+
+  .architecture-image-wrap {
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    padding: 1rem;
+    box-shadow: 0 16px 32px -16px var(--shadow-main);
+  }
+
+  .architecture-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .architecture-content {
+    margin-top: 1rem;
+  }
+</style>

@@ -6,6 +6,7 @@
  */
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
+import mdx from '@astrojs/mdx';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -90,6 +91,7 @@ export default defineConfig({
   output: 'server',
   /** Cloudflare adapter. */
   adapter: cloudflare(),
+  integrations: [mdx()],
   /** Standardizes URLs to always have a trailing slash. */
   trailingSlash: 'always',
   vite: {

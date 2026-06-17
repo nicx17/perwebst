@@ -1686,3 +1686,148 @@ header.page-header h1 {
   position: relative;
   z-index: 2;
 }
+
+/* Markdown content media */
+.project-detail-content img,
+.project-detail-content video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 1rem 0.5rem;
+  vertical-align: middle;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.project-detail-content p:has(img:not([src*='shields.io'])) {
+  text-align: center;
+}
+
+/* Arrange shields.io badges horizontally */
+.project-detail-content p:has(img[src*='shields.io']) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.project-detail-content p:has(img[src*='shields.io']) a,
+.project-detail-content p:has(img[src*='shields.io']) img {
+  margin: 0 !important; /* Override the 2rem auto margin from the rule above */
+  display: inline-block;
+}
+
+/* Markdown Tables */
+.project-detail-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  background: linear-gradient(180deg, var(--glass-bg-strong), var(--glass-bg));
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px var(--shadow-main);
+}
+
+.project-detail-content th,
+.project-detail-content td {
+  border: 1px solid var(--border-color);
+  padding: 0.85rem 1.15rem;
+  text-align: left;
+}
+
+.project-detail-content th {
+  color: var(--text-main);
+  font-weight: 600;
+  background: var(--bg-secondary);
+}
+
+.project-detail-content tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Code Blocks */
+.project-detail-content pre {
+  padding: 1.25rem 1.5rem !important;
+  border-radius: 12px;
+  margin: 2.5rem 0;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 12px 32px -12px var(--shadow-main);
+  overflow-x: auto;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.project-detail-content pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit;
+}
+
+/* Inline Code */
+.project-detail-content :not(pre) > code {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-family: monospace;
+  color: var(--text-main);
+}
+
+/* Scrollbar for Code Blocks */
+.project-detail-content pre::-webkit-scrollbar {
+  height: 8px;
+}
+.project-detail-content pre::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 12px 12px;
+}
+.project-detail-content pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+.project-detail-content pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Copy Code Button */
+.code-wrapper {
+  position: relative;
+  margin: 2.5rem 0;
+}
+.code-wrapper pre {
+  margin: 0 !important;
+}
+.copy-code-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: var(--text-soft);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.code-wrapper:hover .copy-code-btn,
+.copy-code-btn:focus-visible {
+  opacity: 1;
+}
+.copy-code-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+}
+.copy-code-btn.copied {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+}

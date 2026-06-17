@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NavBack from '../../components/NavBack.astro';
+import ProjectHero from '../../components/project/ProjectHero.astro';
 
 const slug = Astro.params.slug ?? '';
 const expectedPath = `/projects/${slug}/`;
@@ -17,13 +18,6 @@ if (project) {
 } else {
   Astro.response.status = 404;
 }
-
-const repositoryHost = project
-  ? new URL(project.data.repository).hostname.replace(/^www\./, '')
-  : '';
-const liveHost = project?.data.liveUrl
-  ? new URL(project.data.liveUrl).hostname.replace(/^www\./, '')
-  : '';
 ---
 
 {
@@ -37,71 +31,76 @@ const liveHost = project?.data.liveUrl
       <NavBack href="/projects/" label="<- Back to Projects" />
 
       <article class="article project-detail-card">
-        <header class="project-detail-header">
-          <div class="project-detail-title-wrap">
-            <div class="project-detail-icon-box" aria-hidden="true">
-              {project.data.icon ? (
-                <img
-                  class="project-detail-icon"
-                  src={project.data.icon}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <span class="project-detail-icon-fallback">
-                  {project.data.title.slice(0, 1)}
-                </span>
-              )}
-            </div>
-            <div>
-              <h1>{project.data.title}</h1>
-              <p class="subtitle projects-page-subtitle">
-                {project.data.summary}
-              </p>
-            </div>
-          </div>
-          <div class="meta-row">
-            <div class="project-action-row" aria-label="Project actions">
-              <a
-                class="project-action-button project-action-primary"
-                href={project.data.repository}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open source repository on ${repositoryHost}`}
-              >
-                View Source
-              </a>
-              {project.data.liveUrl ? (
-                <a
-                  class="project-action-button"
-                  href={project.data.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open live site at ${liveHost}`}
-                >
-                  Visit Live Site
-                </a>
-              ) : null}
-            </div>
-            <div class="project-meta-row" aria-label="Project hosts">
-              <span class="project-meta-chip">{repositoryHost}</span>
-              {liveHost ? (
-                <span class="project-meta-chip">{liveHost}</span>
-              ) : null}
-            </div>
-          </div>
-          <div class="tag-list">
-            {project.data.tags.map((tag) => (
-              <span class="tag">{tag}</span>
-            ))}
-          </div>
-        </header>
+        <ProjectHero
+          title={project.data.title}
+          summary={project.data.summary}
+          icon={project.data.icon}
+          repository={project.data.repository}
+          liveUrl={project.data.liveUrl}
+          tags={project.data.tags}
+        />
 
         <section class="article-content project-detail-content">
           <Content />
         </section>
       </article>
+
+      <script>
+        function setupCopyButtons() {
+          const codeBlocks = document.querySelectorAll('.project-detail-content pre');
+          
+          codeBlocks.forEach(block => {
+            if (block.parentElement?.classList.contains('code-wrapper')) return;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-wrapper';
+            block.parentNode?.insertBefore(wrapper, block);
+            wrapper.appendChild(block);
+
+            const copyButton = document.createElement('button');
+            copyButton.className = 'copy-code-btn';
+            copyButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            `;
+            copyButton.setAttribute('aria-label', 'Copy code');
+            copyButton.setAttribute('title', 'Copy code');
+            
+            wrapper.appendChild(copyButton);
+
+            copyButton.addEventListener('click', async () => {
+              const code = block.querySelector('code');
+              const text = code ? code.innerText : block.innerText;
+              
+              try {
+                await navigator.clipboard.writeText(text);
+                copyButton.classList.add('copied');
+                copyButton.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                `;
+                setTimeout(() => {
+                  copyButton.classList.remove('copied');
+                  copyButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  `;
+                }, 2000);
+              } catch (err) {
+                console.error('Failed to copy text: ', err);
+              }
+            });
+          });
+        }
+
+        // Run setup when the page finishes parsing
+        document.addEventListener('DOMContentLoaded', setupCopyButtons);
+        // Fallback for Astro page load events if View Transitions are used
+        document.addEventListener('astro:page-load', setupCopyButtons);
+        
+        // Safety execution for instant loading
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+          setupCopyButtons();
+        }
+      </script>
+
     </BaseLayout>
   ) : (
     <BaseLayout

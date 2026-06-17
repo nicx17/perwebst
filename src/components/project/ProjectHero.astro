@@ -1,0 +1,133 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  icon?: string;
+  repository: string;
+  liveUrl?: string;
+  tags: string[];
+}
+
+const { title, summary, icon, repository, liveUrl, tags } = Astro.props;
+
+const repositoryHost = new URL(repository).hostname.replace(/^www\./, '');
+const liveHost = liveUrl ? new URL(liveUrl).hostname.replace(/^www\./, '') : '';
+---
+
+<header class="project-hero">
+  <div class="hero-logo-wrap">
+    {
+      icon ? (
+        <img
+          class="hero-logo"
+          src={icon}
+          alt={`${title} logo`}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div class="hero-logo-text">{title}</div>
+      )
+    }
+  </div>
+
+  <div class="hero-content">
+    <h1 class="hero-title">{title}</h1>
+    <p class="subtitle hero-subtitle">{summary}</p>
+  </div>
+
+  <div class="meta-row hero-meta">
+    <div class="project-action-row" aria-label="Project actions">
+      <a
+        class="project-action-button project-action-primary"
+        href={repository}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open source repository on ${repositoryHost}`}
+      >
+        View Repository
+      </a>
+      {
+        liveUrl && (
+          <a
+            class="project-action-button"
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open live site at ${liveHost}`}
+          >
+            Visit Live Site
+          </a>
+        )
+      }
+    </div>
+  </div>
+
+  <div class="tag-list hero-tags">
+    {tags.map((tag) => <span class="tag">{tag}</span>)}
+  </div>
+</header>
+
+<style>
+  .project-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 0 3rem;
+    animation: heroTextReveal 700ms var(--ease-sleek) both;
+  }
+
+  .hero-logo-wrap {
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    border-radius: 20px;
+    box-shadow: 0 12px 24px -12px var(--shadow-main);
+  }
+
+  .hero-logo-text {
+    font-family: var(--font-serif);
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 140px;
+    border-radius: 20px;
+    background: linear-gradient(
+      135deg,
+      var(--button-bg),
+      var(--button-bg-hover)
+    );
+    border: 1px solid var(--button-border);
+    box-shadow: 0 12px 24px -12px var(--shadow-main);
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    max-width: 800px;
+    margin: 0 auto 2rem;
+  }
+
+  .hero-meta {
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-tags {
+    justify-content: center;
+  }
+</style>
