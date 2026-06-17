@@ -10,7 +10,7 @@ import mdx from '@astrojs/mdx';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const DEFAULT_ORIGIN = 'https://link.nickcardoso.com';
+const DEFAULT_ORIGIN = 'https://nickcardoso.com';
 
 /** Normalizes a URL by removing trailing slashes. */
 const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, '');

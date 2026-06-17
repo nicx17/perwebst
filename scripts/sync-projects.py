@@ -191,23 +191,40 @@ def convert_readme_to_mdx(readme_text, repository_url):
 
     if features_match:
         list_text = features_match.group(1)
-        items = [
-            line for line in list_text.split("\n") if re.match(r"^[-*]", line.strip())
-        ]
+        lines = list_text.split("\n")
+        items = []
+        current_item = []
+        for line in lines:
+            if not line.strip():
+                continue
+            if re.match(r"^[-*]\s+", line):
+                if current_item:
+                    items.append("\n".join(current_item))
+                current_item = [line]
+            elif current_item:
+                current_item.append(line)
+        if current_item:
+            items.append("\n".join(current_item))
 
         grid_content = "\n<FeatureGrid>\n"
         for item in items:
-            text = re.sub(r"^[-*]\s+", "", item).strip()
+            item_lines = item.split("\n")
+            first_line = item_lines[0].strip()
+            text_first_line = re.sub(r"^[-*]\s+", "", first_line).strip()
+            
             title = "Feature"
-
-            bold_match = re.match(r"^\*\*(.*?)\*\*(?:\s*[:-]\s*)?(.*)", text)
+            bold_match = re.match(r"^\*\*(.*?)\*\*(?:\s*[:-]\s*)?(.*)", text_first_line)
             if bold_match:
                 title = bold_match.group(1)
-                text = bold_match.group(2)
+                desc_first_line = bold_match.group(2)
             else:
-                words = text.split(" ")
+                words = text_first_line.split(" ")
                 title = " ".join(words[:3]) + "..."
-
+                desc_first_line = text_first_line
+            
+            desc_lines = [desc_first_line] + item_lines[1:]
+            text = "\n    ".join(desc_lines).strip()
+            
             grid_content += (
                 f'  <FeatureItem title="{title}">\n    {text}\n  </FeatureItem>\n'
             )
