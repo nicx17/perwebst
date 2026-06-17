@@ -125,8 +125,9 @@ const setSecurityHeaders = (
     'camera=(), microphone=(), geolocation=(), usb=(), payment=()'
   );
   headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
-  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  // Disabled COEP/CORP to allow third-party iframe embeds (like YouTube)
+  // headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  // headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   headers.set('Accept-CH', 'Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform');
   headers.set('Origin-Agent-Cluster', '?1');
   headers.set('X-Permitted-Cross-Domain-Policies', 'none');
