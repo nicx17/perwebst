@@ -82,7 +82,7 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string) =>
     "frame-ancestors 'none'",
     "frame-src 'none'",
     "form-action 'self'",
-    "img-src 'self' data:",
+    "img-src 'self' data: https://img.shields.io https://github.com",
     "font-src 'self' data:",
     "connect-src 'self'",
     "manifest-src 'self'",

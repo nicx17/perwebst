@@ -2,13 +2,62 @@ import os
 import re
 import urllib.request
 import urllib.error
+import urllib.parse
+import hashlib
 from pathlib import Path
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECTS_DIR = SCRIPT_DIR.parent / "src" / "content" / "projects"
+ASSETS_DIR = SCRIPT_DIR.parent / "public" / "project-assets"
 
 IGNORED_PROJECTS = {"mimick.md", "mimick.mdx"}
+
+def download_asset(url, project_slug):
+    if "img.shields.io" in url or "shields.io" in url or "youtube.com" in url or "youtu.be" in url:
+        return url
+        
+    import mimetypes
+        
+    try:
+        project_assets_dir = ASSETS_DIR / project_slug
+        project_assets_dir.mkdir(parents=True, exist_ok=True)
+        
+        parsed_url = urllib.parse.urlparse(url)
+        filename = os.path.basename(parsed_url.path)
+        if not filename:
+            filename = hashlib.md5(url.encode()).hexdigest()[:8]
+            
+        filename = filename.split("?")[0]
+        url_hash = hashlib.md5(url.encode()).hexdigest()[:6]
+        
+        # We don't know the safe filename until we fetch the content type (if extension is missing)
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            content_type = response.info().get_content_type()
+            
+            # Check if filename lacks extension
+            _, ext = os.path.splitext(filename)
+            if not ext:
+                ext = mimetypes.guess_extension(content_type)
+                if ext:
+                    if ext == ".jpe": ext = ".jpg"
+                    filename += ext
+                else:
+                    # fallback
+                    filename += ".png"
+                    
+            safe_filename = f"{url_hash}_{filename}"
+            local_path = project_assets_dir / safe_filename
+            
+            if not local_path.exists():
+                with open(local_path, 'wb') as out_file:
+                    out_file.write(response.read())
+                
+        return f"/project-assets/{project_slug}/{safe_filename}"
+    except Exception as e:
+        print(f"Failed to download asset {url}: {e}")
+        return url
 
 
 def fetch_github_readme(repository_url):
@@ -68,7 +117,7 @@ def parse_frontmatter(file_content):
     return frontmatter_str, body, data
 
 
-def convert_readme_to_mdx(readme_text, repository_url):
+def convert_readme_to_mdx(readme_text, repository_url, project_slug):
     mdx = readme_text
 
     repo_url = repository_url.rstrip("/")
@@ -98,6 +147,8 @@ def convert_readme_to_mdx(readme_text, repository_url):
             else:
                 separator = "&" if "?" in src else "?"
                 src += f"{separator}style=for-the-badge"
+        elif not src.startswith("data:"):
+            src = download_asset(src, project_slug)
 
         return f"![{alt}]({src})"
 
@@ -122,6 +173,8 @@ def convert_readme_to_mdx(readme_text, repository_url):
             else:
                 separator = "&" if "?" in src else "?"
                 src += f"{separator}style=for-the-badge"
+        elif not src.startswith("data:"):
+            src = download_asset(src, project_slug)
 
         return f'{pre}src="{src}"{post}'
 
@@ -268,7 +321,7 @@ def sync_projects():
         readme_text = fetch_github_readme(data["repository"])
 
         if readme_text:
-            mdx_body = convert_readme_to_mdx(readme_text, data["repository"])
+            mdx_body = convert_readme_to_mdx(readme_text, data["repository"], file_path.stem)
             new_content = f"{frontmatter_str}\n{mdx_body}"
 
             mdx_path = PROJECTS_DIR / f"{file_path.stem}.mdx"
