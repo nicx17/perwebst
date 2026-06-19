@@ -193,6 +193,7 @@ const setCacheHeaders = (headers: Headers, pathname: string) => {
   if (
     pathname.endsWith('.xml') ||
     pathname.endsWith('robots.txt') ||
+    pathname.endsWith('llms.txt') ||
     pathname.endsWith('site.webmanifest')
   ) {
     headers.set(
