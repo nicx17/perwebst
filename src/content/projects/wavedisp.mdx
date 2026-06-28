@@ -1,0 +1,199 @@
+---
+title: WaveDisp
+summary: Interactive control dashboard and rendering engine for Raspberry Pi LED matrix displays.
+icon: /project-icons/wavedisp.svg
+repository: https://github.com/nicx17/wavedisp
+repositoryLabel: nicx17/wavedisp
+canonicalPath: /projects/wavedisp/
+tags:
+  - Python
+  - React
+  - FastAPI
+  - Raspberry Pi
+  - Hardware
+order: 4
+featured: true
+---
+
+import FeatureGrid from '../../components/project/FeatureGrid.astro';
+import FeatureItem from '../../components/project/FeatureItem.astro';
+import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
+
+# WaveDisp
+
+Interactive LED Matrix Dashboard
+
+<div
+  style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+    marginTop: '1rem',
+  }}
+>
+  <a href="https://github.com/nicx17/wavedisp/blob/main/LICENSE">
+    <img
+      src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge"
+      alt="License: MIT"
+    />
+  </a>
+  <img
+    src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white"
+    alt="Python"
+  />
+  <img
+    src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"
+    alt="FastAPI"
+  />
+  <img
+    src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black"
+    alt="React"
+  />
+  <img
+    src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white"
+    alt="Vite"
+  />
+  <img
+    src="https://img.shields.io/badge/Raspberry%20Pi-A22846?style=for-the-badge&logo=raspberrypi&logoColor=white"
+    alt="Raspberry Pi"
+  />
+  <img
+    src="https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white"
+    alt="Spotify"
+  />
+</div>
+
+<FeatureGrid>
+  <FeatureItem title="Diverse Display Modes" icon="lucide:monitor-play">
+    Supports Clock, Warning Sign, Smiley, Matrix Rain, Game of Life, Bad Apple
+    video playback, QR Code, Drawing Canvas, and Spotify art.
+  </FeatureItem>
+  <FeatureItem title="Live Preview Stream" icon="lucide:video">
+    MJPEG video stream mirroring the LED matrix framebuffer back to the web UI
+    in real-time.
+  </FeatureItem>
+  <FeatureItem title="Hardware Native" icon="lucide:cpu">
+    Integrates directly with the `hzeller/rpi-rgb-led-matrix` C++ driver via
+    Python bindings.
+  </FeatureItem>
+</FeatureGrid>
+
+## Overview
+
+WaveDisp is an interactive control dashboard and rendering engine designed for Raspberry Pi LED matrix displays. Specifically, it is built and tested for the Waveshare RGB-Matrix-Px-64x64 (P2.5 64x64 HUB75) panel. The system uses a FastAPI backend coupled with a Vite/React frontend to provide real-time control, configuration, and rendering over the network.
+
+## Features & Display Modes
+
+The platform supports a robust set of visual modes that can be hot-swapped from the dashboard:
+
+- **Clock**: Highly customizable layouts with millisecond precision updates.
+- **Spotify Integration**: Connects via the Spotify Developer API using OAuth to fetch and display the currently playing album art and playback status.
+- **Interactive Drawing Canvas**: A pixel-art canvas integrated into the frontend, allowing real-time sketching directly onto the matrix.
+- **Bad Apple Playback**: The system plays the iconic "Bad Apple" video. It uses a pre-generated binary file (`bad_apple.bin`) processed via `yt-dlp` and `OpenCV` to avoid heavy video decoding overhead on the Pi's CPU at runtime.
+- **Game of Life**: Conway's cellular automaton simulation.
+- **Matrix Rain**: The classic falling green code effect.
+- **QR Code**: On-the-fly QR code generation (using Segno).
+- **Basic Graphics**: Includes Warning Sign, Alarm, and Smiley modes.
+
+## Configuration & Presets
+
+- **Preset Memory Bank**: Includes a 10-slot persistent memory bank for saving and instantly recalling display configurations.
+- **Debounced Persistence**: The state is rigorously validated using Pydantic and saved to `backend/config.json`. The backend actively debounces these writes to minimize SD card wear on the Raspberry Pi.
+- **Hardware Tuning (`gpio_slowdown`)**: Hardware timing can be modified directly from the dashboard. This allows tuning to accommodate faster processors (like the Pi Zero 2 W or Pi 4) which otherwise cause visual rendering artifacts or flickering.
+
+## Dashboard Showcase
+
+The web UI provides a clean, responsive interface for managing the matrix.
+
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '1rem',
+    marginTop: '1rem',
+  }}
+>
+  <div>
+    <strong>General Overview & Live Stream</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-1.png"
+      alt="WaveDisp Dashboard General View showing live preview"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+  <div>
+    <strong>Bad Apple Playback Mode</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-2.png"
+      alt="WaveDisp Dashboard displaying the Bad Apple video mode"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+  <div>
+    <strong>Presets & State Controls</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-3.png"
+      alt="WaveDisp Dashboard Presets memory bank and configuration toggles"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+  <div>
+    <strong>Mode Selection Menu</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-4.png"
+      alt="WaveDisp Dashboard Modes list showing visual capabilities"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+  <div>
+    <strong>Interactive Drawing Canvas</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-5.png"
+      alt="WaveDisp Dashboard Interactive Drawing canvas interface"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+  <div>
+    <strong>Hardware Configuration Settings</strong>
+    <img
+      src="/project-assets/wavedisp/dashboard-6.png"
+      alt="WaveDisp Dashboard Hardware Settings for tuning gpio_slowdown and timing"
+      style={{ borderRadius: '8px', width: '100%' }}
+    />
+  </div>
+</div>
+
+## Technology Stack
+
+### Frontend
+
+- **Framework**: React 19 / Vite 8
+- **Styling**: Vanilla CSS. The app uses dynamic custom CSS properties (`--bg-color`, `--accent`, etc.) to implement robust Light/Dark theming on the fly.
+- **Icons**: `lucide-react`
+
+### Backend
+
+- **Server Framework**: FastAPI and Uvicorn
+- **Data Validation**: Pydantic (config payload structure heavily typed in `backend/config.py`)
+- **Image Processing**: Pillow (PIL) for graphics and drawing.
+- **External Integrations**: Spotipy (Spotify API), Segno (QR Code generation).
+
+### Hardware & Deployment
+
+- **Hardware Target**: Raspberry Pi (Zero 2 W recommended) + Adafruit RGB Matrix Bonnet (or compatible wiring).
+- **Deployment Mechanism**: A `deploy.sh` shell script configures a systemd service (`wavedisp.service`) that serves the compiled React build statically via the FastAPI server, easing the deployment pipeline.
+- **Security**: Built-in support for HTTPS via environment variables (`WAVEDISP_USE_HTTPS`, `WAVEDISP_CERT_FILE`, `WAVEDISP_KEY_FILE`).
+
+<ArchitectureSection title="Architecture & Performance Details">
+
+- **Multiprocessing Isolation**: The `backend/main.py` entry point uses Python's `multiprocessing` to run the FastAPI ASGI server and the matrix rendering loop in entirely separate processes (sharing state via `multiprocessing.Manager()`). This is critical because the matrix rendering loop is synchronous and timing-sensitive; blocking it with HTTP requests would cause visual flickering on the LED matrix.
+- **Frontend Network Throttling**: The React frontend uses a `setTimeout` throttle mechanism (~33 FPS / 30ms interval) for API updates (`/api/config`). This prevents network saturation when users rapidly change values, such as dragging a color picker or drawing on the canvas.
+
+</ArchitectureSection>
+
+## Project Links & Reference
+
+- **Repository**: [github.com/nicx17/wavedisp](https://github.com/nicx17/wavedisp)
+- **Hardware Reference**: [Waveshare P2.5 64x64](https://docs.waveshare.com/RGB-Matrix-Px-64x64?variant=P2.5-64x64)
+- **Underlying Driver**: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)

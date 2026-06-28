@@ -25,6 +25,9 @@ Served via PM2 managed Node process, behind Cloudflare.
 - **[Unstats](https://github.com/nicx17/unstats)** — Home Assistant HACS integration surfacing live Unsplash account stats.
 - **[MultiWave](https://github.com/nicx17/MultiWave)** — Wireless multi-cable tester on C++ and Arduino Mega.
 - **[InfinityX](https://github.com/nicx17/InfinityX)** — ESPHome config wiring an ESP32 inside a Bluetooth speaker for Home Assistant GPIO control.
+- **[Lets Watch](https://github.com/nicx17/letswatch)** — Local-first watch-party app for self-hosted environments that syncs video playback over Socket.IO.
+- **[Room VSA](https://github.com/nicx17/roomvsa)** — High-performance, client-side web application designed for 3D room visualization and interior design.
+- **[WaveDisp](https://github.com/nicx17/wavedisp)** — Interactive control dashboard and rendering engine for Raspberry Pi LED matrix displays.
 
 ---
 

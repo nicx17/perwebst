@@ -1,18 +1,19 @@
 ---
-title: LetsWatch
-summary: Lightweight self-hosted watchlist and release-tracking web app focused on clean UX and low-overhead deployment.
+title: Lets Watch
+summary: Local-first watch-party app for self-hosted environments that syncs video playback over Socket.IO.
 icon: /project-icons/letswatch.svg
 repository: https://github.com/nicx17/letswatch
 repositoryLabel: nicx17/letswatch
 canonicalPath: /projects/letswatch/
 tags:
   - TypeScript
+  - React
+  - Node.js
+  - Socket.IO
   - Self-hosted
-  - Web App
-  - Automation
 order: 8
 featured: false
-liveUrl: https://letswatch.hyclotron.com/
+liveUrl: https://letswatch.nicx.dev
 ---
 
 import FeatureGrid from '../../components/project/FeatureGrid.astro';
@@ -20,6 +21,39 @@ import FeatureItem from '../../components/project/FeatureItem.astro';
 import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
 
 # Lets Watch
+
+<div
+  style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+    marginTop: '1rem',
+  }}
+>
+  <a href="https://github.com/nicx17/letswatch/blob/main/LICENSE">
+    <img
+      src="https://img.shields.io/badge/License-GPL%203.0-blue?style=for-the-badge"
+      alt="License: GPL 3.0"
+    />
+  </a>
+  <img
+    src="https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white"
+    alt="Node.js"
+  />
+  <img
+    src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black"
+    alt="React"
+  />
+  <img
+    src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socketdotio&logoColor=white"
+    alt="Socket.io"
+  />
+  <img
+    src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white"
+    alt="Vite"
+  />
+</div>
 
 Lets Watch is a local-first watch-party app for self-hosted environments. Each viewer opens the video file from their own machine, while the server only coordinates playback state over Socket.IO.
 

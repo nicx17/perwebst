@@ -9,11 +9,13 @@
 - [HyTrackV3](https://link.nickcardoso.com/projects/hytrackv3/): Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.
 - [ImmichSync](https://link.nickcardoso.com/projects/immichsync/): Python-based folder-to-Immich sync automation with route fallback, deduplication, and album-aware uploads.
 - [InfinityX](https://link.nickcardoso.com/projects/infinityx/): ESPHome-powered hardware mod that turns a Bluetooth speaker into a Home Assistant controllable device.
-- [LetsWatch](https://link.nickcardoso.com/projects/letswatch/): Lightweight self-hosted watchlist and release-tracking web app focused on clean UX and low-overhead deployment.
+- [Lets Watch](https://link.nickcardoso.com/projects/letswatch/): Local-first watch-party app for self-hosted environments that syncs video playback over Socket.IO.
 - [MultiWave](https://link.nickcardoso.com/projects/multiwave/): Wireless dual-node cable tester for RJ45, RJ11, and BNC diagnostics with multiple validation modes.
 - [Picoaudio](https://link.nickcardoso.com/projects/picoaudio/): Bluetooth A2DP audio receiver for the Raspberry Pi Pico 2 W that outputs 16-bit stereo PCM over I2S.
+- [Room VSA](https://link.nickcardoso.com/projects/roomvsa/): High-performance, client-side web application designed for 3D room visualization and interior design.
 - [Unstats](https://link.nickcardoso.com/projects/unstats/): Home Assistant integration for Unsplash account metrics with a privacy-preserving relay architecture.
 - [Voltas IR Mapping](https://link.nickcardoso.com/projects/voltas-ir/): Complete IR code database, decoded protocol documentation, and ready-to-use Home Assistant integration for the Voltas 183V DZU2 AC.
+- [WaveDisp](https://link.nickcardoso.com/projects/wavedisp/): Interactive control dashboard and rendering engine for Raspberry Pi LED matrix displays.
 
 ## Source Code
 
