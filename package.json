@@ -1,6 +1,6 @@
 {
   "name": "pers-v2-site",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,23 +16,23 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.0.1",
-    "@astrojs/mdx": "^7.0.0",
-    "astro": "^7.0.3"
+    "@astrojs/cloudflare": "^14.2.0",
+    "@astrojs/mdx": "^7.0.5",
+    "astro": "^7.2.0"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.8",
-    "eslint": "^10.5.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.1.0",
     "eslint-plugin-prettier": "^5.5.6",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "sharp": "^0.35.1",
+    "sharp": "^0.35.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
-    "vitest": "^4.1.4",
-    "wrangler": "^4.98.0"
+    "typescript-eslint": "^8.66.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.120.0"
   },
   "overrides": {
     "esbuild": "0.28.1",
@@ -40,6 +40,6 @@
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
-    "workerd@1.20260730.1": true
+    "workerd@1.20260801.1": true
   }
 }
