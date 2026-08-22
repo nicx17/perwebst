@@ -4,8 +4,9 @@
  * Supports Astro View Transitions.
  */
 (() => {
-  if ((globalThis as any).__persImageZoomInitialized) return;
-  (globalThis as any).__persImageZoomInitialized = true;
+  const g = globalThis as { __persImageZoomInitialized?: boolean };
+  if (g.__persImageZoomInitialized) return;
+  g.__persImageZoomInitialized = true;
 
   const initZoom = () => {
     const images = document.querySelectorAll<HTMLImageElement>(

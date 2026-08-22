@@ -47,3 +47,6 @@ __pycache__/
 .github/workflows/deploy.yml
 /mimick_docs_cont
 /.wrangler
+
+# Private docs
+docs/private/
