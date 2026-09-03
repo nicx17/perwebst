@@ -95,6 +95,12 @@
     "isDark": false,
     "luminance": 212.84
   },
+  "makesumo-doKatAORoIs-unsplash": {
+    "average": "#f98eaf",
+    "dominant": "#ffaba9",
+    "isDark": false,
+    "luminance": 177.755
+  },
   "mohammad-alizade-nIlwOYUbQEA-unsplash": {
     "average": "#afcff4",
     "dominant": "#9fc0ed",
@@ -106,6 +112,12 @@
     "dominant": "#eed3ae",
     "isDark": false,
     "luminance": 200.979
+  },
+  "pawel-czerwinski-z4n8CGRuzOA-unsplash": {
+    "average": "#edc0d4",
+    "dominant": "#eac1d3",
+    "isDark": false,
+    "luminance": 207.735
   },
   "plufow-le-studio-aE8Mx8-vQss-unsplash": {
     "average": "#e8cfc0",

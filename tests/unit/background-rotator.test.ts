@@ -19,8 +19,10 @@ const lightImages: string[] = [
   'iklas-FeNrGgQ1Tu8-unsplash',
   'iklas-xjSu2KbJlAg-unsplash',
   'iklas-y9Ujplj3KIU-unsplash',
+  'makesumo-doKatAORoIs-unsplash',
   'mohammad-alizade-nIlwOYUbQEA-unsplash',
   'mymind-KnUX9qtR_4E-unsplash',
+  'pawel-czerwinski-z4n8CGRuzOA-unsplash',
   'plufow-le-studio-aE8Mx8-vQss-unsplash',
   'radoslav-bali-Bp2sWPJGPHs-unsplash',
   'radoslav-bali-rhnZzt9XblE-unsplash',
@@ -51,14 +53,25 @@ const darkImages: string[] = [
 ];
 
 /**
+ * Day-of-week overrides replicated from BaseLayout.astro.
+ * Key: JS day-of-week number (0=Sunday, 6=Saturday).
+ */
+const dayOfWeekOverrides: Record<number, string> = {
+  6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash', // Saturday
+};
+
+/**
  * Calendar days to test selection over a typical month.
  */
 const CALENDAR_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 /**
- * Replicates the logic in src/layouts/BaseLayout.astro
+ * Replicates the selection logic in src/layouts/BaseLayout.astro
  */
-function selectImage(pool: string[], day: number): string {
+function selectImage(pool: string[], day: number, dayOfWeek?: number): string {
+  if (dayOfWeek !== undefined && dayOfWeekOverrides[dayOfWeek]) {
+    return dayOfWeekOverrides[dayOfWeek];
+  }
   return pool[day % pool.length]!;
 }
 
@@ -67,8 +80,8 @@ function selectImage(pool: string[], day: number): string {
  * Ensures images are correctly named and formatted as expected by the build scripts.
  */
 describe('lightImages pool', () => {
-  it('contains 26 entries', () => {
-    expect(lightImages).toHaveLength(26);
+  it('contains 28 entries', () => {
+    expect(lightImages).toHaveLength(28);
   });
 
   it('has no empty strings', () => {
@@ -184,6 +197,37 @@ describe('selectImage — dark pool', () => {
 });
 
 /**
+ * Verifies day-of-week override behavior.
+ * On Saturday (dayOfWeek=6), the pawel-czerwinski background is always shown.
+ */
+describe('day-of-week overrides', () => {
+  it('returns the Saturday override regardless of the day-of-month', () => {
+    for (const day of CALENDAR_DAYS) {
+      const result = selectImage(lightImages, day, 6);
+      expect(result).toBe('pawel-czerwinski-z4n8CGRuzOA-unsplash');
+    }
+  });
+
+  it('does not override on non-Saturday days', () => {
+    // dayOfWeek 0-5 (Sunday-Friday) should use normal rotation
+    for (let dow = 0; dow <= 5; dow++) {
+      const result = selectImage(lightImages, 1, dow);
+      expect(result).toBe(lightImages[1 % lightImages.length]);
+    }
+  });
+
+  it('Saturday override image exists in the lightImages pool', () => {
+    expect(lightImages).toContain(dayOfWeekOverrides[6]);
+  });
+
+  it('all override images exist in the lightImages pool', () => {
+    for (const image of Object.values(dayOfWeekOverrides)) {
+      expect(lightImages).toContain(image);
+    }
+  });
+});
+
+/**
  * Tests for theme toggle independence.
  * This ensures that users see a unique pair of images across the month
  * when they toggle themes.
@@ -206,7 +250,7 @@ describe('independent pool cycling', () => {
     const lcm = (a: number, b: number): number => (a * b) / gcd(a, b);
     const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
     const repeatAfter = lcm(lightImages.length, darkImages.length);
-    // LCM(26, 16) = 208 — well beyond the 31 days of the longest month
+    // LCM(28, 16) = 112 — well beyond the 31 days of the longest month
     expect(repeatAfter).toBeGreaterThan(31);
   });
 });

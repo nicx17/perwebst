@@ -33,7 +33,9 @@ const topbarPersistKey = getTopbarPersistKey(shell);
  * This ensures a variety of imagery across the month while remaining deterministic
  * for SSR/Hydration consistency.
  */
-const day = new Date().getDate();
+const now = new Date();
+const day = now.getDate();
+const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
 
 /** Pool of background images for the ivory theme. */
 const lightImages: string[] = [
@@ -53,8 +55,10 @@ const lightImages: string[] = [
   'iklas-FeNrGgQ1Tu8-unsplash',
   'iklas-xjSu2KbJlAg-unsplash',
   'iklas-y9Ujplj3KIU-unsplash',
+  'makesumo-doKatAORoIs-unsplash',
   'mohammad-alizade-nIlwOYUbQEA-unsplash',
   'mymind-KnUX9qtR_4E-unsplash',
+  'pawel-czerwinski-z4n8CGRuzOA-unsplash',
   'plufow-le-studio-aE8Mx8-vQss-unsplash',
   'radoslav-bali-Bp2sWPJGPHs-unsplash',
   'radoslav-bali-rhnZzt9XblE-unsplash',
@@ -65,7 +69,16 @@ const lightImages: string[] = [
   'sean-sinclair-C_NJKfnTR5A-unsplash',
 ];
 
-const lightImage = lightImages[day % lightImages.length]!;
+/**
+ * Day-of-week overrides for specific backgrounds.
+ * Key: JS day-of-week number (0=Sunday, 6=Saturday).
+ */
+const dayOfWeekOverrides: Record<number, string> = {
+  6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash', // Saturday
+};
+
+const lightImage =
+  dayOfWeekOverrides[dayOfWeek] ?? lightImages[day % lightImages.length]!;
 
 const backgroundColors: Record<string, BackgroundColor> =
   backgroundColorsData as Record<string, BackgroundColor>;
