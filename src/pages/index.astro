@@ -56,30 +56,28 @@ const homeLinkIcons: Record<HomeLinkLabel, HomeLinkIcon> = {
     </header>
 
     <section class="home-links home-links-centered" aria-label="Primary links">
-      {
-        homeLinks.map((link) => {
-          const icon = homeLinkIcons[link.label];
+      {homeLinks.map((link) => {
+        const icon = homeLinkIcons[link.label];
 
-          return (
-            <a
-              class="home-link"
-              data-icon={icon.key}
-              href={link.href}
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noopener noreferrer' : undefined}
-            >
-              <span class="home-link-icon" aria-hidden="true">
-                <svg
-                  viewBox={icon.viewBox}
-                  focusable="false"
-                  set:html={icon.markup}
-                />
-              </span>
-              <span class="home-link-label">{link.label}</span>
-            </a>
-          );
-        })
-      }
+        return (
+          <a
+            class="home-link"
+            data-icon={icon.key}
+            href={link.href}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noopener noreferrer' : undefined}
+          >
+            <span class="home-link-icon" aria-hidden="true">
+              <svg
+                viewBox={icon.viewBox}
+                focusable="false"
+                set:html={icon.markup}
+              />
+            </span>
+            <span class="home-link-label">{link.label}</span>
+          </a>
+        );
+      })}
     </section>
   </section>
 </BaseLayout>

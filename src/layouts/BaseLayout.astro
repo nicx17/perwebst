@@ -161,7 +161,6 @@ const currentYear = new Date().getFullYear();
         } catch {}
       }
     </script>
-
     <!-- Theme and quality-of-service (QoS) initialization.
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
     <script is:inline nonce={cspNonce}>
@@ -214,7 +213,6 @@ const currentYear = new Date().getFullYear();
     <script>
       import '../scripts/theme-toggle.ts';
     </script>
-
     <!-- Dynamic CSS injection for background image variations.
          Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
          reactively based on client-side feature detection and loading state. -->
@@ -257,87 +255,83 @@ const currentYear = new Date().getFullYear();
       class="ambient-orb ambient-orb-one"
       aria-hidden="true"
       transition:persist="ambient-orb-one"
-    >
-    </div>
+    ></div>
     <div
       class="ambient-orb ambient-orb-two"
       aria-hidden="true"
       transition:persist="ambient-orb-two"
-    >
-    </div>
+    ></div>
     <main class:list={{ 'page-shell': true, 'page-shell-plain': !shell }}>
-      {
-        shell ? (
-          <section class="app-shell">
-            <header class="app-topbar" transition:persist={topbarPersistKey}>
-              <div class="app-controls">
-                <nav class="app-nav" aria-label="Primary">
-                  {navItems.map((item) => (
-                    <a
-                      class:list={{
-                        'app-tab': true,
-                        'is-active': isActive(item.href),
-                      }}
-                      data-nav-link
-                      data-nav-href={item.href}
-                      href={item.href}
-                      aria-current={isActive(item.href) ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            </header>
+      {shell ? (
+        <section class="app-shell">
+          <header class="app-topbar" transition:persist={topbarPersistKey}>
+            <div class="app-controls">
+              <nav class="app-nav" aria-label="Primary">
+                {navItems.map((item) => (
+                  <a
+                    class:list={{
+                      'app-tab': true,
+                      'is-active': isActive(item.href),
+                    }}
+                    data-nav-link
+                    data-nav-href={item.href}
+                    href={item.href}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </header>
 
-            <section class="app-content">
-              <slot />
-            </section>
+          <section class="app-content">
+            <slot />
           </section>
-        ) : (
-          <>
-            <header
-              class="app-topbar app-topbar-plain"
-              transition:persist={topbarPersistKey}
-            >
-              <div class="app-controls">
-                <nav class="app-nav" aria-label="Primary">
-                  {navItems.map((item) => (
-                    <a
-                      class:list={{
-                        'app-tab': true,
-                        'is-active': isActive(item.href),
-                      }}
-                      data-nav-link
-                      data-nav-href={item.href}
-                      href={item.href}
-                      aria-current={isActive(item.href) ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            </header>
+        </section>
+      ) : (
+        <>
+          <header
+            class="app-topbar app-topbar-plain"
+            transition:persist={topbarPersistKey}
+          >
+            <div class="app-controls">
+              <nav class="app-nav" aria-label="Primary">
+                {navItems.map((item) => (
+                  <a
+                    class:list={{
+                      'app-tab': true,
+                      'is-active': isActive(item.href),
+                    }}
+                    data-nav-link
+                    data-nav-href={item.href}
+                    href={item.href}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </header>
 
-            <section class="app-content app-content-plain">
-              <slot />
-            </section>
-          </>
-        )
-      }
+          <section class="app-content app-content-plain">
+            <slot />
+          </section>
+        </>
+      )}
     </main>
 
     <a
       href={lightUnsplash.url}
       class="bg-credit"
       target="_blank"
-      rel="noopener noreferrer">Background by {lightUnsplash.author}</a
+      rel="noopener noreferrer"
     >
+      Background by {lightUnsplash.author}
+    </a>
 
-    <div class="site-footer">
-      &copy; {currentYear} Nick Cardoso
-    </div>
+    <div class="site-footer">&copy; {currentYear} Nick Cardoso</div>
 
     <style>
       .bg-credit,

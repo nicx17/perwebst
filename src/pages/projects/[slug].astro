@@ -20,50 +20,48 @@ if (project) {
 }
 ---
 
-{
-  project && Content ? (
-    <BaseLayout
-      title={`${project.data.title} | Nick Cardoso`}
-      description={project.data.summary}
-      canonicalPath={project.data.canonicalPath}
-      shell={false}
-    >
-      <NavBack href="/projects/" label="<- Back to Projects" />
+{project && Content ? (
+  <BaseLayout
+    title={`${project.data.title} | Nick Cardoso`}
+    description={project.data.summary}
+    canonicalPath={project.data.canonicalPath}
+    shell={false}
+  >
+    <NavBack href="/projects/" label="<- Back to Projects" />
 
-      <article class="article project-detail-card">
-        <ProjectHero
-          title={project.data.title}
-          summary={project.data.summary}
-          icon={project.data.icon}
-          repository={project.data.repository}
-          liveUrl={project.data.liveUrl}
-          tags={project.data.tags}
-        />
+    <article class="article project-detail-card">
+      <ProjectHero
+        title={project.data.title}
+        summary={project.data.summary}
+        icon={project.data.icon}
+        repository={project.data.repository}
+        liveUrl={project.data.liveUrl}
+        tags={project.data.tags}
+      />
 
-        <section class="article-content project-detail-content">
-          <Content />
-        </section>
-      </article>
-    </BaseLayout>
-  ) : (
-    <BaseLayout
-      title="Project Not Found | Nick Cardoso"
-      description="The requested project page does not exist."
-      canonicalPath={expectedPath}
-      shell={false}
-    >
-      <NavBack href="/projects/" label="<- Back to Projects" />
-      <article class="article project-detail-card">
-        <header>
-          <h1>Project Not Found</h1>
-          <p class="subtitle projects-page-subtitle">
-            The URL you requested does not match an available project.
-          </p>
-        </header>
-      </article>
-    </BaseLayout>
-  )
-}
+      <section class="article-content project-detail-content">
+        <Content />
+      </section>
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout
+    title="Project Not Found | Nick Cardoso"
+    description="The requested project page does not exist."
+    canonicalPath={expectedPath}
+    shell={false}
+  >
+    <NavBack href="/projects/" label="<- Back to Projects" />
+    <article class="article project-detail-card">
+      <header>
+        <h1>Project Not Found</h1>
+        <p class="subtitle projects-page-subtitle">
+          The URL you requested does not match an available project.
+        </p>
+      </header>
+    </article>
+  </BaseLayout>
+)}
 
 <script>
   function setupCopyButtons() {

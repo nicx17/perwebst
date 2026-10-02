@@ -16,19 +16,17 @@ const liveHost = liveUrl ? new URL(liveUrl).hostname.replace(/^www\./, '') : '';
 
 <header class="project-hero">
   <div class="hero-logo-wrap">
-    {
-      icon ? (
-        <img
-          class="hero-logo"
-          src={icon}
-          alt={`${title} logo`}
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <div class="hero-logo-text">{title}</div>
-      )
-    }
+    {icon ? (
+      <img
+        class="hero-logo"
+        src={icon}
+        alt={`${title} logo`}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class="hero-logo-text">{title}</div>
+    )}
   </div>
 
   <div class="hero-content">
@@ -47,24 +45,24 @@ const liveHost = liveUrl ? new URL(liveUrl).hostname.replace(/^www\./, '') : '';
       >
         View Repository
       </a>
-      {
-        liveUrl && (
-          <a
-            class="project-action-button"
-            href={liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open live site at ${liveHost}`}
-          >
-            Visit Live Site
-          </a>
-        )
-      }
+      {liveUrl && (
+        <a
+          class="project-action-button"
+          href={liveUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open live site at ${liveHost}`}
+        >
+          Visit Live Site
+        </a>
+      )}
     </div>
   </div>
 
   <div class="tag-list hero-tags">
-    {tags.map((tag) => <span class="tag">{tag}</span>)}
+    {tags.map((tag) => (
+      <span class="tag">{tag}</span>
+    ))}
   </div>
 </header>
 

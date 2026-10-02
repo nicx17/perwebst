@@ -25,6 +25,8 @@ const projects = (await getCollection('projects')).sort(
   </header>
 
   <section class="project-grid projects-showcase">
-    {projects.map((project) => <ProjectCard project={project} />)}
+    {projects.map((project) => (
+      <ProjectCard project={project} />
+    ))}
   </section>
 </BaseLayout>
