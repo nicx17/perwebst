@@ -18,9 +18,17 @@ interface Props {
   canonicalPath?: string;
   /** Controls whether the standard app shell (topbar, navigation) is rendered. */
   shell?: boolean;
+  /** Custom OpenGraph image URL or root-relative path (falls back to rotating background). */
+  ogImage?: string;
 }
 
-const { title, description, canonicalPath, shell = true } = Astro.props;
+const {
+  title,
+  description,
+  canonicalPath,
+  shell = true,
+  ogImage: ogImageProp,
+} = Astro.props;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
 const canonical = canonicalPath
@@ -114,10 +122,16 @@ const getUnsplashData = (filename: string) => {
 
 const lightUnsplash = getUnsplashData(lightImage);
 
-const ogImage = new URL(
+const defaultOgImage = new URL(
   `/backgrounds/light/${lightImage}.jpg`,
   Astro.site
 ).toString();
+
+const ogImage = ogImageProp
+  ? ogImageProp.startsWith('http://') || ogImageProp.startsWith('https://')
+    ? ogImageProp
+    : new URL(ogImageProp, Astro.site).toString()
+  : defaultOgImage;
 
 /** Nonce provided by middleware for script/style authorization under CSP. */
 const cspNonce =

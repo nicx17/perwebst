@@ -30,6 +30,7 @@ const projectSchema = z.object({
   order: z.number(),
   featured: z.boolean().default(false),
   liveUrl: HTTPS_URL.optional(),
+  ogImage: z.string().optional(),
 });
 
 type Project = z.infer<typeof projectSchema>;

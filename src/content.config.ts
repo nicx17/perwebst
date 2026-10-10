@@ -37,6 +37,7 @@ const projects = defineCollection({
     order: z.number(),
     featured: z.boolean().default(false),
     liveUrl: HTTPS_URL.optional(),
+    ogImage: z.string().optional(),
   }),
 });
 
