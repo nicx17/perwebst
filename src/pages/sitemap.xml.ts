@@ -17,7 +17,7 @@ export const GET: APIRoute = async ({ site }) => {
   }
 
   const projects = await getCollection('projects');
-  const staticRoutes = ['/', '/about/', '/projects/'];
+  const staticRoutes = ['/', '/colophon/', '/projects/'];
   const projectRoutes = projects.map((project) => project.data.canonicalPath);
   const allRoutes = [...staticRoutes, ...projectRoutes];
 

@@ -84,6 +84,9 @@ const site = resolveSiteOrigin();
 export default defineConfig({
   /** The base URL for the built site. */
   site: 'https://nickcardoso.com',
+  redirects: {
+    '/about/': { status: 301, destination: '/colophon/' },
+  },
   devToolbar: { enabled: false },
   /** Keep client-side navigation, but disable automatic link prefetching. */
   prefetch: false,
