@@ -22,7 +22,7 @@ const buildSitemapIndexXml = (site: URL): string => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SITE = new URL('https://link.nickcardoso.com');
+const SITE = new URL('https://nickcardoso.com');
 const STATIC_ROUTES = ['/', '/about/', '/projects/'];
 const PROJECT_ROUTES = [
   '/projects/hytrackv3/',
@@ -49,15 +49,15 @@ describe('sitemap.xml', () => {
 
   it('includes all static routes as absolute URLs', () => {
     const xml = buildSitemapXml(SITE, STATIC_ROUTES);
-    expect(xml).toContain('<loc>https://link.nickcardoso.com/</loc>');
-    expect(xml).toContain('<loc>https://link.nickcardoso.com/about/</loc>');
-    expect(xml).toContain('<loc>https://link.nickcardoso.com/projects/</loc>');
+    expect(xml).toContain('<loc>https://nickcardoso.com/</loc>');
+    expect(xml).toContain('<loc>https://nickcardoso.com/about/</loc>');
+    expect(xml).toContain('<loc>https://nickcardoso.com/projects/</loc>');
   });
 
   it('includes all project routes', () => {
     const xml = buildSitemapXml(SITE, [...STATIC_ROUTES, ...PROJECT_ROUTES]);
     for (const route of PROJECT_ROUTES) {
-      expect(xml).toContain(`<loc>https://link.nickcardoso.com${route}</loc>`);
+      expect(xml).toContain(`<loc>https://nickcardoso.com${route}</loc>`);
     }
   });
 
@@ -72,7 +72,7 @@ describe('sitemap.xml', () => {
     const xml = buildSitemapXml(SITE, [...STATIC_ROUTES, ...PROJECT_ROUTES]);
     const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
     for (const loc of locs) {
-      expect(loc).toMatch(/^https:\/\/link\.nickcardoso\.com(?:\/|$)/);
+      expect(loc).toMatch(/^https:\/\/nickcardoso\.com(?:\/|$)/);
     }
   });
 });
@@ -93,8 +93,6 @@ describe('sitemap-index.xml', () => {
 
   it('points to sitemap.xml at the site root', () => {
     const xml = buildSitemapIndexXml(SITE);
-    expect(xml).toContain(
-      '<loc>https://link.nickcardoso.com/sitemap.xml</loc>'
-    );
+    expect(xml).toContain('<loc>https://nickcardoso.com/sitemap.xml</loc>');
   });
 });

@@ -21,11 +21,11 @@ interface Props {
 }
 
 const { title, description, canonicalPath, shell = true } = Astro.props;
-const canonical = canonicalPath
-  ? new URL(canonicalPath, Astro.site).toString()
-  : undefined;
 const pathname = Astro.url.pathname;
 const pageUrl = new URL(pathname, Astro.site).toString();
+const canonical = canonicalPath
+  ? new URL(canonicalPath, Astro.site).toString()
+  : pageUrl;
 const topbarPersistKey = getTopbarPersistKey(shell);
 
 /**

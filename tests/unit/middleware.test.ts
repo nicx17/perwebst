@@ -37,7 +37,7 @@ const buildSecurityPolicy = (nonce: string, reportEndpoint: string): string =>
     'block-all-mixed-content',
   ].join('; ');
 
-const TRUSTED_REPORT_ORIGIN = 'https://link.nickcardoso.com';
+const TRUSTED_REPORT_ORIGIN = 'https://nickcardoso.com';
 
 const setSecurityHeaders = (
   headers: Headers,
@@ -126,8 +126,8 @@ const setCacheHeaders = (headers: Headers, pathname: string): void => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 const NONCE = 'abc123';
-const HTTPS_URL = new URL('https://link.nickcardoso.com/');
-const HTTP_URL = new URL('http://link.nickcardoso.com/');
+const HTTPS_URL = new URL('https://nickcardoso.com/');
+const HTTP_URL = new URL('http://nickcardoso.com/');
 
 describe('buildSecurityPolicy', () => {
   it('embeds the nonce in script-src and script-src-elem', () => {
@@ -246,7 +246,7 @@ describe('setSecurityHeaders — HTTPS request', () => {
     const untrustedHost = new URL('https://attacker.example/');
     setSecurityHeaders(h, untrustedHost, NONCE);
     expect(h.get('Reporting-Endpoints')).toContain(
-      'https://link.nickcardoso.com/api/csp-report'
+      'https://nickcardoso.com/api/csp-report'
     );
     expect(h.get('Reporting-Endpoints')).not.toContain('attacker.example');
   });

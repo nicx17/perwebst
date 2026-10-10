@@ -83,7 +83,7 @@ const site = resolveSiteOrigin();
 
 export default defineConfig({
   /** The base URL for the built site. */
-  site,
+  site: 'https://nickcardoso.com',
   devToolbar: { enabled: false },
   /** Keep client-side navigation, but disable automatic link prefetching. */
   prefetch: false,

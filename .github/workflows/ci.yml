@@ -11,7 +11,7 @@ jobs:
     name: Typecheck & Build
     runs-on: ubuntu-latest
     env:
-      ORIGIN: https://link.nickcardoso.com
+      ORIGIN: https://nickcardoso.com
       HOST: 127.0.0.1
       PORT: 4393
     steps:

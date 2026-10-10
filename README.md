@@ -4,7 +4,7 @@
 
 Source for my personal portfolio site. Links to software engineering projects, hardware experiments, and self-hosted infrastructure work.
 
-**Live site:** [link.nickcardoso.com](https://nickcardoso.com)
+**Live site:** [nickcardoso.com](https://nickcardoso.com)
 
 ---
 
