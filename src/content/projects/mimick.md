@@ -12,7 +12,7 @@ tags:
   - Immich
   - Flatpak
   - Tokio
-order: 3
+order: 0
 featured: true
 liveUrl: https://nicx17.github.io/mimick/
 ---
