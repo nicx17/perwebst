@@ -83,7 +83,7 @@ const site = resolveSiteOrigin();
 
 export default defineConfig({
   /** The base URL for the built site. */
-  site: 'https://nickcardoso.com',
+  site,
   redirects: {
     '/about/': { status: 301, destination: '/colophon/' },
   },
