@@ -14,6 +14,7 @@ tags:
   - Tokio
 order: 0
 featured: true
+standalone: true
 ogImage: /projects/mimick/assets/library-light.png
 liveUrl: https://nicx17.github.io/mimick/
 ---

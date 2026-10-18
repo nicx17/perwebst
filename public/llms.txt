@@ -5,6 +5,7 @@
 ## Projects
 
 - [Mimick](https://nickcardoso.com/projects/mimick/): Premier unofficial Immich desktop client for Linux -- native GTK4 app built in Rust with background sync, watch folders, OCR search, and queue inspector.
+- [DE 1](https://nickcardoso.com/projects/de-1/): Two hand-wired digital electronics perfboard builds -- an NE555 + CD4017 LED chaser and a 74LS90 / CD4513 two-digit BCD counter -- with interactive board layouts.
 - [HyTrack API](https://nickcardoso.com/projects/hytrackapi/): Hardened FastAPI microservice for courier status scraping with key management, rate limiting, and edge-ready deployment.
 - [HyTrackV3](https://nickcardoso.com/projects/hytrackv3/): Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.
 - [ImmichSync](https://nickcardoso.com/projects/immichsync/): Python-based folder-to-Immich sync automation with route fallback, deduplication, and album-aware uploads.

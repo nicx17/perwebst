@@ -1,0 +1,4329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Two-digit 74LS90 / CD4513 BCD counter with NE555 one-shot input, validated perfboard layout for an 80 × 55 mm FR2 board."
+    />
+    <meta name="theme-color" content="#ece9e3" />
+    <link rel="icon" type="image/png" href="/project-icons/de-1.png" />
+    <title>BCD Counter 00–99</title>
+    <style>
+      /* nickcardoso.com look: ivory paper, serif display type, frosted cards, pill controls, warm/cool ambient glow. */
+      :root {
+        color-scheme: light;
+        --bg: #ece9e3;
+        --glass: rgba(249, 246, 241, 0.84);
+        --glass-strong: rgba(255, 252, 247, 0.78);
+        --ink: #181d25;
+        --muted: #495566;
+        --soft: #5f6f83;
+        --rule: rgba(72, 92, 119, 0.18);
+        --rule-strong: rgba(72, 92, 119, 0.34);
+        --btn: rgba(249, 246, 241, 0.7);
+        --btn-hover: rgba(255, 255, 255, 0.86);
+        --btn-active: #253243;
+        --btn-ink: #3f4e62;
+        --btn-ink-active: #f4f7fb;
+        --warm: rgba(244, 190, 130, 0.42);
+        --cool: rgba(126, 156, 198, 0.24);
+        --glow: rgba(129, 160, 205, 0.2);
+        --sheen: rgba(255, 255, 255, 0.56);
+        --shadow: rgba(39, 49, 64, 0.2);
+        --grid: rgba(72, 92, 119, 0.07);
+        --serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+        --sans:
+          system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
+        --mono:
+          ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+        --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+        /* signal colours, shared by schematic, pinouts and board */
+        --n-vcc: #c0392b;
+        --n-gnd: #1f2a36;
+        --n-clk: #c96a1b;
+        --n-tim: #2f6fb0;
+        --n-rst: #8a4fb5;
+        --n-bcd: #2b7a4b;
+        --n-seg: #0f7c86;
+        --ok: #2b7a4b;
+        --warn: #a86a12;
+        --bad: #b8322a;
+        --add: #2f6fb0;
+        --hot: #c96a1b;
+        --led: #ff3b2f;
+        --led-off: #f3dcd8;
+        --seg-on: #ff3b2f;
+        --seg-off: #3a2426;
+        --board: #cdae72;
+        --board-edge: #a88a52;
+        --pad: #c27c3a;
+        --hole: #3b2a17;
+        --solder: #b9c0c6;
+        --part: #e6d1a3;
+        --cer: #d4872f;
+        --elec: #24324a;
+        --stripe: #9fb0c4;
+        --chip: #24282c;
+        --chip-ink: #e8ebee;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      html {
+        background: var(--bg);
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font: 16px/1.6 var(--sans);
+        background: transparent;
+        position: relative;
+        isolation: isolate;
+        padding: 18px max(16px, env(safe-area-inset-right, 0px)) 48px
+          max(16px, env(safe-area-inset-left, 0px));
+      }
+      /* site scene: rotating Unsplash photo + ivory wash + drifting orbs (mirrors global.css) */
+      #scene-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background-color: var(--bg);
+        background-image: var(--scene-image, none);
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        pointer-events: none;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: rgba(236, 233, 227, 0.15);
+      }
+      .ambient-orb {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        filter: blur(118px);
+        opacity: 0.72;
+        will-change: transform;
+      }
+      .ambient-orb-one {
+        width: clamp(280px, 36vw, 520px);
+        height: clamp(280px, 36vw, 520px);
+        top: -8%;
+        right: -6%;
+        background: radial-gradient(circle, var(--warm), transparent 72%);
+        animation: drift1 28s ease-in-out infinite;
+      }
+      .ambient-orb-two {
+        width: clamp(220px, 28vw, 420px);
+        height: clamp(220px, 28vw, 420px);
+        bottom: -4%;
+        left: -8%;
+        background: radial-gradient(circle, var(--cool), transparent 72%);
+        animation: drift2 24s ease-in-out infinite;
+      }
+      @keyframes drift1 {
+        25% {
+          transform: translate3d(8vw, -6vh, 0) scale(1.08);
+        }
+        50% {
+          transform: translate3d(-4vw, 4vh, 0) scale(0.95);
+        }
+        75% {
+          transform: translate3d(5vw, 8vh, 0) scale(1.04);
+        }
+      }
+      @keyframes drift2 {
+        25% {
+          transform: translate3d(-6vw, 5vh, 0) scale(0.96);
+        }
+        50% {
+          transform: translate3d(7vw, -3vh, 0) scale(1.06);
+        }
+        75% {
+          transform: translate3d(-3vw, -7vh, 0) scale(0.98);
+        }
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 16px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* shell */
+      /* site nav (same pills as BaseLayout's plain topbar) */
+      .site-top {
+        max-width: 1180px;
+        margin: 0 auto 1.1rem;
+        display: flex;
+        justify-content: center;
+      }
+      .site-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .site-nav .tab {
+        padding: 0.62rem 0.92rem;
+        font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+      }
+      .nav-back {
+        display: inline-flex;
+        align-items: center;
+        margin: 0 0 1.25rem;
+        text-decoration: none;
+        border: 1px solid rgba(72, 92, 119, 0.22);
+        border-radius: 1rem / 0.9rem;
+        background: var(--btn);
+        color: var(--btn-ink);
+        padding: 0.36rem 0.68rem;
+        transition:
+          color 0.26s,
+          border-color 0.26s,
+          background-color 0.26s,
+          transform 0.34s var(--ease),
+          box-shadow 0.34s var(--ease);
+      }
+      .nav-back:hover {
+        color: var(--ink);
+        border-color: var(--rule-strong);
+        background: var(--btn-hover);
+        transform: translateY(-2px) scale(1.012);
+        box-shadow: 0 18px 34px -24px var(--shadow);
+      }
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      /* shell: translucent project-detail-card glass */
+      .shell {
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 84%, transparent);
+        border-radius: 1.3rem;
+        overflow: hidden;
+        background:
+          linear-gradient(
+            168deg,
+            color-mix(in srgb, var(--btn) 72%, transparent),
+            color-mix(in srgb, var(--glass-strong) 92%, transparent)
+          ),
+          radial-gradient(
+            circle at 8% 0%,
+            color-mix(in srgb, var(--glow) 84%, transparent),
+            transparent 62%
+          );
+        box-shadow:
+          0 24px 60px -36px var(--shadow),
+          inset 0 1px 0 color-mix(in srgb, var(--sheen) 88%, transparent);
+      }
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .brand {
+        font: 400 1.15rem var(--serif);
+        letter-spacing: 0.02em;
+        color: var(--ink);
+      }
+
+      /* fixed corner pills, as on every site page */
+      .bg-credit,
+      .site-footer {
+        position: fixed;
+        bottom: 1.25rem;
+        z-index: 50;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--ink);
+        text-decoration: none;
+        opacity: 0.85;
+        padding: 0.45rem 0.85rem;
+        background: rgba(248, 245, 240, 0.66);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        transition:
+          opacity 0.26s,
+          background-color 0.26s,
+          border-color 0.26s;
+      }
+      .bg-credit {
+        left: 1.25rem;
+      }
+      .site-footer {
+        right: 1.25rem;
+      }
+      .bg-credit:hover,
+      .site-footer:hover {
+        opacity: 1;
+        background: var(--btn-hover);
+        border-color: var(--rule-strong);
+      }
+      @media (max-width: 720px) {
+        .ambient-orb {
+          filter: none;
+          opacity: 0.63;
+        }
+        .bg-credit,
+        .site-footer {
+          bottom: 0.75rem;
+        }
+        .bg-credit {
+          left: 0.75rem;
+        }
+        .site-footer {
+          right: 0.75rem;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ambient-orb {
+          animation: none;
+        }
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tab {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--btn-ink);
+        border: 1px solid rgba(72, 92, 119, 0.22);
+        border-radius: 999px;
+        background: var(--btn);
+        padding: 7px 13px;
+        font: 600 0.85rem var(--sans);
+        letter-spacing: 0.02em;
+        transition:
+          transform 0.34s var(--ease),
+          background-color 0.26s,
+          color 0.26s,
+          box-shadow 0.34s var(--ease);
+      }
+      .tab:hover {
+        color: var(--ink);
+        background: var(--btn-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 18px 32px -20px var(--shadow);
+      }
+      .tab[aria-current='page'] {
+        color: var(--btn-ink-active);
+        background: var(--btn-active);
+        border-color: var(--btn-active);
+      }
+      .content {
+        padding: clamp(18px, 3vw, 34px) clamp(14px, 3vw, 34px) 40px;
+        display: grid;
+        gap: 34px;
+      }
+      .content > * {
+        animation: rise 0.56s var(--ease) both;
+        min-width: 0;
+      }
+
+      /* type */
+      h1,
+      h2,
+      h3 {
+        font-family: var(--serif);
+        font-weight: 400;
+        color: var(--ink);
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(2.1rem, 6vw, 3.4rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      h2 {
+        font-size: clamp(1.45rem, 3.2vw, 1.8rem);
+        line-height: 1.2;
+        position: relative;
+        padding-bottom: 0.5rem;
+        justify-self: start;
+      }
+      h2::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 64%;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          rgba(244, 190, 130, 0.9),
+          rgba(126, 156, 198, 0.7)
+        );
+      }
+      h3 {
+        font-size: 1.15rem;
+      }
+      .eyebrow {
+        font: 600 0.75rem var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--soft);
+      }
+      .lede {
+        max-width: 70ch;
+        color: var(--muted);
+        margin: 0;
+      }
+      .sec {
+        display: grid;
+        gap: 16px;
+      }
+      .sec > p {
+        margin: 0;
+      }
+      code,
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.86em;
+      }
+      :not(pre) > code {
+        background: var(--glass);
+        border: 1px solid var(--rule);
+        padding: 0.1rem 0.35rem;
+        border-radius: 6px;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--rule-strong);
+      }
+      a:hover {
+        text-decoration-color: currentColor;
+      }
+
+      /* hero */
+      .hero {
+        display: grid;
+        gap: 12px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      span.chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--btn) 82%, transparent);
+        color: var(--soft);
+        padding: 3px 10px;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+      }
+      span.chip b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* cards */
+      .card {
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 84%, transparent);
+        border-radius: 1.3rem;
+        padding: 18px;
+        background:
+          linear-gradient(
+            168deg,
+            color-mix(in srgb, var(--btn) 72%, transparent),
+            color-mix(in srgb, var(--glass-strong) 92%, transparent)
+          ),
+          radial-gradient(
+            circle at 8% 0%,
+            color-mix(in srgb, var(--glow) 84%, transparent),
+            transparent 62%
+          );
+        box-shadow:
+          0 24px 60px -36px var(--shadow),
+          inset 0 1px 0 color-mix(in srgb, var(--sheen) 88%, transparent);
+        min-width: 0;
+      }
+      .plate {
+        padding: 10px;
+        overflow-x: auto;
+        background-color: #fbfaf7;
+        background-image:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .plate svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .callout {
+        border-left: 3px solid rgba(244, 190, 130, 0.95);
+        padding: 12px 16px;
+        border-radius: 0 12px 12px 0;
+        background: var(--glass);
+        max-width: 78ch;
+        margin: 0;
+        color: var(--muted);
+      }
+      .callout b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* controls */
+      .seg {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .btn,
+      .seg button {
+        font: 700 0.78rem var(--sans);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 8px 14px;
+        min-height: 36px;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 82%, transparent);
+        color: var(--btn-ink);
+        background: linear-gradient(
+          155deg,
+          color-mix(in srgb, var(--btn) 82%, transparent),
+          color-mix(in srgb, var(--glass-strong) 90%, transparent)
+        );
+        transition:
+          transform 0.4s var(--ease),
+          box-shadow 0.4s var(--ease),
+          background-color 0.26s,
+          color 0.26s;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .btn:hover,
+      .seg button:hover {
+        color: var(--ink);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 36px -26px var(--shadow);
+      }
+      .btn:active,
+      .btn.down {
+        transform: translateY(1px) scale(0.98);
+      }
+      .seg button[aria-pressed='true'],
+      .btn.primary {
+        background: var(--btn-active);
+        color: var(--btn-ink-active);
+        border-color: var(--btn-active);
+      }
+      .btn:focus-visible,
+      .seg button:focus-visible,
+      input:focus-visible,
+      .tab:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--warm) 70%, transparent);
+      }
+      input[type='range'] {
+        width: 100%;
+        accent-color: var(--btn-active);
+      }
+      .ctl {
+        display: grid;
+        gap: 7px;
+      }
+      .ctl label,
+      .lbl {
+        font: 600 0.72rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--soft);
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .ctl output {
+        color: var(--ink);
+        font-family: var(--mono);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+
+      /* readouts */
+      .bench {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+        gap: 18px;
+      }
+      @media (max-width: 820px) {
+        .bench {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+      }
+      .readouts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        overflow: hidden;
+        margin: 0;
+      }
+      .ro {
+        background: color-mix(in srgb, #fffdf9 88%, transparent);
+        padding: 12px 14px;
+        display: grid;
+        gap: 2px;
+        margin: 0;
+      }
+      .ro dt {
+        font: 600 0.68rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--soft);
+      }
+      .ro dd {
+        margin: 0;
+        font: 500 1.25rem var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .ro small {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .ro.warn dd {
+        color: var(--warn);
+      }
+      .ro.bad dd {
+        color: var(--bad);
+      }
+      .formula {
+        font: 0.8rem/1.6 var(--mono);
+        color: var(--muted);
+        margin: 0;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .kdot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .sw {
+        width: 22px;
+        height: 0;
+        border-top: 2px solid var(--n-gnd);
+        display: inline-block;
+      }
+
+      /* validation log */
+      .log {
+        display: grid;
+        border-top: 1px solid var(--rule);
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 14px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .tag {
+        font: 700 0.66rem var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        justify-self: start;
+        align-self: start;
+        background: color-mix(in srgb, currentColor 7%, transparent);
+      }
+      .tag.ok {
+        color: var(--ok);
+      }
+      .tag.warn {
+        color: var(--warn);
+      }
+      .tag.fix {
+        color: var(--add);
+      }
+      .tag.bad {
+        color: var(--bad);
+      }
+      .item h3 {
+        font: 600 1rem var(--sans);
+        margin: 0 0 2px;
+      }
+      .item p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 76ch;
+      }
+      @media (max-width: 520px) {
+        .item {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+
+      /* tables */
+      .tblwrap {
+        overflow-x: auto;
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+      }
+      .pins {
+        width: 100%;
+        border-collapse: collapse;
+        font: 0.8rem var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .pins th,
+      .pins td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--rule);
+        text-align: left;
+        white-space: nowrap;
+      }
+      .pins th {
+        color: var(--soft);
+        font: 600 0.68rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        background: color-mix(in srgb, var(--glass) 60%, transparent);
+      }
+      .pins tr:last-child td {
+        border-bottom: 0;
+      }
+      .pins tr.hlrow td {
+        background: color-mix(in srgb, var(--warm) 40%, transparent);
+      }
+      .pins td.wrap {
+        white-space: normal;
+        min-width: 18ch;
+      }
+      .sub {
+        font: 600 1rem var(--sans);
+        margin: 0;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+        gap: 18px;
+      }
+      .two > div {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-width: 0;
+      }
+      .grid-figs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+        gap: 18px;
+      }
+      .grid-figs figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+        overflow-x: auto;
+      }
+      .grid-figs svg {
+        display: block;
+        width: 100%;
+        min-width: 420px;
+        height: auto;
+      }
+      .grid-figs figcaption {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      ol.steps {
+        margin: 0;
+        padding-left: 1.4em;
+        display: grid;
+        gap: 9px;
+        max-width: 80ch;
+        color: var(--muted);
+      }
+      ol.steps b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .foot {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 16px 18px;
+        border-top: 1px solid var(--rule);
+        color: var(--soft);
+        font-size: 0.85rem;
+      }
+
+      /* shared svg text */
+      svg text {
+        fill: var(--ink);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        body::before,
+        body::after,
+        .content > * {
+          animation: none;
+        }
+        .btn,
+        .seg button,
+        .tab {
+          transition: none;
+        }
+      }
+      /* schematic */
+      #sch {
+        min-width: 860px;
+      }
+      #sch .wire {
+        fill: none;
+        stroke: var(--n-gnd);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #sch .w-vcc {
+        stroke: var(--n-vcc);
+      }
+      #sch .w-clk {
+        stroke: var(--n-clk);
+      }
+      #sch .w-bcd {
+        stroke: var(--n-bcd);
+      }
+      #sch .w-seg {
+        stroke: var(--n-seg);
+      }
+      #sch .w-rst {
+        stroke: var(--n-rst);
+      }
+      #sch .w-tim {
+        stroke: var(--n-tim);
+      }
+      #sch .w-clk.hot {
+        stroke-width: 3.4;
+        filter: drop-shadow(0 0 4px rgba(201, 106, 27, 0.55));
+      }
+      #sch .dot {
+        fill: var(--n-gnd);
+      }
+      #sch .box {
+        fill: #fffdf9;
+        stroke: var(--n-gnd);
+        stroke-width: 1.8;
+      }
+      #sch .pn {
+        fill: var(--soft);
+        font-size: 10px;
+      }
+      #sch .ref {
+        font-weight: 700;
+        font-size: 12.5px;
+      }
+      #sch .val {
+        fill: var(--muted);
+        font-size: 11px;
+      }
+      #sch .ttl {
+        font-family: var(--serif);
+        font-size: 17px;
+      }
+      #sch .cap {
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        fill: var(--soft);
+      }
+      #sch .dsface {
+        fill: #1a1416;
+      }
+      #sch .seg {
+        fill: var(--seg-off);
+        transition: fill 0.06s;
+      }
+      #sch .seg.lit {
+        fill: var(--seg-on);
+      }
+      #sch .sw-act {
+        transition: transform 0.08s;
+        transform-box: fill-box;
+      }
+      #sch .pressed .sw-act {
+        transform: translateY(5px);
+      }
+
+      /* perfboard */
+      .pb-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        align-items: center;
+      }
+      .pb-plate {
+        padding: 8px;
+      }
+      .pb-plate svg {
+        min-width: 800px;
+      }
+      svg .pb-board {
+        fill: var(--board);
+        stroke: var(--board-edge);
+        stroke-width: 2;
+      }
+      svg .pb-pad {
+        fill: var(--pad);
+      }
+      svg .pb-hole {
+        fill: var(--hole);
+      }
+      svg .pb-solder {
+        fill: none;
+        stroke: var(--solder);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      svg .pb-core {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      svg .pb-under {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0.45;
+      }
+      svg .pb-joint {
+        fill: var(--solder);
+        stroke: var(--board-edge);
+        stroke-width: 0.8;
+      }
+      svg .pb-ghost {
+        fill: none;
+        stroke: var(--ink);
+        stroke-width: 1.2;
+        stroke-dasharray: 4 3;
+        opacity: 0.5;
+      }
+      svg .pb-ghostj {
+        fill: none;
+        stroke: var(--ink);
+        stroke-width: 1;
+        opacity: 0.5;
+      }
+      svg .pb-chip {
+        fill: var(--chip);
+      }
+      svg .pb-notch {
+        fill: var(--board);
+      }
+      svg .pb-dot {
+        fill: var(--chip-ink);
+      }
+      svg .pb-chipt {
+        fill: var(--chip-ink);
+        font-size: 10px;
+      }
+      svg .pb-leg {
+        fill: var(--solder);
+      }
+      svg .pb-lead {
+        stroke: var(--solder);
+        stroke-width: 2;
+      }
+      svg .pb-res {
+        fill: var(--part);
+        stroke: var(--board-edge);
+        stroke-width: 1;
+      }
+      svg .pb-cer {
+        fill: var(--cer);
+        stroke: var(--board-edge);
+        stroke-width: 1;
+      }
+      svg .pb-elec {
+        fill: var(--elec);
+        stroke: var(--board-edge);
+        stroke-width: 1;
+      }
+      svg .pb-stripe {
+        fill: var(--stripe);
+      }
+      svg .pb-plus {
+        fill: var(--chip-ink);
+        font-size: 11px;
+        font-weight: 500;
+      }
+      svg .pb-ring {
+        fill: none;
+        stroke: var(--add);
+        stroke-width: 2;
+        stroke-dasharray: 2 2;
+      }
+      svg .pb-ds {
+        fill: #1a1416;
+        stroke: #000;
+        stroke-width: 1;
+      }
+      svg .seg {
+        fill: var(--seg-off);
+      }
+      svg .seg.lit {
+        fill: var(--seg-on);
+      }
+      svg .pb-tact {
+        fill: #2b2f33;
+      }
+      svg .pb-cap {
+        fill: #5b6168;
+        stroke: #1b1d20;
+      }
+      svg .pb-capt {
+        fill: #fff;
+        font-size: 8px;
+        font-family: var(--sans);
+        font-weight: 700;
+      }
+      svg .w-halo {
+        fill: none;
+        stroke: var(--board-edge);
+        stroke-width: 5;
+        stroke-linecap: round;
+      }
+      svg .w {
+        fill: none;
+        stroke-width: 2.6;
+        stroke-linecap: round;
+      }
+      svg .pb-wire {
+        transition: opacity 0.15s;
+      }
+      svg .pb-wire.ghost {
+        display: none;
+      }
+      svg .pb-wire.ghost.hl {
+        display: inline;
+        opacity: 0.85;
+      }
+      svg .pb-wire.hl .w {
+        stroke-width: 5;
+      }
+      svg .pb-wire.hl .w-halo {
+        stroke-width: 8;
+      }
+      svg.dim .pb-wire:not(.on) {
+        opacity: 0.1;
+      }
+      svg .pbl {
+        fill: var(--muted);
+        font-size: 9.5px;
+      }
+      svg .pbn {
+        font-size: 9px;
+        paint-order: stroke;
+        stroke: var(--board);
+        stroke-width: 3px;
+      }
+      svg .pbt {
+        font-size: 10.5px;
+        font-weight: 600;
+        paint-order: stroke;
+        stroke: var(--board);
+        stroke-width: 3.5px;
+        stroke-linejoin: round;
+      }
+      svg .pbg {
+        opacity: 0.7;
+      }
+    </style>
+    <script>
+      /* Same day-of-month background rotation as src/layouts/BaseLayout.astro: keep the lists in sync. */
+      (() => {
+        const images = [
+          'antonius-harel-2rkqE7SgcE8-unsplash',
+          'antonius-harel-VbOjY42c6a4-unsplash',
+          'antonius-harel-WsaPcg512jE-unsplash',
+          'asi-mong-Gf5Q_5UF3vs-unsplash',
+          'dirk-lach-_uamwvb8UlI-unsplash',
+          'eve-9xY__xnwCy0-unsplash',
+          'eve-Fp96C-6Wd6o-unsplash',
+          'eve-WK9sTh1FiSs-unsplash',
+          'eve-bKOpGRbHBGs-unsplash',
+          'eve-jCBLFtjpXfw-unsplash',
+          'eve-lP_4h4oVO1E-unsplash',
+          'eve-lxepp3ZUxTs-unsplash',
+          'hassaan-here-bKfkhVRAJTQ-unsplash',
+          'iklas-FeNrGgQ1Tu8-unsplash',
+          'iklas-xjSu2KbJlAg-unsplash',
+          'iklas-y9Ujplj3KIU-unsplash',
+          'makesumo-doKatAORoIs-unsplash',
+          'mohammad-alizade-nIlwOYUbQEA-unsplash',
+          'mymind-KnUX9qtR_4E-unsplash',
+          'pawel-czerwinski-z4n8CGRuzOA-unsplash',
+          'plufow-le-studio-aE8Mx8-vQss-unsplash',
+          'radoslav-bali-Bp2sWPJGPHs-unsplash',
+          'radoslav-bali-rhnZzt9XblE-unsplash',
+          'rohit-choudhari-_E6sXQHsgQc-unsplash',
+          'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
+          'sean-fahrenbruch-_07FxAO8oG0-unsplash',
+          'sean-fahrenbruch-g95tsUeCohM-unsplash',
+          'sean-sinclair-C_NJKfnTR5A-unsplash',
+        ];
+        const overrides = { 6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash' };
+        const now = new Date();
+        const name =
+          overrides[now.getDay()] ?? images[now.getDate() % images.length];
+        const base = `/backgrounds/light/${name}`;
+        const v = '?v=20260404hq';
+        document.documentElement.style.setProperty(
+          '--scene-image',
+          `image-set(url("${base}.avif${v}") type("image/avif"), url("${base}.webp${v}") type("image/webp"), url("${base}.jpg${v}") type("image/jpeg"))`
+        );
+
+        const clean = name.replace('-unsplash', '');
+        const cut = clean.lastIndexOf('-');
+        const author = clean
+          .slice(0, cut)
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+        document.addEventListener('DOMContentLoaded', () => {
+          const credit = document.querySelector('.bg-credit');
+          if (!credit) return;
+          credit.href = `https://unsplash.com/photos/${clean}`;
+          credit.textContent = `Background by ${author}`;
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="scene-bg" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-two" aria-hidden="true"></div>
+    <header class="site-top">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="tab" href="/">Home</a>
+        <a class="tab" href="/projects/" aria-current="page">Projects</a>
+        <a class="tab" href="/colophon/">Colophon</a>
+      </nav>
+    </header>
+    <div class="page">
+      <a class="nav-back" href="/projects/">&lt;- Back to Projects</a>
+      <div class="shell">
+        <nav class="topbar" aria-label="DE 1 circuits">
+          <span class="brand">DE 1</span>
+          <div class="tabs">
+            <a class="tab" href="./">LED chaser</a>
+            <a class="tab" href="bcd-counter.html" aria-current="page"
+              >BCD counter</a
+            >
+          </div>
+        </nav>
+
+        <main class="content">
+          <header class="hero">
+            <div class="eyebrow">Digital electronics · project 2 of 2</div>
+            <h1>Two-digit BCD counter, 00 → 99</h1>
+            <p class="lede">
+              Two 74LS90 decade counters in BCD mode count pulses from an NE555
+              one-shot. Two CD4513 decoders turn each 4-bit BCD value into
+              segments on a pair of 5161AS displays. Press the COUNT button or
+              any button on an IR remote and the number goes up by one. RESET
+              returns it to 00. Everything runs on 5 V from USB-C, on one 80 ×
+              55 mm FR2 perfboard.
+            </p>
+            <div class="chips">
+              <span class="chip"><b>5 V</b> USB-C</span
+              ><span class="chip"><b>2×</b> 74LS90</span
+              ><span class="chip"><b>2×</b> CD4513BE</span>
+              <span class="chip"><b>1×</b> NE555</span
+              ><span class="chip"><b>2×</b> 5161AS (CC)</span
+              ><span class="chip">IR remote + button</span
+              ><span class="chip">FR2 · 80 × 55 mm</span>
+            </div>
+          </header>
+
+          <section class="sec">
+            <h2>Schematic</h2>
+            <div class="card plate">
+              <svg
+                id="sch"
+                viewBox="0 0 1120 640"
+                role="img"
+                aria-label="Schematic: USB-C 5 V supply; NE555 one-shot triggered by an IR receiver or the COUNT button; two 74LS90 counters in BCD mode with 4.7 kilohm pull-ups; two CD4513 decoders driving 5161AS common-cathode displays through 330 ohm resistors"
+              ></svg>
+            </div>
+            <div class="legend">
+              <span
+                ><i class="kdot" style="background: var(--n-vcc)"></i>+5 V</span
+              ><span
+                ><i class="kdot" style="background: var(--n-gnd)"></i>GND</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-clk)"></i>clock
+                (lights while the 555 pulse is high)</span
+              ><span
+                ><i class="kdot" style="background: var(--n-bcd)"></i>BCD
+                lines</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-seg)"></i
+                >segments</span
+              ><span
+                ><i class="kdot" style="background: var(--n-rst)"></i
+                >reset</span
+              ><span
+                ><i class="kdot" style="background: var(--n-tim)"></i
+                >timing</span
+              >
+            </div>
+          </section>
+
+          <section class="bench">
+            <div class="card panel">
+              <h2>Bench</h2>
+              <p
+                class="formula"
+                style="font-family: var(--sans); font-size: 0.88rem"
+              >
+                The simulator runs on the real timing. Each count lands when the
+                555 pulse ends, because the 74LS90 counts on the falling edge.
+              </p>
+              <div class="ctl">
+                <span class="lbl">Inputs</span>
+                <div class="seg">
+                  <button type="button" class="btn primary" id="bCount">
+                    Count
+                  </button>
+                  <button type="button" class="btn" id="bIR">IR remote</button>
+                  <button type="button" class="btn" id="bReset">Reset</button>
+                </div>
+                <span
+                  class="formula"
+                  style="font-family: var(--sans); font-size: 0.8rem"
+                  >Hold <b>IR remote</b> to send repeat codes and watch it
+                  auto-count. Holding <b>Count</b> still gives exactly one
+                  count. C7 passes only the moment of the press.</span
+                >
+              </div>
+              <div class="ctl">
+                <label for="r2"
+                  >R2 · one-shot resistor
+                  <output id="r2Out">220 kΩ</output></label
+                >
+                <input
+                  type="range"
+                  id="r2"
+                  min="0"
+                  max="5"
+                  step="1"
+                  value="2"
+                />
+              </div>
+              <div class="ctl">
+                <label for="vcc"
+                  >Supply <output id="vccOut">5.00 V</output></label
+                >
+                <input
+                  type="range"
+                  id="vcc"
+                  min="4.5"
+                  max="5.5"
+                  step="0.05"
+                  value="5"
+                />
+              </div>
+              <p class="formula">
+                t = 1.1 · R2 · C1 (C1 = 1 µF)<br />I<sub>seg</sub> ≈ (V<sub
+                  >OH</sub
+                >
+                − V<sub>LED</sub>) / 330 Ω
+              </p>
+            </div>
+            <div class="card panel">
+              <h2>Readouts</h2>
+              <dl class="readouts">
+                <div class="ro">
+                  <dt>Display</dt>
+                  <dd id="rN">00</dd>
+                  <small id="rNs">counts since reset: 0</small>
+                </div>
+                <div class="ro">
+                  <dt>BCD tens · units</dt>
+                  <dd id="rB">0000 0000</dd>
+                  <small>D C B A on each 74LS90</small>
+                </div>
+                <div class="ro" id="roT">
+                  <dt>One-shot</dt>
+                  <dd id="rT">0.24 s</dd>
+                  <small id="rTn">swallows bounce and IR bursts</small>
+                </div>
+                <div class="ro">
+                  <dt>Remote held</dt>
+                  <dd id="rRep">3.1 /s</dd>
+                  <small>auto-repeat rate (NEC)</small>
+                </div>
+                <div class="ro" id="roI">
+                  <dt>Segment current</dt>
+                  <dd id="rI">–</dd>
+                  <small id="rIn">per lit segment</small>
+                </div>
+                <div class="ro">
+                  <dt>Board current</dt>
+                  <dd id="rIt">–</dd>
+                  <small id="rItn">now, 14 segments max</small>
+                </div>
+              </dl>
+              <div>
+                <span class="lbl" style="margin-bottom: 6px"
+                  >Logic trace · last 2 s</span
+                ><canvas
+                  id="trace"
+                  height="120"
+                  style="
+                    width: 100%;
+                    height: 120px;
+                    display: block;
+                    border: 1px solid var(--rule);
+                    border-radius: 12px;
+                    background: #fbfaf7;
+                  "
+                ></canvas>
+              </div>
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Validation</h2>
+            <p class="lede" id="netSummary">Running the netlist check…</p>
+            <div class="log" id="vlog"></div>
+          </section>
+
+          <section class="sec">
+            <h2>Chip pinouts · top view</h2>
+            <p class="lede">
+              Seen from above with the legs in the board, notch at the top: pin
+              1 is top-left and the numbers run down the left side and back up
+              the right. Each pin shows where it goes in this build.
+            </p>
+            <div class="grid-figs" id="pinouts"></div>
+            <div class="legend">
+              <span
+                ><i class="kdot" style="background: var(--n-vcc)"></i>+5 V</span
+              ><span
+                ><i class="kdot" style="background: var(--n-gnd)"></i>GND</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-clk)"></i>clock /
+                carry</span
+              ><span
+                ><i class="kdot" style="background: var(--n-tim)"></i>555 timing
+                &amp; trigger</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-bcd)"></i>BCD</span
+              ><span
+                ><i class="kdot" style="background: var(--n-seg)"></i
+                >segments</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-rst)"></i
+                >reset</span
+              ><span
+                ><i class="kdot" style="background: var(--soft)"></i>not
+                connected</span
+              >
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Perfboard layout · 80 × 55 mm</h2>
+            <p class="lede">
+              Rows A–T × columns 1–30 on the FR2 board, the same grid as the LED
+              chaser. Bare wire along row B is the +5 V rail and along row S the
+              ground rail. Most signal wiring is insulated wire on the solder
+              side. Flip the view to see it, drawn mirrored the way you see the
+              board turned over. Hover a row in the wire table to highlight that
+              wire.
+            </p>
+            <p class="callout">
+              <b>Decoder part:</b> use the <b>CD4513BE</b> (DIP-18).
+              <b>Display check:</b> 5161<b>AS</b> = common cathode, which is
+              what the CD4513 needs. A 5161BS won't light. <b>Supply:</b> 5 V
+              only. The 9 V PD board from the chaser would destroy both 74LS90s
+              (7 V absolute maximum).
+            </p>
+            <div class="pb-tools">
+              <div class="seg" id="pbSeg">
+                <button type="button" id="pbTop" aria-pressed="true">
+                  Component side</button
+                ><button type="button" id="pbBot" aria-pressed="false">
+                  Solder side (flipped)
+                </button>
+              </div>
+              <div class="seg" id="pbLayer" hidden>
+                <button type="button" data-l="all" aria-pressed="true">
+                  All wires</button
+                ><button type="button" data-l="seg" aria-pressed="false">
+                  Segments
+                </button>
+                <button type="button" data-l="bcd" aria-pressed="false">
+                  BCD</button
+                ><button type="button" data-l="ctl" aria-pressed="false">
+                  Clock · reset · power
+                </button>
+              </div>
+            </div>
+            <div class="card plate pb-plate">
+              <svg
+                id="pb"
+                role="img"
+                aria-label="Perfboard layout of the BCD counter on an 80 by 55 millimetre board"
+              ></svg>
+            </div>
+            <p class="formula" id="pbHint">
+              Component side: parts as you place them. Faint dashed lines are
+              bare links underneath.
+            </p>
+            <div class="legend">
+              <span
+                ><i class="kdot" style="background: var(--n-vcc)"></i>+5 V</span
+              ><span
+                ><i class="kdot" style="background: var(--n-gnd)"></i>GND</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-clk)"></i
+                >clock</span
+              ><span
+                ><i class="kdot" style="background: var(--n-tim)"></i>555 /
+                trigger</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-bcd)"></i>BCD</span
+              ><span
+                ><i class="kdot" style="background: var(--n-seg)"></i
+                >segments</span
+              ><span
+                ><i class="kdot" style="background: var(--n-rst)"></i
+                >reset</span
+              >
+            </div>
+            <div class="two">
+              <div>
+                <h3 class="sub">Insulated wires · solder side</h3>
+                <div class="tblwrap">
+                  <table class="pins" id="pbWires"></table>
+                </div>
+              </div>
+              <div>
+                <h3 class="sub">Parts and holes</h3>
+                <div class="tblwrap">
+                  <table class="pins" id="pbParts"></table>
+                </div>
+              </div>
+            </div>
+            <h3 class="sub">Build order</h3>
+            <ol class="steps">
+              <li>
+                <b>Rails.</b> On the solder side, lay bare tinned wire along row
+                B and row S (columns 1–30). Solder it every few holes.
+              </li>
+              <li>
+                <b>Bare links.</b> Switch to the solder view and make every
+                silver line: bare wire for the long ones, a solder bridge for
+                neighbouring pads. The +5 V links are column 1 (B–K), row K
+                (1–11), column 11 (K–R) and row P (12–29). Several run under the
+                sockets, so do them <i>before</i> fitting the sockets.
+              </li>
+              <li>
+                <b>C1 first.</b> It's the SMD electrolytic and lives under U1 on
+                the solder side: + on E11, − (striped end) on G11.
+              </li>
+              <li>
+                <b>Sockets.</b> U1 DIP-8 with pin 1 at D9, notch toward row A.
+                U3 and U2 DIP-14 with pin 1 at L1 and L6, notch toward row A. U4
+                and U5 DIP-18 lying sideways with pin 1 at R12 and R22, notch
+                toward column 1.
+              </li>
+              <li>
+                <b>Resistors.</b> Fit R2 flat, R1/R3/R26 and the eight 4.7 kΩ
+                pull-ups standing up, then the fourteen 330 Ω segment resistors
+                flat in columns 13–19 and 23–29 (rows J–N).
+              </li>
+              <li>
+                <b>Capacitors.</b> C2 10 nF, C3, C4, C5 and C7 100 nF ceramics.
+                C6 10 µF: + in G1, stripe in G2.
+              </li>
+              <li>
+                <b>Buttons and displays.</b> COUNT at E4/E7/G4/G7 and RESET at
+                C27/C30/E27/E30, each wired on its diagonal legs. Displays with
+                pin 1 at I15 and I21: the decimal point sits bottom-right.
+              </li>
+              <li>
+                <b>Solder-side wiring.</b> Work through the wire table group by
+                group: power and control first, then BCD, then segments. Tick
+                each one off.
+              </li>
+              <li>
+                <b>Off-board.</b> USB-C breakout VBUS → B1, GND → S1, with 5.1
+                kΩ from CC1 and CC2 to GND on the breakout. IR module + → C5,
+                OUT → C7, − → G3. Match the silk on <i>your</i> module, because
+                pin orders differ.
+              </li>
+              <li>
+                <b>Test before the chips.</b> No beep between rails B and S.
+                Power up, then check 5 V at U1-8, U2-5, U3-5, U4-18 and U5-18
+                sockets and at U4-3/4 (LT/BI). Power off, insert the chips,
+                power on: you should see <b>00</b>.
+              </li>
+            </ol>
+          </section>
+
+          <section class="sec">
+            <h2>Parts</h2>
+            <div class="tblwrap"><table class="pins" id="bom"></table></div>
+          </section>
+        </main>
+        <footer class="foot">
+          <span>Project 2 of 2 · <a href="./">← LED chaser</a></span
+          ><span><a href="/projects/">All projects</a></span>
+        </footer>
+      </div>
+    </div>
+    <a
+      class="bg-credit"
+      href="https://unsplash.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Background from Unsplash</a
+    >
+    <div class="site-footer">
+      <span>&copy; <span data-year>2026</span> Nick Cardoso</span>
+    </div>
+    <script>
+      document.querySelector('[data-year]').textContent =
+        new Date().getFullYear();
+    </script>
+
+    <script>
+      /* Board engine shared by bcd-counter.html and the node checker.
+   Holes are "F10" = row F, column 10. Rows A..T top to bottom, columns 1..30 left to right (component side). */
+      const BOARD = (() => {
+        const ROWS = 'ABCDEFGHIJKLMNOPQRST';
+        const rc = (h) => [ROWS.indexOf(h[0]), +h.slice(1)];
+        const hole = (r, c) => ROWS[r] + c;
+
+        // Pin holes for every placed package.
+        //  v  : DIP, notch toward row A, pin 1 top-left, pins run down the left column then up the right (+3 columns).
+        //  h  : DIP, notch toward column 1, pin 1 bottom-left, pins run right along the bottom then back along the row 3 above.
+        //  ds : 0.56" 10-pin digit, `at` = pin 1 (bottom-left). Pins 1–5 bottom row left→right, 6–10 top row (6 rows up) right→left.
+        function pinHoles(ic) {
+          const [r, c] = rc(ic.at),
+            n = ic.pins;
+          return Array.from({ length: n }, (_, i) => {
+            const p = i + 1;
+            if (ic.orient === 'h')
+              return p <= n / 2 ? hole(r, c + p - 1) : hole(r - 3, c + (n - p));
+            if (ic.orient === 'ds')
+              return p <= 5 ? hole(r, c + p - 1) : hole(r - 6, c + (10 - p));
+            return p <= n / 2 ? hole(r + p - 1, c) : hole(r + n - p, c + 3);
+          });
+        }
+
+        // Every electrical endpoint on the board: "U1.3", "R2.1" … mapped to its hole.
+        function endpoints(L) {
+          const ep = [];
+          [...L.ics, ...(L.displays || [])].forEach((ic) =>
+            pinHoles(ic).forEach((h, i) =>
+              ep.push({ id: `${ic.ref}.${i + 1}`, hole: h, ref: ic.ref })
+            )
+          );
+          L.parts.forEach((p) =>
+            p.leads.forEach((h, i) =>
+              ep.push({ id: `${p.ref}.${i + 1}`, hole: h, ref: p.ref })
+            )
+          );
+          (L.offboard || []).forEach((f) =>
+            ep.push({ id: `${f.ref}.${f.pin}`, hole: f.hole, ref: f.ref })
+          );
+          return ep;
+        }
+
+        // holes hidden under package bodies (sockets, digits, switch caps)
+        function keepout(L) {
+          const out = [];
+          L.ics.forEach((ic) => {
+            const [r, c] = rc(ic.at),
+              n = ic.pins / 2;
+            for (let i = 0; i < n; i++)
+              for (let k = 1; k <= 2; k++)
+                out.push({
+                  hole:
+                    ic.orient === 'h' ? hole(r - k, c + i) : hole(r + i, c + k),
+                  who: ic.ref,
+                });
+          });
+          (L.displays || []).forEach((d) => {
+            const [r, c] = rc(d.at);
+            for (let i = 1; i < 6; i++)
+              for (let k = 0; k < 5; k++)
+                out.push({ hole: hole(r - i, c + k), who: d.ref });
+          });
+          L.parts
+            .filter((p) => p.kind === 'tact')
+            .forEach((p) => {
+              const rs = p.leads.map((h) => rc(h)[0]),
+                cs = p.leads.map((h) => rc(h)[1]);
+              for (let r = Math.min(...rs) + 1; r < Math.max(...rs); r++)
+                for (let c = Math.min(...cs) + 1; c < Math.max(...cs); c++)
+                  out.push({ hole: hole(r, c), who: p.ref });
+            });
+          return out;
+        }
+
+        function check(L, EXPECT) {
+          const errors = [],
+            warnings = [],
+            parent = {};
+          const find = (x) =>
+            (parent[x] ??= x) === x ? x : (parent[x] = find(parent[x]));
+          const join = (a, b) => {
+            parent[find(a)] = find(b);
+          };
+          const inBoard = (h) => {
+            const [r, c] = rc(h);
+            return r >= 0 && r < L.rows && c >= 1 && c <= L.cols;
+          };
+          const adj = (a, b) => {
+            const [r1, c1] = rc(a),
+              [r2, c2] = rc(b);
+            return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+          };
+
+          // copper: rails + bare links join every hole they pass; consecutive holes must be neighbours
+          [...L.rails, ...L.bridges].forEach((b) => {
+            b.holes.forEach((h) => {
+              if (!inBoard(h))
+                errors.push(`link ${b.net}: ${h} is off the board`);
+            });
+            for (let i = 1; i < b.holes.length; i++) {
+              if (!adj(b.holes[i - 1], b.holes[i]))
+                errors.push(
+                  `link ${b.net}: ${b.holes[i - 1]}→${b.holes[i]} are not neighbouring holes`
+                );
+              join(b.holes[i - 1], b.holes[i]);
+            }
+          });
+          // insulated wires join only their two ends
+          L.wires.forEach((w) => {
+            const a = w.path[0],
+              b = w.path[w.path.length - 1];
+            [a, b].forEach((h) => {
+              if (!inBoard(h)) errors.push(`wire ${w.id}: ${h} off board`);
+            });
+            join(a, b);
+          });
+
+          // a hole takes one lead from the component side; solder-side wires land on existing joints
+          const occ = {};
+          const take = (h, who) => {
+            if (occ[h])
+              errors.push(`hole ${h} used twice: ${occ[h]} and ${who}`);
+            else occ[h] = who;
+          };
+          const ep = endpoints(L);
+          ep.forEach((e) => {
+            if (!inBoard(e.hole))
+              errors.push(`${e.id} at ${e.hole} is off the board`);
+            take(e.hole, e.id);
+          });
+          (L.dummies || []).forEach((d) => take(d.hole, d.who));
+          L.wires
+            .filter((w) => w.side !== 'bottom')
+            .forEach((w) =>
+              [w.path[0], w.path[w.path.length - 1]].forEach((h) =>
+                take(h, 'wire ' + w.id)
+              )
+            );
+          // unsoldered/unused legs must sit in holes nothing else touches
+          (L.dummies || []).forEach((d) => {
+            const touched =
+              [...L.rails, ...L.bridges].some((b) =>
+                b.holes.includes(d.hole)
+              ) ||
+              L.wires.some(
+                (w) =>
+                  w.path[0] === d.hole || w.path[w.path.length - 1] === d.hole
+              );
+            if (touched)
+              errors.push(`${d.who} at ${d.hole} must stay isolated`);
+          });
+
+          // nothing may be pushed through a hole covered by a chip, display or switch body
+          keepout(L).forEach(({ hole: h, who }) => {
+            const p = L.parts.find(
+              (p) => p.leads.includes(h) && p.kind !== 'smd'
+            );
+            if (p) errors.push(`${p.ref} lead in ${h} sits under ${who}`);
+            if (
+              L.wires.some(
+                (w) =>
+                  w.side !== 'bottom' &&
+                  [w.path[0], w.path[w.path.length - 1]].includes(h)
+              )
+            )
+              errors.push(`wire end ${h} sits under ${who}`);
+            if ((L.offboard || []).some((f) => f.hole === h))
+              errors.push(`off-board pad ${h} sits under ${who}`);
+          });
+
+          // compare against the intended netlist
+          const where = Object.fromEntries(ep.map((e) => [e.id, e.hole]));
+          const netOfGroup = {};
+          Object.entries(EXPECT).forEach(([net, ids]) => {
+            const groups = new Set();
+            ids.forEach((id) => {
+              if (!where[id]) {
+                errors.push(`${net}: ${id} is not placed`);
+                return;
+              }
+              groups.add(find(where[id]));
+            });
+            if (groups.size > 1) {
+              const parts = [...groups].map((g) =>
+                ids.filter((id) => where[id] && find(where[id]) === g).join(' ')
+              );
+              errors.push(`${net} is split: [${parts.join('] / [')}]`);
+            }
+            groups.forEach((g) => {
+              if (netOfGroup[g] && netOfGroup[g] !== net)
+                errors.push(`SHORT: ${netOfGroup[g]} ↔ ${net}`);
+              netOfGroup[g] = net;
+            });
+          });
+          // anything placed but not in the netlist must not touch a net (NC pins)
+          const listed = new Set(Object.values(EXPECT).flat());
+          ep.filter((e) => !listed.has(e.id)).forEach((e) => {
+            const g = find(e.hole);
+            if (netOfGroup[g])
+              errors.push(
+                `${e.id} (should be unconnected) touches ${netOfGroup[g]}`
+              );
+          });
+          // wires/links tagged with a net must actually be on it
+          [...L.bridges, ...L.wires].forEach((b) => {
+            const h = b.holes ? b.holes[0] : b.path[0],
+              g = netOfGroup[find(h)];
+            if (b.net && g && g !== b.net)
+              errors.push(`${b.id || 'link'} tagged ${b.net} but sits on ${g}`);
+            if (b.net && !g)
+              warnings.push(
+                `${b.id || 'link ' + b.holes.join(',')} (${b.net}) reaches no listed pin`
+              );
+          });
+
+          // neighbouring pads on different nets where at least one side carries a bare link: the places a solder blob would short
+          const copper = new Set(
+              [...L.rails, ...L.bridges].flatMap((b) => b.holes)
+            ),
+            active = new Set([...copper, ...ep.map((e) => e.hole)]);
+          const net = (h) => netOfGroup[find(h)],
+            pkg = {};
+          ep.forEach((e) => (pkg[e.hole] = e.ref));
+          const risky = [];
+          active.forEach((h) => {
+            const [r, c] = rc(h);
+            [
+              [r, c + 1],
+              [r + 1, c],
+            ].forEach(([r2, c2]) => {
+              const h2 = hole(r2, c2);
+              if (!active.has(h2) || !(copper.has(h) || copper.has(h2))) return;
+              const a = net(h),
+                b = net(h2);
+              if (a && b && a !== b && !(pkg[h] && pkg[h] === pkg[h2]))
+                risky.push([h, h2, a, b]);
+            });
+          });
+          const nets = Object.keys(EXPECT).length,
+            pins = listed.size;
+          return {
+            ok: errors.length === 0,
+            errors,
+            warnings,
+            nets,
+            pins,
+            wires: L.wires.length,
+            links: L.bridges.length,
+            risky,
+          };
+        }
+
+        // ---- drawing -------------------------------------------------------------
+        const SEGS = {
+          0: 'abcdef',
+          1: 'bc',
+          2: 'abdeg',
+          3: 'abcdg',
+          4: 'bcfg',
+          5: 'acdfg',
+          6: 'acdefg',
+          7: 'abc',
+          8: 'abcdefg',
+          9: 'abcdfg',
+        }; // CD4513: 6 and 9 with tails
+        const BANDC = {
+          brown: '#7a4a24',
+          black: '#1b1b1b',
+          red: '#c8322a',
+          orange: '#e07b1f',
+          yellow: '#e8c21c',
+          violet: '#7d4bb3',
+          gold: '#c9a227',
+        };
+        const netColor = (n) => {
+          n = (n || '').replace("'", '');
+          if (n === 'VCC') return 'var(--n-vcc)';
+          if (n === 'GND') return 'var(--n-gnd)';
+          if (n === 'CLK') return 'var(--n-clk)';
+          if (n === 'RST') return 'var(--n-rst)';
+          if (/^[TU][ABCD]$/.test(n)) return 'var(--n-bcd)';
+          if (/^[TU][a-g]$/.test(n)) return 'var(--n-seg)';
+          return 'var(--n-tim)';
+        };
+        // one seven-segment glyph, centred on 0,0, w × h
+        function glyph(w, h, on) {
+          const t = w * 0.17,
+            x0 = -w / 2,
+            y0 = -h / 2,
+            hm = h / 2,
+            sk = 0.09;
+          const H = (x, y, l) =>
+            `M${x + t / 2},${y} l${t / 2},${-t / 2} h${l - 2 * t} l${t / 2},${t / 2} l${-t / 2},${t / 2} h${-(l - 2 * t)} z`;
+          const V = (x, y, l) =>
+            `M${x},${y + t / 2} l${t / 2},${t / 2} v${l - 2 * t} l${-t / 2},${t / 2} l${-t / 2},${-t / 2} v${-(l - 2 * t)} z`;
+          const s = {
+            a: H(x0, y0, w),
+            g: H(x0, 0, w),
+            d: H(x0, -y0, w),
+            f: V(x0, y0, hm),
+            b: V(-x0, y0, hm),
+            e: V(x0, 0, hm),
+            c: V(-x0, 0, hm),
+          };
+          return (
+            `<g transform="skewX(${-sk * 57})">` +
+            Object.entries(s)
+              .map(
+                ([k, d]) =>
+                  `<path d="${d}" class="seg${on.includes(k) ? ' lit' : ''}"/>`
+              )
+              .join('') +
+            `</g>`
+          );
+        }
+
+        function draw(L, o = {}) {
+          const P = 22,
+            OX = 118,
+            OY = 46,
+            mirror = !!o.mirror;
+          const xy = (h) => {
+            const [r, c] = rc(h);
+            return [OX + ((mirror ? L.cols + 1 - c : c) - 1) * P, OY + r * P];
+          };
+          const T = (x, y, t, a = 'middle', cls = 'pbt') =>
+            `<text x="${x}" y="${y}" text-anchor="${a}" class="${cls}">${t}</text>`;
+          const joint = (q) =>
+            `<circle cx="${q[0]}" cy="${q[1]}" r="5" class="pb-joint"/>`;
+          const pts = (hs) => hs.map((h) => xy(h).join(',')).join(' ');
+          const lab = (M, d) => {
+            const dx = (d?.[0] ?? 0) * (mirror ? -1 : 1),
+              dy = d?.[1] ?? 0;
+            return [
+              M[0] + dx,
+              M[1] + dy,
+              dx === 0 ? 'middle' : dx > 0 ? 'start' : 'end',
+            ];
+          };
+          const W = OX * 2 + (L.cols - 1) * P,
+            Hh = OY + (L.rows - 1) * P + 40;
+          const bx = OX - P * 0.9,
+            by = OY - P * 0.9,
+            bw = (L.cols - 1) * P + P * 1.8,
+            bh = (L.rows - 1) * P + P * 1.8;
+          let s = `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" class="pb-board"/>`;
+          for (let c = 1; c <= L.cols; c++)
+            s += T(xy('A' + c)[0], by - 7, c, 'middle', 'pbl');
+          const rlx = mirror ? bx - 8 : bx + bw + 8;
+          for (let r = 0; r < L.rows; r++)
+            s += T(
+              rlx,
+              OY + r * P + 3.5,
+              ROWS[r],
+              mirror ? 'end' : 'start',
+              'pbl'
+            );
+          for (let r = 0; r < L.rows; r++)
+            for (let c = 1; c <= L.cols; c++) {
+              const [x, y] = xy(ROWS[r] + c);
+              s += `<circle cx="${x}" cy="${y}" r="4.6" class="pb-pad"/><circle cx="${x}" cy="${y}" r="1.7" class="pb-hole"/>`;
+            }
+
+          // copper-side links
+          [...L.rails.map((l) => ({ ...l, rail: true })), ...L.bridges].forEach(
+            (l) => {
+              const p = pts(l.holes),
+                c = netColor(l.net);
+              s += mirror
+                ? `<polyline points="${p}" class="pb-solder" style="stroke-width:${l.rail ? 7 : 6}"/><polyline points="${p}" class="pb-core" style="stroke:${c}"/>`
+                : `<polyline points="${p}" class="pb-under" style="stroke:${c};stroke-width:${l.rail ? 4 : 2}${l.rail ? '' : ';stroke-dasharray:3 3'}"/>`;
+            }
+          );
+          const mid = xy('A15')[0] + (mirror ? -P / 2 : P / 2);
+          s +=
+            T(mid, OY + P - 9, '+5 V rail · row B') +
+            T(mid, OY + 18 * P + 17, 'GND rail · row S');
+
+          // solder-side insulated wires (drawn fully on the solder view; only the highlighted one on the component view)
+          const wireSvg = (w, ghost) => {
+            const a = xy(w.path[0]),
+              b = xy(w.path[w.path.length - 1]),
+              c = netColor(w.net);
+            const dx = b[0] - a[0],
+              dy = b[1] - a[1],
+              bend = Math.min(18, Math.hypot(dx, dy) * 0.12);
+            const d = `M${a} Q${(a[0] + b[0]) / 2 - (dy / Math.hypot(dx, dy || 1)) * bend},${(a[1] + b[1]) / 2 + (dx / Math.hypot(dx || 1, dy)) * bend} ${b}`;
+            return (
+              `<g class="pb-wire${ghost ? ' ghost' : ''}${o.hl === w.id ? ' hl' : ''}" data-w="${w.id}"><title>${w.id}: ${w.note}</title><path d="${d}" class="w-halo"/><path d="${d}" class="w" style="stroke:${c}"/>` +
+              [a, b]
+                .map(
+                  (q) =>
+                    `<circle cx="${q[0]}" cy="${q[1]}" r="3.4" style="fill:${c}"/>`
+                )
+                .join('') +
+              `</g>`
+            );
+          };
+
+          // packages
+          L.ics.forEach((ic) => {
+            const pins = pinHoles(ic),
+              xs = pins.map((h) => xy(h)[0]),
+              ys = pins.map((h) => xy(h)[1]);
+            const x0 = Math.min(...xs),
+              x1 = Math.max(...xs),
+              y0 = Math.min(...ys),
+              y1 = Math.max(...ys),
+              cx = (x0 + x1) / 2,
+              cy = (y0 + y1) / 2;
+            const [p1x, p1y] = xy(pins[0]);
+            if (mirror) {
+              s +=
+                ic.orient === 'h'
+                  ? `<rect x="${x0 - P * 0.55}" y="${y0 - 8}" width="${x1 - x0 + P * 1.1}" height="${y1 - y0 + 16}" rx="3" class="pb-ghost"/>`
+                  : `<rect x="${x0 - 8}" y="${y0 - P * 0.55}" width="${x1 - x0 + 16}" height="${y1 - y0 + P * 1.1}" rx="3" class="pb-ghost"/>`;
+              pins.forEach((h, i) => {
+                const [x, y] = xy(h);
+                s +=
+                  joint([x, y]) +
+                  (ic.orient === 'h'
+                    ? T(x, y + (y === y1 ? 15 : -8), i + 1, 'middle', 'pbn')
+                    : T(
+                        x + (x === x0 ? 9 : -9),
+                        y + 3.5,
+                        i + 1,
+                        x === x0 ? 'start' : 'end',
+                        'pbn'
+                      ));
+              });
+              s += T(cx, cy + 4, `${ic.ref} ↕`, 'middle', 'pbt pbg');
+              return;
+            }
+            pins.forEach((h) => {
+              const [x, y] = xy(h);
+              s +=
+                ic.orient === 'h'
+                  ? `<rect x="${x - 3}" y="${y - 4}" width="6" height="8" class="pb-leg"/>`
+                  : `<rect x="${x - 4}" y="${y - 3}" width="8" height="6" class="pb-leg"/>`;
+            });
+            if (ic.orient === 'h') {
+              const L0 = x0 - P * 0.5,
+                R0 = x1 + P * 0.5;
+              s += `<rect x="${L0}" y="${y0 + 6}" width="${R0 - L0}" height="${y1 - y0 - 12}" rx="3" class="pb-chip"/><path d="M${L0},${cy - 6} a6,6 0 0 1 0,12 z" class="pb-notch"/>`;
+              s += `<circle cx="${p1x}" cy="${p1y - 13}" r="3" class="pb-dot"/>`;
+              s += `<text x="${cx}" y="${cy - 1}" text-anchor="middle" class="pb-chipt">${ic.label}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" class="pb-chipt" style="opacity:.7">${ic.ref}</text>`;
+            } else {
+              const top = y0 - P * 0.55,
+                bot = y1 + P * 0.55;
+              s += `<rect x="${x0 + 6}" y="${top}" width="${x1 - x0 - 12}" height="${bot - top}" rx="3" class="pb-chip"/><path d="M${cx - 6},${top} a6,6 0 0 0 12,0 z" class="pb-notch"/>`;
+              s += `<circle cx="${p1x + 13}" cy="${p1y}" r="3" class="pb-dot"/>`;
+              s += `<text x="${cx}" y="${cy - 2}" text-anchor="middle" class="pb-chipt" transform="rotate(-90 ${cx} ${cy})">${ic.label} · ${ic.ref}</text>`;
+            }
+          });
+          (L.displays || []).forEach((d, i) => {
+            const pins = pinHoles(d),
+              xs = pins.map((h) => xy(h)[0]),
+              ys = pins.map((h) => xy(h)[1]);
+            const x0 = Math.min(...xs),
+              x1 = Math.max(...xs),
+              y0 = Math.min(...ys),
+              y1 = Math.max(...ys),
+              cx = (x0 + x1) / 2,
+              cy = (y0 + y1) / 2;
+            if (mirror) {
+              s += `<rect x="${x0 - P * 0.5}" y="${y0 - P * 0.7}" width="${x1 - x0 + P}" height="${y1 - y0 + P * 1.4}" rx="3" class="pb-ghost"/>`;
+              pins.forEach((h, k) => {
+                const [x, y] = xy(h);
+                s +=
+                  joint([x, y]) +
+                  T(x, y + (y === y1 ? -8 : 15), k + 1, 'middle', 'pbn');
+              });
+              s += T(cx, cy + 4, `${d.ref} ↕`, 'middle', 'pbt pbg');
+              return;
+            }
+            const v = o.digits ? o.digits[i] : 8;
+            s += `<rect x="${x0 - P * 0.5}" y="${y0 - P * 0.7}" width="${x1 - x0 + P}" height="${y1 - y0 + P * 1.4}" rx="3" class="pb-ds"/>`;
+            s += `<g class="pb-glyph" data-k="${i}" transform="translate(${cx - 3},${cy - 4})">${glyph(46, 82, SEGS[v] || '')}</g>`;
+            s += `<circle cx="${x1 - 3}" cy="${y1 - 2}" r="3.4" class="seg"/>`;
+            s += `<text x="${x0 - P * 0.5 + 7}" y="${y0 - P * 0.7 + 13}" class="pb-chipt" style="opacity:.75">${d.ref} · ${d.label}</text>`;
+          });
+
+          // parts
+          L.parts.forEach((p) => {
+            const A = xy(p.leads[0]),
+              B = xy(p.leads[1]),
+              M = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+            const len = Math.hypot(B[0] - A[0], B[1] - A[1]),
+              ang = (Math.atan2(B[1] - A[1], B[0] - A[0]) * 180) / Math.PI;
+            const g = (inner) =>
+              `<g transform="translate(${M[0]},${M[1]}) rotate(${ang})">${inner}</g>`;
+            const showLab = !(
+              p.grp &&
+              p.lab &&
+              p.lab[0] === 0 &&
+              p.lab[1] === 0
+            );
+            const [lx, ly, la] = lab(M, p.lab),
+              label = showLab ? T(lx, ly, p.ref, la) : '';
+            if (p.kind === 'tact') {
+              const q = p.leads.map(xy),
+                mx =
+                  (Math.min(...q.map((v) => v[0])) +
+                    Math.max(...q.map((v) => v[0]))) /
+                  2,
+                my =
+                  (Math.min(...q.map((v) => v[1])) +
+                    Math.max(...q.map((v) => v[1]))) /
+                  2;
+              if (mirror) {
+                s +=
+                  q
+                    .map((v, k) =>
+                      k === 0 || k === 3
+                        ? joint(v)
+                        : `<circle cx="${v[0]}" cy="${v[1]}" r="4" class="pb-ghostj"/>`
+                    )
+                    .join('') + T(mx, my + 4, p.ref);
+                return;
+              }
+              s +=
+                q
+                  .map(
+                    (v) =>
+                      `<rect x="${v[0] - 3}" y="${v[1] - 3}" width="6" height="6" class="pb-leg"/>`
+                  )
+                  .join('') +
+                `<rect x="${mx - 26}" y="${my - 26}" width="52" height="52" rx="3" class="pb-tact"/><circle cx="${mx}" cy="${my}" r="15" class="pb-cap"/>` +
+                T(mx, my + 4, p.value, 'middle', 'pb-capt') +
+                T(mx, my + 39, p.ref);
+              return;
+            }
+            if (mirror) {
+              if (p.kind === 'smd') {
+                const bl = len * 0.78;
+                s +=
+                  `<g transform="translate(${M[0]},${M[1]}) rotate(${ang})"><rect x="${-bl / 2}" y="-9" width="${bl}" height="18" rx="2" class="pb-elec"/><rect x="${bl / 2 - 9}" y="-9" width="9" height="18" class="pb-stripe"/></g>` +
+                  `<text x="${A[0]}" y="${A[1] + 4}" text-anchor="middle" class="pb-plus">+</text>` +
+                  T(
+                    M[0] + (mirror ? -14 : 14),
+                    M[1] + 4,
+                    p.ref,
+                    mirror ? 'end' : 'start'
+                  );
+              } else s += joint(A) + joint(B) + (p.grp ? '' : label);
+              return;
+            }
+            const lead = `<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" class="pb-lead"/>`;
+            if (p.kind === 'res') {
+              const bl = Math.min(len * 0.62, 40);
+              s +=
+                lead +
+                g(
+                  `<rect x="${-bl / 2}" y="-5.5" width="${bl}" height="11" rx="5" class="pb-res"/>` +
+                    p.bands
+                      .map(
+                        (b, k) =>
+                          `<rect x="${-bl / 2 + 5 + (k * (bl - 13)) / 3}" y="-5.5" width="3" height="11" style="fill:${BANDC[b]}"/>`
+                      )
+                      .join('')
+                ) +
+                label;
+            } else if (p.kind === 'resUp') {
+              s +=
+                lead +
+                `<circle cx="${B[0]}" cy="${B[1]}" r="8" class="pb-res"/>` +
+                p.bands
+                  .slice(0, 3)
+                  .map(
+                    (b, k) =>
+                      `<rect x="${B[0] - 5.5 + k * 4}" y="${B[1] - 4}" width="3" height="8" style="fill:${BANDC[b]}"/>`
+                  )
+                  .join('') +
+                label;
+            } else if (p.kind === 'cer') {
+              s +=
+                lead +
+                g(
+                  `<ellipse rx="${Math.max(7, len * 0.3)}" ry="5.5" class="pb-cer"/>`
+                ) +
+                label;
+            } else if (p.kind === 'elec') {
+              const r = P * 0.8,
+                k = r * 0.45,
+                hh = Math.sqrt(r * r - k * k);
+              s +=
+                g(
+                  `<circle r="${r}" class="pb-elec"/><path d="M${k},${-hh} A${r},${r} 0 0 1 ${k},${hh} Z" class="pb-stripe"/>`
+                ) +
+                `<text x="${A[0]}" y="${A[1] + 4}" text-anchor="middle" class="pb-plus">+</text>` +
+                label;
+            } else if (p.kind === 'smd') {
+              const bl = len * 0.78;
+              s +=
+                g(
+                  `<rect x="${-bl / 2}" y="-9" width="${bl}" height="18" rx="2" class="pb-ghost"/>`
+                ) + T(M[0] + 14, M[1] + 4, p.ref + ' ↓', 'start');
+            }
+          });
+          // group labels for the resistor arrays
+          const grp = (refs, text, dy) => {
+            const q = L.parts
+              .filter((p) => refs(p))
+              .flatMap((p) => p.leads.map(xy));
+            if (!q.length) return '';
+            const x =
+              (Math.min(...q.map((v) => v[0])) +
+                Math.max(...q.map((v) => v[0]))) /
+              2;
+            return T(
+              x,
+              (dy < 0
+                ? Math.min(...q.map((v) => v[1]))
+                : Math.max(...q.map((v) => v[1]))) + dy,
+              text
+            );
+          };
+          if (!mirror)
+            s +=
+              grp((p) => p.grp === 'pu', 'R8–R11 · 4.7 kΩ', -13) +
+              grp((p) => p.grp === 'puU', 'R4–R7', -16);
+
+          // wires
+          L.wires.forEach((w) => {
+            if (mirror) s += wireSvg(w);
+            else s += wireSvg(w, true);
+          });
+
+          // off-board pads
+          (L.offboard || []).forEach((f) => {
+            const [x, y] = xy(f.hole);
+            if (f.ref === 'J1') {
+              const ex = mirror ? bx + bw + 40 : bx - 40,
+                c = f.pin === '+' ? 'var(--n-vcc)' : 'var(--n-gnd)';
+              s +=
+                `<line x1="${x}" y1="${y}" x2="${ex}" y2="${y}" class="w" style="stroke:${c}"/>` +
+                (mirror
+                  ? joint([x, y])
+                  : `<circle cx="${x}" cy="${y}" r="3.6" style="fill:${c}"/>`) +
+                T(
+                  ex + (mirror ? 4 : -4),
+                  y + 4,
+                  f.note,
+                  mirror ? 'start' : 'end',
+                  'pbl'
+                );
+            } else {
+              const [lx, ly, la] = lab([x, y], f.lab);
+              s +=
+                (mirror
+                  ? joint([x, y])
+                  : `<circle cx="${x}" cy="${y}" r="7.5" class="pb-ring"/>`) +
+                T(lx, ly, f.note, la);
+            }
+          });
+          return { svg: s, viewBox: `0 0 ${W} ${Hh}` };
+        }
+
+        return {
+          ROWS,
+          rc,
+          hole,
+          pinHoles,
+          endpoints,
+          keepout,
+          check,
+          draw,
+          glyph,
+          SEGS,
+          netColor,
+        };
+      })();
+      if (typeof module !== 'undefined') module.exports = BOARD;
+
+      /*LAYOUT*/
+      const LAYOUT = (() => {
+        const ROWS = 'ABCDEFGHIJKLMNOPQRST';
+        const row = (r, a, b) =>
+          Array.from({ length: b - a + 1 }, (_, i) => r + (a + i));
+        const col = (c, r1, r2) => {
+          const i1 = ROWS.indexOf(r1),
+            i2 = ROWS.indexOf(r2);
+          return Array.from(
+            { length: i2 - i1 + 1 },
+            (_, i) => ROWS[i1 + i] + c
+          );
+        };
+        const segs = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        // CD4513 top row (notch left): VDD f g a b c d e RBO → column offset of each segment output from pin 18
+        const segOff = { a: 3, b: 4, c: 5, d: 6, e: 7, f: 1, g: 2 };
+        // 5161AS pin holes relative to pin 1 (bottom-left): a b c d e f g → display pins 7 6 4 2 1 9 10
+        const dsHole = (c0, s) =>
+          ({
+            a: 'C' + (c0 + 3),
+            b: 'C' + (c0 + 4),
+            c: 'I' + (c0 + 3),
+            d: 'I' + (c0 + 1),
+            e: 'I' + c0,
+            f: 'C' + (c0 + 1),
+            g: 'C' + c0,
+          })[s];
+        const BAND = {
+          '330 Ω': ['orange', 'orange', 'brown', 'gold'],
+          '4.7 kΩ': ['yellow', 'violet', 'red', 'gold'],
+        };
+        const digit = (name, u, ds, firstR, decCol, dsCol) => {
+          const parts = [],
+            wires = [],
+            bridges = [];
+          segs.forEach((s, i) => {
+            const x = decCol + segOff[s],
+              ref = 'R' + (firstR + i);
+            parts.push({
+              ref,
+              kind: 'res',
+              leads: ['N' + x, 'J' + x],
+              value: '330 Ω',
+              bands: BAND['330 Ω'],
+              lab: [0, 0],
+              grp: name,
+              note: `${u} seg ${s} → ${ds}`,
+            });
+            bridges.push({
+              net: (name === 'tens' ? 'T' : 'U') + s,
+              holes: ['O' + x, 'N' + x],
+            });
+            wires.push({
+              id: `${name === 'tens' ? 'T' : 'U'}${s}`,
+              net: (name === 'tens' ? 'T' : 'U') + s + "'",
+              side: 'bottom',
+              path: ['J' + x, dsHole(dsCol, s)],
+              note: `${ref} → ${ds} segment ${s}`,
+            });
+          });
+          return { parts, wires, bridges };
+        };
+        const T = digit('tens', 'U4', 'DS1', 12, 12, 15),
+          U = digit('units', 'U5', 'DS2', 19, 22, 21);
+        // pull-ups: upright, +5 lead in row K, signal lead in row J
+        const pu = [
+          ['R8', 2, 'TA'],
+          ['R9', 3, 'TB'],
+          ['R10', 4, 'TC'],
+          ['R11', 5, 'TD'],
+        ];
+        // units pull-ups stand beside U2, between its Q pins (col 9) and the +5 V link on col 11
+        const puU = [
+          ['R4', 'N', 'UA'],
+          ['R7', 'O', 'UD'],
+          ['R5', 'Q', 'UB'],
+          ['R6', 'R', 'UC'],
+        ];
+        // BCD runs: [net, LS90 Q pin, pull-up node, CD4513 input]
+        const bcd = [
+          ['TA', 'N4', 'J2', 'R18'],
+          ['TB', 'Q4', 'J3', 'R12'],
+          ['TC', 'R4', 'J4', 'R13'],
+          ['TD', 'O4', 'J5', 'R17'],
+        ];
+        const bcdU = [
+          ['UA', 'N10', 'R28'],
+          ['UB', 'Q10', 'R22'],
+          ['UC', 'R10', 'R23'],
+          ['UD', 'O10', 'R27'],
+        ];
+        return {
+          cols: 30,
+          rows: 20,
+          rails: [
+            { net: 'VCC', holes: row('B', 1, 30) },
+            { net: 'GND', holes: row('S', 1, 30) },
+          ],
+          ics: [
+            {
+              ref: 'U1',
+              label: 'NE555',
+              pins: 8,
+              at: 'D9',
+              orient: 'v',
+              note: 'DIP-8 socket, pin 1 at D9, notch toward row A',
+            },
+            {
+              ref: 'U2',
+              label: '74LS90',
+              pins: 14,
+              at: 'L6',
+              orient: 'v',
+              note: 'units counter, DIP-14, pin 1 at L6, notch toward row A',
+            },
+            {
+              ref: 'U3',
+              label: '74LS90',
+              pins: 14,
+              at: 'L1',
+              orient: 'v',
+              note: 'tens counter, DIP-14, pin 1 at L1, notch toward row A',
+            },
+            {
+              ref: 'U4',
+              label: 'CD4513',
+              pins: 18,
+              at: 'R12',
+              orient: 'h',
+              note: 'tens decoder, DIP-18, pin 1 at R12, notch toward column 1',
+            },
+            {
+              ref: 'U5',
+              label: 'CD4513',
+              pins: 18,
+              at: 'R22',
+              orient: 'h',
+              note: 'units decoder, DIP-18, pin 1 at R22, notch toward column 1',
+            },
+          ],
+          displays: [
+            {
+              ref: 'DS1',
+              label: 'tens',
+              pins: 10,
+              at: 'I15',
+              orient: 'ds',
+              note: '5161AS, pin 1 at I15 (decimal point bottom-right)',
+            },
+            {
+              ref: 'DS2',
+              label: 'units',
+              pins: 10,
+              at: 'I21',
+              orient: 'ds',
+              note: '5161AS, pin 1 at I21',
+            },
+          ],
+          parts: [
+            {
+              ref: 'R1',
+              kind: 'resUp',
+              leads: ['B8', 'C8'],
+              value: '10 kΩ',
+              bands: ['brown', 'black', 'orange', 'gold'],
+              lab: [6, -13],
+              note: 'upright, body on C8 · trigger pull-up',
+            },
+            {
+              ref: 'R2',
+              kind: 'res',
+              leads: ['B13', 'F13'],
+              value: '220 kΩ',
+              bands: ['red', 'red', 'yellow', 'gold'],
+              lab: [12, 4],
+              note: 'lying flat · sets the 0.24 s one-shot',
+            },
+            {
+              ref: 'R3',
+              kind: 'resUp',
+              leads: ['I12', 'H12'],
+              value: '470 Ω',
+              bands: ['yellow', 'violet', 'brown', 'gold'],
+              lab: [0, 20],
+              note: 'upright, body on H12 · holds RESET low',
+            },
+            ...pu.map(([ref, c, net]) => ({
+              ref,
+              kind: 'resUp',
+              leads: ['K' + c, 'J' + c],
+              value: '4.7 kΩ',
+              bands: BAND['4.7 kΩ'],
+              lab: [0, 0],
+              grp: 'pu',
+              note: `upright · ${net} pull-up`,
+            })),
+            ...puU.map(([ref, r, net]) => ({
+              ref,
+              kind: 'resUp',
+              leads: [r + 11, r + 10],
+              value: '4.7 kΩ',
+              bands: BAND['4.7 kΩ'],
+              lab: [0, 0],
+              grp: 'puU',
+              note: `upright, body on ${r}10 · ${net} pull-up`,
+            })),
+            ...T.parts,
+            ...U.parts,
+            {
+              ref: 'C1',
+              kind: 'smd',
+              leads: ['E11', 'G11'],
+              value: '1 µF',
+              lab: [0, 0],
+              note: 'SMD on the solder side, under U1 · + E11, − G11',
+            },
+            {
+              ref: 'C2',
+              kind: 'cer',
+              leads: ['G13', 'H13'],
+              value: '10 nF (103)',
+              lab: [12, 4],
+              note: '555 control pin',
+            },
+            {
+              ref: 'C3',
+              kind: 'cer',
+              leads: ['C12', 'C9'],
+              value: '100 nF (104)',
+              lab: [0, -9],
+              note: 'U1 decoupling, across the notch end',
+            },
+            {
+              ref: 'C4',
+              kind: 'cer',
+              leads: ['K10', 'H10'],
+              value: '100 nF (104)',
+              lab: [12, 4],
+              note: '74LS90 decoupling',
+            },
+            {
+              ref: 'C5',
+              kind: 'cer',
+              leads: ['P21', 'R21'],
+              value: '100 nF (104)',
+              lab: [0, 0],
+              note: 'decoder decoupling, in the gap between U4 and U5',
+            },
+            {
+              ref: 'C6',
+              kind: 'elec',
+              leads: ['G1', 'G2'],
+              value: '10 µF',
+              lab: [0, 22],
+              note: 'bulk · + in G1, stripe in G2',
+            },
+            {
+              ref: 'SW1',
+              kind: 'tact',
+              leads: ['E7', 'E4', 'G7', 'G4'],
+              value: 'COUNT',
+              lab: [0, 0],
+              note: '6 × 6 mm tactile · legs E4 E7 G4 G7',
+            },
+            {
+              ref: 'R26',
+              kind: 'resUp',
+              leads: ['B6', 'C6'],
+              value: '100 kΩ',
+              bands: ['brown', 'black', 'yellow', 'gold'],
+              lab: [-10, 34],
+              note: 'upright, body on C6 · button-node pull-up',
+            },
+            {
+              ref: 'C7',
+              kind: 'cer',
+              leads: ['D8', 'D6'],
+              value: '100 nF (104)',
+              lab: [0, 4],
+              note: 'couples the button to TRIG (edge only)',
+            },
+            {
+              ref: 'SW2',
+              kind: 'tact',
+              leads: ['C30', 'C27', 'E30', 'E27'],
+              value: 'RESET',
+              lab: [0, 0],
+              note: '6 × 6 mm tactile · legs C27 C30 E27 E30',
+            },
+          ],
+          offboard: [
+            { ref: 'J1', pin: '+', hole: 'B1', note: 'USB-C VBUS' },
+            { ref: 'J1', pin: '-', hole: 'S1', note: 'USB-C GND' },
+            { ref: 'IR1', pin: 'VCC', hole: 'C5', note: 'IR+', lab: [-10, 4] },
+            {
+              ref: 'IR1',
+              pin: 'OUT',
+              hole: 'C7',
+              note: 'IR out',
+              lab: [0, -13],
+            },
+            { ref: 'IR1', pin: 'GND', hole: 'G3', note: 'IR −', lab: [0, 20] },
+          ],
+          bridges: [
+            // +5 V distribution
+            { net: 'VCC', holes: col(1, 'B', 'K') },
+            { net: 'VCC', holes: row('K', 1, 11) },
+            { net: 'VCC', holes: [...col(11, 'K', 'R')] },
+            { net: 'VCC', holes: ['P11', 'P12'] },
+            { net: 'VCC', holes: row('P', 12, 29) },
+            { net: 'VCC', holes: ['O12', 'P12'] },
+            { net: 'VCC', holes: ['P14', 'Q14', 'R14', 'R15'] },
+            { net: 'VCC', holes: ['O22', 'P22'] },
+            { net: 'VCC', holes: ['P24', 'Q24', 'R24', 'R25'] },
+            { net: 'VCC', holes: ['K2', 'L2', 'M2', 'N2', 'N1', 'O1', 'P1'] },
+            { net: 'VCC', holes: ['K7', 'L7', 'M7', 'N7', 'N6', 'O6', 'P6'] },
+            { net: 'VCC', holes: ['D12', 'C12', 'B12'] },
+            { net: 'VCC', holes: ['B5', 'C5'] },
+            { net: 'VCC', holes: ['B30', 'C30'] },
+            // ground
+            { net: 'GND', holes: row('H', 2, 13) },
+            { net: 'GND', holes: ['Q1', 'R1', 'S1'] },
+            { net: 'GND', holes: ['P4', 'P3', 'Q3', 'R3', 'S3'] },
+            { net: 'GND', holes: ['Q6', 'R6', 'S6'] },
+            { net: 'GND', holes: ['P9', 'P8', 'Q8', 'R8', 'S8'] },
+            { net: 'GND', holes: ['R16', 'S16'] },
+            { net: 'GND', holes: ['R19', 'S19'] },
+            { net: 'GND', holes: ['R20', 'S20'] },
+            { net: 'GND', holes: ['R26', 'S26'] },
+            { net: 'GND', holes: ['R29', 'S29'] },
+            { net: 'GND', holes: ['R30', 'S30'] },
+            { net: 'GND', holes: ['R21', 'S21'] },
+            { net: 'GND', holes: ['D9', 'D10', 'E10', 'F10', 'G10', 'H10'] },
+            { net: 'GND', holes: ['G11', 'G10'] },
+            { net: 'GND', holes: ['C9', 'D9'] },
+            { net: 'GND', holes: ['G4', 'H4'] },
+            { net: 'GND', holes: ['G3', 'H3'] },
+            { net: 'GND', holes: ['G2', 'H2'] },
+            { net: 'GND', holes: [...col(17, 'C', 'I')] },
+            { net: 'GND', holes: row('D', 17, 23) },
+            { net: 'GND', holes: [...col(23, 'C', 'I')] },
+            // 555 timing / trigger / output
+            { net: 'THR', holes: ['E12', 'F12', 'F13'] },
+            { net: 'THR', holes: ['E11', 'E12'] },
+            { net: 'CV', holes: ['G12', 'G13'] },
+            { net: 'TRIG', holes: ['C7', 'C8', 'D8', 'E8', 'E9'] },
+            { net: 'SWB', holes: ['C6', 'D6', 'E6', 'E7'] },
+            { net: 'CLK', holes: ['F9', 'F8'] },
+            { net: 'RST', holes: ['E27', 'F27'] },
+            ...puU.map(([, r, net]) => ({ net, holes: [r + 9, r + 10] })),
+            ...T.bridges,
+            ...U.bridges,
+          ],
+          wires: [
+            {
+              id: 'P1',
+              net: 'VCC',
+              side: 'bottom',
+              path: ['G9', 'D12'],
+              note: '555 pin 4 (reset) → pin 8, across the chip',
+            },
+            {
+              id: 'CK',
+              net: 'CLK',
+              side: 'bottom',
+              path: ['F8', 'L9'],
+              note: '555 out → U2 pin 14 (units clock)',
+            },
+            {
+              id: 'CU',
+              net: 'UA',
+              side: 'bottom',
+              path: ['N9', 'L6'],
+              note: 'U2 QA → U2 pin 1 (BCD mode)',
+            },
+            {
+              id: 'CT',
+              net: 'TA',
+              side: 'bottom',
+              path: ['N4', 'L1'],
+              note: 'U3 QA → U3 pin 1 (BCD mode)',
+            },
+            {
+              id: 'CY',
+              net: 'UD',
+              side: 'bottom',
+              path: ['O9', 'L4'],
+              note: 'units QD → tens clock (carry)',
+            },
+            {
+              id: 'RS1',
+              net: 'RST',
+              side: 'bottom',
+              path: ['F27', 'I12'],
+              note: 'RESET button → R3 pull-down',
+            },
+            {
+              id: 'RS2',
+              net: 'RST',
+              side: 'bottom',
+              path: ['I12', 'M6'],
+              note: '→ U2 pin 2 (R0)',
+            },
+            {
+              id: 'RS3',
+              net: 'RST',
+              side: 'bottom',
+              path: ['M6', 'M1'],
+              note: '→ U3 pin 2 (R0)',
+            },
+            {
+              id: 'GF',
+              net: 'GND',
+              side: 'bottom',
+              path: ['H11', 'S10'],
+              note: 'ground feed for the row-H bus → GND rail',
+            },
+            {
+              id: 'GC',
+              net: 'GND',
+              side: 'bottom',
+              path: ['D20', 'R20'],
+              note: 'display commons → U4 VSS',
+            },
+            ...bcd.flatMap(([net, q, n, d]) => [
+              {
+                id: net + '1',
+                net,
+                side: 'bottom',
+                path: [q, n],
+                note: `${net}: counter → pull-up`,
+              },
+              {
+                id: net + '2',
+                net,
+                side: 'bottom',
+                path: [q, d],
+                note: `${net}: counter → decoder`,
+              },
+            ]),
+            ...bcdU.map(([net, n, d]) => ({
+              id: net,
+              net,
+              side: 'bottom',
+              path: [n, d],
+              note: `${net}: counter → decoder`,
+            })),
+            ...T.wires,
+            ...U.wires,
+          ],
+        };
+      })();
+      /*END*/
+      if (typeof module !== 'undefined') module.exports = LAYOUT;
+
+      /* Intended circuit, pin by pin. U2/U3 74LS90 (units/tens), U4/U5 CD4513 (tens/units), DS1/DS2 5161AS (tens/units). */
+      const NETLIST = (() => {
+        const SEG = {
+          a: [15, 7],
+          b: [14, 6],
+          c: [13, 4],
+          d: [12, 2],
+          e: [11, 1],
+          f: [17, 9],
+          g: [16, 10],
+        }; // [CD4513 pin, display pin]
+        const segR = { tens: 12, units: 19 }; // R12–R18, R19–R25 in a..g order
+        const N = {
+          VCC: [
+            'J1.+',
+            'IR1.VCC',
+            'U1.8',
+            'U1.4',
+            'U2.5',
+            'U2.3',
+            'U3.5',
+            'U3.3',
+            'U4.18',
+            'U4.3',
+            'U4.4',
+            'U5.18',
+            'U5.3',
+            'U5.4',
+            'R1.1',
+            'R2.1',
+            'R26.1',
+            ...[4, 5, 6, 7, 8, 9, 10, 11].map((i) => `R${i}.1`),
+            'SW2.1',
+            ...[3, 4, 5, 6].map((i) => `C${i}.1`),
+            'U2.4',
+            'U3.4',
+          ],
+          GND: [
+            'J1.-',
+            'IR1.GND',
+            'U1.1',
+            'U2.10',
+            'U2.6',
+            'U2.7',
+            'U3.10',
+            'U3.6',
+            'U3.7',
+            'U4.9',
+            'U4.5',
+            'U4.8',
+            'U5.9',
+            'U5.5',
+            'U5.8',
+            'DS1.3',
+            'DS1.8',
+            'DS2.3',
+            'DS2.8',
+            'C1.2',
+            'C2.2',
+            ...[3, 4, 5, 6].map((i) => `C${i}.2`),
+            'SW1.4',
+            'R3.2',
+          ],
+          TRIG: ['U1.2', 'R1.2', 'IR1.OUT', 'C7.1'],
+          SWB: ['SW1.1', 'R26.2', 'C7.2'],
+          THR: ['U1.6', 'U1.7', 'R2.2', 'C1.1'],
+          CV: ['U1.5', 'C2.1'],
+          CLK: ['U1.3', 'U2.14'],
+          RST: ['U2.2', 'U3.2', 'R3.1', 'SW2.4'],
+          UA: ['U2.12', 'U2.1', 'U5.7', 'R4.2'],
+          UB: ['U2.9', 'U5.1', 'R5.2'],
+          UC: ['U2.8', 'U5.2', 'R6.2'],
+          UD: ['U2.11', 'U5.6', 'U3.14', 'R7.2'],
+          TA: ['U3.12', 'U3.1', 'U4.7', 'R8.2'],
+          TB: ['U3.9', 'U4.1', 'R9.2'],
+          TC: ['U3.8', 'U4.2', 'R10.2'],
+          TD: ['U3.11', 'U4.6', 'R11.2'],
+        };
+        Object.entries(SEG).forEach(([s, [dp, sp]], i) => {
+          N[`T${s}`] = [`U4.${dp}`, `R${segR.tens + i}.1`];
+          N[`T${s}'`] = [`R${segR.tens + i}.2`, `DS1.${sp}`];
+          N[`U${s}`] = [`U5.${dp}`, `R${segR.units + i}.1`];
+          N[`U${s}'`] = [`R${segR.units + i}.2`, `DS2.${sp}`];
+        });
+        return N;
+      })();
+      if (typeof module !== 'undefined') module.exports = NETLIST;
+
+      /* Schematic plate. Exposes SCH.setDigits(tens, units), SCH.setClk(on), SCH.press(which, on). */
+      const SCH = (() => {
+        const svg = document.getElementById('sch');
+        let o = '';
+        const P = (pts) => pts.map((p) => p.join(',')).join(' ');
+        const W = (pts, cls = '', id = '') =>
+          (o += `<polyline class="wire ${cls}"${id ? ` id="${id}"` : ''} points="${P(pts)}"/>`);
+        const D = (x, y) =>
+          (o += `<circle class="dot" cx="${x}" cy="${y}" r="3.3"/>`);
+        const t = (x, y, s, cls = '', a = 'start') =>
+          (o += `<text x="${x}" y="${y}" class="${cls}" text-anchor="${a}">${s}</text>`);
+        const zig = (x1, y1, x2, y2, n = 6, amp = 6) => {
+          const pts = [[x1, y1]],
+            dx = (x2 - x1) / n,
+            dy = (y2 - y1) / n,
+            vert = x1 === x2;
+          for (let i = 0; i < n; i++)
+            pts.push([
+              x1 + dx * (i + 0.5) + (vert ? (i % 2 ? -amp : amp) : 0),
+              y1 + dy * (i + 0.5) + (vert ? 0 : i % 2 ? -amp : amp),
+            ]);
+          pts.push([x2, y2]);
+          return pts;
+        };
+        const resV = (x, y1, y2, b1, b2, cls = '', amp = 6) => {
+          W(
+            [
+              [x, y1],
+              [x, b1],
+            ],
+            cls
+          );
+          W(zig(x, b1, x, b2, 6, amp), cls);
+          W(
+            [
+              [x, b2],
+              [x, y2],
+            ],
+            cls
+          );
+        };
+        const resH = (y, x1, x2, b1, b2, cls = '') => {
+          W(
+            [
+              [x1, y],
+              [b1, y],
+            ],
+            cls
+          );
+          W(zig(b1, y, b2, y, 6, 5), cls);
+          W(
+            [
+              [b2, y],
+              [x2, y],
+            ],
+            cls
+          );
+        };
+        const capV = (x, y1, y2, m, cls = '', polar = false, w = 11) => {
+          W(
+            [
+              [x, y1],
+              [x, m - 4],
+            ],
+            cls
+          );
+          W(
+            [
+              [x - w, m - 4],
+              [x + w, m - 4],
+            ],
+            cls
+          );
+          W(
+            [
+              [x - w, m + 4],
+              [x + w, m + 4],
+            ],
+            cls
+          );
+          W(
+            [
+              [x, m + 4],
+              [x, y2],
+            ],
+            cls
+          );
+          if (polar) t(x - w - 3, m - 7, '+', 'pn', 'end');
+        };
+        const vcc = (x, y, up = true) => {
+          const e = up ? y - 14 : y + 14;
+          W(
+            [
+              [x, y],
+              [x, e],
+            ],
+            'w-vcc'
+          );
+          o += `<line x1="${x - 7}" y1="${e}" x2="${x + 7}" y2="${e}" stroke="var(--n-vcc)" stroke-width="2"/>`;
+          t(x, up ? e - 4 : e + 12, '+5', 'pn', 'middle');
+        };
+        const gnd = (x, y, len = 12) => {
+          W([
+            [x, y],
+            [x, y + len],
+          ]);
+          [12, 7, 3].forEach(
+            (h, i) =>
+              (o += `<line x1="${x - h}" y1="${y + len + i * 4}" x2="${x + h}" y2="${y + len + i * 4}" stroke="var(--n-gnd)" stroke-width="1.8"/>`)
+          );
+        };
+        const hopH = (x1, x2, y, hops, cls, id = '') => {
+          // horizontal wire with semicircle hops over vertical wires
+          let d = `M${x1},${y}`;
+          [...hops]
+            .sort((a, b) => (x2 > x1 ? a - b : b - a))
+            .forEach((h) => {
+              const s = x2 > x1 ? 1 : -1;
+              d += ` L${h - 5 * s},${y} A5,5 0 0 ${s > 0 ? 1 : 0} ${h + 5 * s},${y}`;
+            });
+          d += ` L${x2},${y}`;
+          o += `<path class="wire ${cls}"${id ? ` id="${id}"` : ''} d="${d}"/>`;
+        };
+        const pushV = (x, y1, y2, id, label, cls, left = false) => {
+          // vertical push button between y1 (top) and y2
+          const m = (y1 + y2) / 2;
+          W(
+            [
+              [x, y1],
+              [x, m - 9],
+            ],
+            cls
+          );
+          W(
+            [
+              [x, m + 9],
+              [x, y2],
+            ],
+            cls
+          );
+          o += `<circle cx="${x}" cy="${m - 9}" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/><circle cx="${x}" cy="${m + 9}" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/>`;
+          o += `<g id="${id}"><g class="sw-act"><line x1="${x + 12}" y1="${m - 15}" x2="${x + 12}" y2="${m + 3}" stroke="var(--n-gnd)" stroke-width="1.8"/><line x1="${x + 6}" y1="${m - 15}" x2="${x + 18}" y2="${m - 15}" stroke="var(--n-gnd)" stroke-width="1.8"/></g></g>`;
+          if (left) {
+            t(x - 8, m + 4, label[0], 'ref', 'end');
+            t(x - 8, m + 17, label[1], 'val', 'end');
+          } else {
+            t(x + 20, m + 4, label[0], 'ref');
+            t(x + 20, m + 17, label[1], 'val');
+          }
+        };
+        const box = (x, y, w, h, title, ref) => {
+          o += `<rect class="box" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`;
+          t(x + w / 2, y + h / 2 - 2, title, 'ttl', 'middle');
+          t(x + w / 2, y + h / 2 + 15, ref, 'pn', 'middle');
+        };
+        const pinL = (x, y, n, name, cls = '') => {
+          W(
+            [
+              [x - 14, y],
+              [x, y],
+            ],
+            cls
+          );
+          t(x - 4, y - 4, n, 'pn', 'end');
+          t(x + 5, y + 4, name, 'pn');
+        };
+        const pinR = (x, y, n, name, cls = '') => {
+          W(
+            [
+              [x, y],
+              [x + 14, y],
+            ],
+            cls
+          );
+          t(x + 4, y - 4, n, 'pn');
+          t(x - 5, y + 4, name, 'pn', 'end');
+        };
+        const pinT = (x, y, n, name) => {
+          W([
+            [x, y - 12],
+            [x, y],
+          ]);
+          t(x + 3, y - 3, n, 'pn');
+          t(x, y + 13, name, 'pn', 'middle');
+        };
+        const pinB = (x, y, n, name) => {
+          W([
+            [x, y],
+            [x, y + 12],
+          ]);
+          t(x + 3, y + 10, n, 'pn');
+          t(x, y - 5, name, 'pn', 'middle');
+        };
+
+        // ---- power and rails -------------------------------------------------
+        const TOP = 34,
+          BOT = 606;
+        W(
+          [
+            [72, TOP],
+            [470, TOP],
+          ],
+          'w-vcc'
+        );
+        W([
+          [72, BOT],
+          [470, BOT],
+        ]);
+        t(150, TOP - 8, '+5 V', 'ref');
+        t(150, BOT + 16, 'GND', 'ref');
+        o += `<rect class="box" x="40" y="270" width="64" height="84" rx="3"/>`;
+        t(72, 294, 'J1', 'ref', 'middle');
+        t(72, 312, 'USB-C', 'val', 'middle');
+        t(72, 328, '5 V', 'val', 'middle');
+        W(
+          [
+            [72, 270],
+            [72, TOP],
+          ],
+          'w-vcc'
+        );
+        W([
+          [72, 354],
+          [72, BOT],
+        ]);
+        D(72, TOP);
+        D(72, BOT);
+        t(40, 372, 'CC1, CC2:', 'pn');
+        t(40, 385, '5.1 kΩ → GND', 'pn');
+        t(40, 398, 'on the breakout', 'pn');
+        capV(128, TOP, BOT, 450, '', true);
+        D(128, TOP);
+        D(128, BOT);
+        t(144, 446, 'C6', 'ref');
+        t(144, 461, '10 µ', 'val');
+
+        // ---- IR receiver, trigger network, COUNT ----------------------------
+        const TX = 250; // trigger column
+        o += `<rect class="box" x="164" y="120" width="56" height="70" rx="3"/>`;
+        t(192, 108, 'IR1', 'ref', 'middle');
+        t(192, 150, '38 kHz', 'pn', 'middle');
+        t(192, 163, 'receiver', 'pn', 'middle');
+        W(
+          [
+            [220, 132],
+            [232, 132],
+          ],
+          'w-vcc'
+        );
+        vcc(232, 132);
+        t(224, 128, '+', 'pn');
+        W([
+          [220, 178],
+          [232, 178],
+        ]);
+        gnd(232, 178, 8);
+        t(224, 174, '−', 'pn');
+        W(
+          [
+            [220, 155],
+            [TX, 155],
+          ],
+          'w-tim'
+        );
+        t(224, 151, 'OUT', 'pn');
+        D(TX, 155);
+        resV(TX, TOP, 155, 58, 118, 'w-tim');
+        D(TX, TOP);
+        t(TX - 10, 84, 'R1', 'ref', 'end');
+        t(TX - 10, 99, '10 k', 'val', 'end');
+        W(
+          [
+            [TX, 155],
+            [TX, 240],
+          ],
+          'w-tim'
+        );
+        D(TX, 240);
+        capV(TX, 240, 300, 268, 'w-tim');
+        t(TX + 14, 266, 'C7', 'ref');
+        t(TX + 14, 280, '100 n', 'val');
+        D(TX, 300);
+        W(
+          [
+            [TX, 300],
+            [210, 300],
+          ],
+          'w-tim'
+        );
+        resV(210, 252, 300, 258, 294, 'w-tim', 5);
+        vcc(210, 252);
+        t(200, 280, 'R26', 'ref', 'end');
+        t(200, 294, '100 k', 'val', 'end');
+        pushV(TX, 300, 384, 'schSW1', ['SW1', 'COUNT'], 'w-tim', true);
+        W([
+          [TX, 384],
+          [TX, BOT],
+        ]);
+        D(TX, BOT);
+
+        // ---- NE555 one-shot ---------------------------------------------------
+        const BX = 340,
+          BY = 190,
+          BW = 110,
+          BH = 170;
+        box(BX, BY, BW, BH, 'NE555', 'U1');
+        hopH(TX, BX - 14, 240, [], 'w-tim');
+        pinL(BX, 240, 2, 'TRIG', 'w-tim');
+        pinL(BX, 290, 6, 'THR', 'w-tim');
+        pinL(BX, 320, 7, 'DIS', 'w-tim');
+        const RX = 300;
+        W(
+          [
+            [RX, 290],
+            [BX - 14, 290],
+          ],
+          'w-tim'
+        );
+        W(
+          [
+            [RX, 320],
+            [BX - 14, 320],
+          ],
+          'w-tim'
+        );
+        W(
+          [
+            [RX, 290],
+            [RX, 320],
+          ],
+          'w-tim'
+        );
+        D(RX, 290);
+        D(RX, 320);
+        resV(RX, TOP, 290, 150, 210, 'w-tim');
+        D(RX, TOP);
+        t(RX + 8, 168, 'R2', 'ref');
+        t(RX + 8, 183, '220 k', 'val');
+        capV(RX, 320, BOT, 450, 'w-tim', true);
+        D(RX, BOT);
+        t(RX + 15, 446, 'C1', 'ref');
+        t(RX + 15, 461, '1 µ', 'val');
+        pinT(370, BY, 8, 'VCC');
+        W(
+          [
+            [370, BY - 12],
+            [370, TOP],
+          ],
+          'w-vcc'
+        );
+        D(370, TOP);
+        pinT(420, BY, 4, 'RST');
+        W(
+          [
+            [420, BY - 12],
+            [420, TOP],
+          ],
+          'w-vcc'
+        );
+        D(420, TOP);
+        pinB(370, BY + BH, 1, 'GND');
+        W([
+          [370, BY + BH + 12],
+          [370, BOT],
+        ]);
+        D(370, BOT);
+        pinB(420, BY + BH, 5, 'CV');
+        capV(420, BY + BH + 12, BOT, 450);
+        D(420, BOT);
+        t(434, 446, 'C2', 'ref');
+        t(434, 461, '10 n', 'val');
+        capV(462, TOP, BOT, 520);
+        D(462, TOP);
+        D(462, BOT);
+        t(470, 516, 'C3', 'ref');
+        t(470, 531, '100 n', 'val');
+        t(
+          BX + BW / 2,
+          BY + BH + 48,
+          't = 1.1 · R2 · C1 ≈ 0.24 s',
+          'val',
+          'middle'
+        );
+
+        // ---- counters ------------------------------------------------------------
+        const CX = 560,
+          CW = 120,
+          CH = 180,
+          rows = [
+            { y: 80, ref: 'U3', name: 'TENS', n: 0 },
+            { y: 360, ref: 'U2', name: 'UNITS', n: 1 },
+          ];
+        const qy = (y0) => [y0 + 30, y0 + 65, y0 + 100, y0 + 135]; // QA QB QC QD
+        const RSTX = CX - 45,
+          LOOPX = CX - 24;
+        rows.forEach((r) => {
+          const y0 = r.y;
+          box(CX, y0, CW, CH, '74LS90', r.ref + ' · BCD');
+          t(CX, y0 - 30, r.name, 'cap');
+          pinL(CX, y0 + 30, 1, 'CKB');
+          pinL(CX, y0 + 60, 14, 'CKA', 'w-clk');
+          pinL(CX, y0 + 100, 2, 'R0₁', 'w-rst');
+          pinL(CX, y0 + 120, 3, 'R0₂');
+          pinL(CX, y0 + 145, 6, 'R9₁');
+          pinL(CX, y0 + 165, 7, 'R9₂');
+          W(
+            [
+              [CX - 14, y0 + 120],
+              [CX - 26, y0 + 120],
+            ],
+            'w-vcc'
+          );
+          o += `<line x1="${CX - 26}" y1="${y0 + 114}" x2="${CX - 26}" y2="${y0 + 126}" stroke="var(--n-vcc)" stroke-width="2"/>`;
+          t(CX - 30, y0 + 124, '+5', 'pn', 'end');
+          W([
+            [CX - 14, y0 + 145],
+            [CX - 30, y0 + 145],
+            [CX - 30, y0 + 165],
+            [CX - 14, y0 + 165],
+          ]);
+          D(CX - 30, y0 + 165);
+          gnd(CX - 30, y0 + 165, 6);
+          ['QA', 'QB', 'QC', 'QD'].forEach((q, i) =>
+            pinR(CX + CW, qy(y0)[i], [12, 9, 8, 11][i], q, 'w-bcd')
+          );
+          // QA → CKB (BCD mode)
+          W(
+            [
+              [CX + CW + 26, qy(y0)[0]],
+              [CX + CW + 26, y0 - 12],
+              [LOOPX, y0 - 12],
+              [LOOPX, y0 + 30],
+              [CX - 14, y0 + 30],
+            ],
+            'w-bcd'
+          );
+          D(CX + CW + 26, qy(y0)[0]);
+          // pull-ups
+          const px = [CX + CW + 40, CX + CW + 54, CX + CW + 68, CX + CW + 82];
+          W(
+            [
+              [px[0], y0 - 4],
+              [px[3], y0 - 4],
+            ],
+            'w-vcc'
+          );
+          vcc((px[0] + px[3]) / 2, y0 - 4);
+          px.forEach((x, i) => {
+            resV(
+              x,
+              y0 - 4,
+              qy(y0)[i],
+              y0 + 2,
+              Math.min(y0 + 24, qy(y0)[i] - 6),
+              'w-bcd',
+              4
+            );
+            D(x, qy(y0)[i]);
+          });
+          t(
+            px[0] + 10,
+            y0 - 24,
+            (r.n ? 'R4–R7' : 'R8–R11') + ' · 4.7 kΩ',
+            'pn',
+            'end'
+          );
+        });
+        // reset bus, SW2, R3
+        W(
+          [
+            [RSTX, 180],
+            [CX - 14, 180],
+          ],
+          'w-rst'
+        );
+        D(RSTX, 180);
+        W(
+          [
+            [RSTX, 180],
+            [RSTX, 562],
+            [CX + 70, 562],
+          ],
+          'w-rst'
+        );
+        W(
+          [
+            [RSTX, 460],
+            [CX - 14, 460],
+          ],
+          'w-rst'
+        );
+        D(RSTX, 460);
+        D(CX + 20, 562);
+        resV(CX + 20, 562, 596, 568, 590, 'w-rst', 5);
+        gnd(CX + 20, 596, 2);
+        t(CX + 30, 588, 'R3 470 Ω', 'pn');
+        o += `<circle cx="${CX + 70}" cy="562" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/><circle cx="${CX + 106}" cy="562" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/>`;
+        o += `<g id="schSW2"><g class="sw-act"><line x1="${CX + 66}" y1="552" x2="${CX + 110}" y2="552" stroke="var(--n-gnd)" stroke-width="1.8"/><line x1="${CX + 88}" y1="552" x2="${CX + 88}" y2="544" stroke="var(--n-gnd)" stroke-width="1.8"/></g></g>`;
+        W(
+          [
+            [CX + 106, 562],
+            [CX + 124, 562],
+            [CX + 124, 556],
+          ],
+          'w-vcc'
+        );
+        vcc(CX + 124, 556);
+        t(CX + 88, 584, 'SW2 RESET', 'ref', 'middle');
+        // clock: 555 OUT → U2 CKA (hops over the reset bus)
+        pinR(BX + BW, 270, 3, 'OUT', 'w-clk');
+        o += `<path class="wire w-clk" id="schClk" d="M${BX + BW + 14},270 L490,270 L490,420 L${RSTX - 5},420 A5,5 0 0 1 ${RSTX + 5},420 L${CX - 14},420"/>`;
+        // carry: units QD → tens CKA
+        const cyx = CX + CW + 96,
+          uqd = qy(360)[3];
+        W(
+          [
+            [CX + CW + 14, uqd],
+            [cyx, uqd],
+          ],
+          'w-bcd'
+        );
+        D(cyx, uqd);
+        o += `<path class="wire w-clk" id="schCarry" d="M${cyx},${uqd} L${cyx},300 L${RSTX + 5},300 A5,5 0 0 0 ${RSTX - 5},300 L500,300 L500,140 L${CX - 14},140"/>`;
+        t(cyx + 4, 296, 'carry', 'pn');
+
+        // ---- decoders, resistors, displays --------------------------------------
+        const DX = 800,
+          DW = 110,
+          DXR = DX + DW,
+          segN = ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+          segPin = [15, 14, 13, 12, 11, 17, 16],
+          dsPin = [7, 6, 4, 2, 1, 9, 10];
+        rows.forEach((r, k) => {
+          const y0 = r.y;
+          // BCD lines run straight across
+          qy(y0).forEach((y, i) => {
+            W(
+              [
+                [CX + CW + 14, y],
+                [DX - 14, y],
+              ],
+              'w-bcd'
+            );
+            pinL(DX, y, [7, 1, 2, 6][i], ['A', 'B', 'C', 'D'][i], 'w-bcd');
+          });
+          box(DX, y0, DW, CH, 'CD4513', (k ? 'U5' : 'U4') + ' · decoder');
+          pinT(DX + 25, y0, 3, 'LT');
+          vcc(DX + 25, y0 - 12);
+          pinT(DX + 55, y0, 4, 'BI');
+          vcc(DX + 55, y0 - 12);
+          pinB(DX + 25, y0 + CH, 5, 'LE');
+          gnd(DX + 25, y0 + CH + 12, 4);
+          pinB(DX + 55, y0 + CH, 8, 'RBI');
+          gnd(DX + 55, y0 + CH + 12, 4);
+          segN.forEach((s, i) => {
+            const y = y0 + 22 + i * 22;
+            pinR(DXR, y, segPin[i], s, 'w-seg');
+            resH(y, DXR + 14, 1000, 936, 970, 'w-seg');
+            t(1003, y + 4, dsPin[i], 'pn');
+          });
+          t(953, y0 + 10, k ? 'R19–R25' : 'R12–R18', 'pn', 'middle');
+          t(953, y0 + 178, '7 × 330 Ω', 'pn', 'middle');
+          o += `<rect class="dsface" x="1000" y="${y0 + 8}" width="86" height="160" rx="4"/>`;
+          o += `<g id="schDs${k}" transform="translate(1046,${y0 + 84})">${BOARD.glyph(44, 86, '')}</g>`;
+          W([
+            [1043, y0 + 168],
+            [1043, y0 + 180],
+          ]);
+          gnd(1043, y0 + 180, 2);
+          t(1050, y0 + 180, 'COM 3, 8', 'pn');
+          t(1043, y0 - 8, k ? 'DS2 · units' : 'DS1 · tens', 'ref', 'middle');
+          t(1043, y0 + 4, '5161AS', 'pn', 'middle');
+        });
+        t(760, 612, 'Not drawn: 74LS90 pin 5 → +5 V, pin 10 → GND', 'pn');
+        t(760, 626, 'CD4513 pin 18 → +5 V, pin 9 → GND · C4, C5 100 nF', 'pn');
+        svg.innerHTML = o;
+
+        const glyphs = [0, 1].map((k) =>
+          svg.querySelectorAll(`#schDs${k} .seg`)
+        );
+        return {
+          setDigits(tens, units) {
+            [tens, units].forEach((v, k) => {
+              const on = BOARD.SEGS[v] || '';
+              glyphs[k].forEach((p, i) =>
+                p.classList.toggle('lit', on.includes('agdfbec'[i]))
+              );
+            });
+          },
+          setClk(on) {
+            svg.querySelector('#schClk').classList.toggle('hot', on);
+          },
+          setCarry(on) {
+            svg.querySelector('#schCarry').classList.toggle('hot', on);
+          },
+          press(which, on) {
+            svg
+              .querySelector(which === 1 ? '#schSW1' : '#schSW2')
+              ?.classList.toggle('pressed', on);
+          },
+        };
+      })();
+
+      /* Top-view pinouts with where each pin goes in this build. */
+      (() => {
+        const K = {
+          vcc: 'var(--n-vcc)',
+          gnd: 'var(--n-gnd)',
+          clk: 'var(--n-clk)',
+          tim: 'var(--n-tim)',
+          bcd: 'var(--n-bcd)',
+          seg: 'var(--n-seg)',
+          rst: 'var(--n-rst)',
+          nc: 'var(--soft)',
+        };
+        const lsPins = (u, dec, pu, carryIn) => [
+          ['CKB', 'own QA (pin 12)', 'bcd'],
+          ['R0₁', 'RESET line · R3 470 Ω', 'rst'],
+          ['R0₂', '+5 V', 'vcc'],
+          ['NC', 'NC · tied to +5 V', 'nc'],
+          ['VCC', '+5 V', 'vcc'],
+          ['R9₁', 'GND', 'gnd'],
+          ['R9₂', 'GND', 'gnd'],
+          ['QC', `${dec} pin 2 (C) · ${pu[2]}`, 'bcd'],
+          ['QB', `${dec} pin 1 (B) · ${pu[1]}`, 'bcd'],
+          ['GND', 'GND', 'gnd'],
+          [
+            'QD',
+            `${dec} pin 6 (D) · ${pu[3]}${u === 'U2' ? ' · U3 CKA' : ''}`,
+            'bcd',
+          ],
+          ['QA', `${dec} pin 7 (A) · ${pu[0]} · pin 1`, 'bcd'],
+          ['NC', 'not connected', 'nc'],
+          ['CKA', carryIn, 'clk'],
+        ];
+        const CHIPS = [
+          {
+            name: 'NE555',
+            cap: 'U1 · NE555, DIP-8 · one-shot',
+            pins: [
+              ['GND', 'GND', 'gnd'],
+              ['TRIG', 'R1 · C7 · IR OUT', 'tim'],
+              ['OUT', 'U2 pin 14 (clock)', 'clk'],
+              ['RESET', '+5 V (wire to pin 8)', 'vcc'],
+              ['CV', 'C2 10 nF → GND', 'tim'],
+              ['THR', 'pin 7 · C1 +', 'tim'],
+              ['DIS', 'pin 6 · R2 220 kΩ', 'tim'],
+              ['VCC', '+5 V · C3', 'vcc'],
+            ],
+          },
+          {
+            name: '74LS90',
+            cap: 'U2 · 74LS90, units counter, DIP-14',
+            pins: lsPins(
+              'U2',
+              'U5',
+              ['R4', 'R5', 'R6', 'R7'],
+              '555 OUT (clock)'
+            ),
+          },
+          {
+            name: '74LS90',
+            cap: 'U3 · 74LS90, tens counter, DIP-14',
+            pins: lsPins(
+              'U3',
+              'U4',
+              ['R8', 'R9', 'R10', 'R11'],
+              'U2 QD (carry)'
+            ),
+          },
+          {
+            name: 'CD4513',
+            cap: 'U4 · CD4513BE, tens decoder, DIP-18. U5 is wired the same way to U2 and R19–R25.',
+            pins: [
+              ['B', 'U3 QB (pin 9)', 'bcd'],
+              ['C', 'U3 QC (pin 8)', 'bcd'],
+              ['LT', '+5 V (lamp test off)', 'vcc'],
+              ['BI', '+5 V (blanking off)', 'vcc'],
+              ['LE', 'GND (latch transparent)', 'gnd'],
+              ['D', 'U3 QD (pin 11)', 'bcd'],
+              ['A', 'U3 QA (pin 12)', 'bcd'],
+              ['RBI', 'GND (show the 0)', 'gnd'],
+              ['VSS', 'GND', 'gnd'],
+              ['RBO', 'not connected', 'nc'],
+              ['e', 'R16 → DS1 pin 1', 'seg'],
+              ['d', 'R15 → DS1 pin 2', 'seg'],
+              ['c', 'R14 → DS1 pin 4', 'seg'],
+              ['b', 'R13 → DS1 pin 6', 'seg'],
+              ['a', 'R12 → DS1 pin 7', 'seg'],
+              ['g', 'R18 → DS1 pin 10', 'seg'],
+              ['f', 'R17 → DS1 pin 9', 'seg'],
+              ['VDD', '+5 V', 'vcc'],
+            ],
+          },
+        ];
+        const host = document.getElementById('pinouts');
+        const t = (x, y, s, st, a = 'start', ex = '') =>
+          `<text x="${x}" y="${y}" text-anchor="${a}" style="${st}" ${ex}>${s}</text>`;
+        CHIPS.forEach((chip) => {
+          const n = chip.pins.length,
+            half = n / 2,
+            pitch = 30,
+            top = 40,
+            L = 178,
+            R = 322,
+            cx = (L + R) / 2,
+            bottom = top + 18 + half * pitch,
+            W = 500,
+            H = bottom + 18;
+          let o = `<rect x="${L}" y="${top}" width="${R - L}" height="${bottom - top}" rx="5" style="fill:#2a2e33"/>`;
+          o += `<path d="M${cx - 13},${top} a13,13 0 0 0 26,0" style="fill:#fbfaf7"/><circle cx="${L + 15}" cy="${top + 13}" r="4" style="fill:#c9ced4"/>`;
+          o += t(
+            cx,
+            (top + bottom) / 2,
+            chip.name,
+            'font:600 13px var(--mono);fill:#c9ced4;letter-spacing:.2em',
+            'middle',
+            `transform="rotate(-90 ${cx} ${(top + bottom) / 2})" dominant-baseline="middle"`
+          );
+          for (let row = 0; row < half; row++) {
+            const y = top + 9 + pitch * (row + 0.5) + 4;
+            [
+              [row, 'L'],
+              [n - 1 - row, 'R'],
+            ].forEach(([i, side]) => {
+              const [name, conn, cat] = chip.pins[i],
+                col = K[cat],
+                num = i + 1;
+              if (side === 'L')
+                o +=
+                  `<rect x="${L - 14}" y="${y - 5}" width="14" height="10" rx="1" style="fill:${col}"/>` +
+                  t(
+                    L + 8,
+                    y + 4,
+                    num,
+                    'font:500 10.5px var(--mono);fill:#9aa3ad'
+                  ) +
+                  t(
+                    L + 30,
+                    y + 4,
+                    name,
+                    'font:500 12.5px var(--mono);fill:#f1f3f5'
+                  ) +
+                  t(
+                    L - 22,
+                    y + 4,
+                    conn,
+                    `font:11.5px var(--sans);fill:${col}`,
+                    'end'
+                  );
+              else
+                o +=
+                  `<rect x="${R}" y="${y - 5}" width="14" height="10" rx="1" style="fill:${col}"/>` +
+                  t(
+                    R - 8,
+                    y + 4,
+                    num,
+                    'font:500 10.5px var(--mono);fill:#9aa3ad',
+                    'end'
+                  ) +
+                  t(
+                    R - 30,
+                    y + 4,
+                    name,
+                    'font:500 12.5px var(--mono);fill:#f1f3f5',
+                    'end'
+                  ) +
+                  t(R + 22, y + 4, conn, `font:11.5px var(--sans);fill:${col}`);
+            });
+          }
+          host.insertAdjacentHTML(
+            'beforeend',
+            `<figure class="card"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${chip.cap} top-view pinout">${o}</svg><figcaption>${chip.cap}</figcaption></figure>`
+          );
+        });
+        // 5161AS: pins along the top and bottom edges
+        {
+          const W = 500,
+            H = 300,
+            x0 = 170,
+            w = 160,
+            y0 = 50,
+            h = 200,
+            xs = (i) => x0 + 16 + i * 32;
+          const top = [
+              ['g', 10, 'seg'],
+              ['f', 9, 'seg'],
+              ['COM', 8, 'gnd'],
+              ['a', 7, 'seg'],
+              ['b', 6, 'seg'],
+            ],
+            bot = [
+              ['e', 1, 'seg'],
+              ['d', 2, 'seg'],
+              ['COM', 3, 'gnd'],
+              ['c', 4, 'seg'],
+              ['DP', 5, 'nc'],
+            ];
+          let o = `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6" style="fill:#1a1416"/><g transform="translate(${x0 + w / 2 - 6},${y0 + h / 2 - 6})">${BOARD.glyph(70, 130, 'abcdefg')}</g><circle cx="${x0 + w - 22}" cy="${y0 + h - 22}" r="6" class="seg lit"/>`;
+          const lbl = (arr, y, up) =>
+            arr.forEach(([nm, num, cat], i) => {
+              const x = xs(i),
+                col = K[cat];
+              o += `<rect x="${x - 5}" y="${up ? y - 14 : y}" width="10" height="14" rx="1" style="fill:${col}"/>`;
+              o +=
+                t(
+                  x,
+                  up ? y - 20 : y + 27,
+                  num,
+                  'font:500 10.5px var(--mono);fill:var(--soft)',
+                  'middle'
+                ) +
+                t(
+                  x,
+                  up ? y - 33 : y + 41,
+                  nm,
+                  `font:600 12px var(--mono);fill:${col}`,
+                  'middle'
+                );
+            });
+          lbl(top, y0, true);
+          lbl(bot, y0 + h, false);
+          o +=
+            t(
+              x0 - 18,
+              y0 + 30,
+              'top pins 10 → 6',
+              'font:11.5px var(--sans);fill:var(--muted)',
+              'end'
+            ) +
+            t(
+              x0 - 18,
+              y0 + h - 20,
+              'bottom pins 1 → 5',
+              'font:11.5px var(--sans);fill:var(--muted)',
+              'end'
+            );
+          o +=
+            t(
+              x0 + w + 18,
+              y0 + 30,
+              'COM 3 & 8 → GND',
+              'font:11.5px var(--sans);fill:var(--n-gnd)'
+            ) +
+            t(
+              x0 + w + 18,
+              y0 + 48,
+              'joined inside the digit',
+              'font:11.5px var(--sans);fill:var(--muted)'
+            );
+          o +=
+            t(
+              x0 + w + 18,
+              y0 + h - 38,
+              'a–g ← 330 Ω',
+              'font:11.5px var(--sans);fill:var(--n-seg)'
+            ) +
+            t(
+              x0 + w + 18,
+              y0 + h - 20,
+              'DP not connected',
+              'font:11.5px var(--sans);fill:var(--muted)'
+            );
+          host.insertAdjacentHTML(
+            'beforeend',
+            `<figure class="card"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="5161AS display pinout, front view">${o}</svg><figcaption>DS1, DS2 · 5161AS, 0.56" common cathode, front view. Pin 1 is bottom-left with the decimal point at the bottom-right.</figcaption></figure>`
+          );
+        }
+      })();
+
+      /* Perfboard view, wire/part tables, live netlist check, validation log, parts list. */
+      (() => {
+        const $ = (id) => document.getElementById(id),
+          svg = $('pb');
+        let mirror = false,
+          layer = 'all',
+          digits = [0, 0];
+        const group = (w) =>
+          /^[TU][a-g]'$/.test(w.net)
+            ? 'seg'
+            : /^[TU][ABCD]$/.test(w.net)
+              ? 'bcd'
+              : 'ctl';
+        function draw() {
+          const d = BOARD.draw(LAYOUT, { mirror, digits });
+          svg.setAttribute('viewBox', d.viewBox);
+          svg.innerHTML = d.svg;
+          applyLayer();
+        }
+        function applyLayer() {
+          svg.classList.toggle('dim', mirror && layer !== 'all');
+          svg.querySelectorAll('.pb-wire').forEach((g) => {
+            const w = LAYOUT.wires.find((x) => x.id === g.dataset.w);
+            g.classList.toggle('on', layer === 'all' || group(w) === layer);
+          });
+        }
+        document.addEventListener('bcd-digits', (e) => {
+          digits = e.detail;
+          svg.querySelectorAll('.pb-glyph').forEach((g) => {
+            const on = BOARD.SEGS[digits[+g.dataset.k]] || '';
+            g.querySelectorAll('.seg').forEach((p, i) =>
+              p.classList.toggle('lit', on.includes('agdfbec'[i]))
+            );
+          });
+        });
+
+        // view + layer toggles
+        const hint = $('pbHint');
+        document.querySelectorAll('#pbSeg button').forEach((b) =>
+          b.addEventListener('click', () => {
+            mirror = b.id === 'pbBot';
+            document
+              .querySelectorAll('#pbSeg button')
+              .forEach((x) => x.setAttribute('aria-pressed', x === b));
+            $('pbLayer').hidden = !mirror;
+            hint.textContent = mirror
+              ? 'Solder side, mirrored as you see it turned over. Silver lines are bare links and solder bridges, coloured lines are insulated wires. Grey dots are joints, and the numbers are IC pins seen from below. C1 is the SMD part under U1.'
+              : 'Component side: parts as you place them. Faint dashed lines are bare links underneath.';
+            draw();
+          })
+        );
+        document.querySelectorAll('#pbLayer button').forEach((b) =>
+          b.addEventListener('click', () => {
+            layer = b.dataset.l;
+            document
+              .querySelectorAll('#pbLayer button')
+              .forEach((x) => x.setAttribute('aria-pressed', x === b));
+            applyLayer();
+          })
+        );
+
+        // wire table
+        const label = {
+          seg: 'Segments',
+          bcd: 'BCD (counter → decoder / pull-up)',
+          ctl: 'Clock, reset, power',
+        };
+        const wt = $('pbWires');
+        wt.innerHTML =
+          `<thead><tr><th>Wire</th><th>From</th><th>To</th><th>Connects</th></tr></thead><tbody>` +
+          ['ctl', 'bcd', 'seg']
+            .map(
+              (gk) =>
+                `<tr><td colspan="4" style="font-family:var(--sans);font-weight:600;color:var(--soft)">${label[gk]}</td></tr>` +
+                LAYOUT.wires
+                  .filter((w) => group(w) === gk)
+                  .map(
+                    (w) =>
+                      `<tr data-w="${w.id}"><td><i class="kdot" style="background:${BOARD.netColor(w.net)};margin-right:6px"></i>${w.id}</td><td>${w.path[0]}</td><td>${w.path[w.path.length - 1]}</td><td class="wrap">${w.note}</td></tr>`
+                  )
+                  .join('')
+            )
+            .join('') +
+          LAYOUT.offboard
+            .map(
+              (f) =>
+                `<tr><td>${f.ref}</td><td>${f.hole}</td><td>off-board</td><td class="wrap">${f.ref === 'J1' ? (f.pin === '+' ? 'USB-C breakout VBUS' : 'USB-C breakout GND') : 'IR module ' + f.pin + ', match the silk on your module'}</td></tr>`
+            )
+            .join('') +
+          `</tbody>`;
+        wt.querySelectorAll('tr[data-w]').forEach((tr) => {
+          const on = (v) => {
+            tr.classList.toggle('hlrow', v);
+            svg
+              .querySelector(`.pb-wire[data-w="${tr.dataset.w}"]`)
+              ?.classList.toggle('hl', v);
+          };
+          tr.addEventListener('mouseenter', () => on(true));
+          tr.addEventListener('mouseleave', () => on(false));
+          tr.addEventListener('click', () =>
+            on(!tr.classList.contains('hlrow'))
+          );
+        });
+
+        // parts table (resistor arrays folded)
+        const rows = [];
+        LAYOUT.ics.forEach((ic) =>
+          rows.push([ic.ref, ic.label, ic.at + ' (pin 1)', ic.note])
+        );
+        LAYOUT.displays.forEach((d) =>
+          rows.push([d.ref, '5161AS', d.at + ' (pin 1)', d.note])
+        );
+        const fold = (refs, name, value, note) => {
+          const ps = LAYOUT.parts.filter((p) => refs.includes(p.ref));
+          rows.push([
+            name,
+            value,
+            ps.map((p) => p.leads.join('/')).join(' · '),
+            note,
+          ]);
+        };
+        LAYOUT.parts
+          .filter((p) => !p.grp)
+          .forEach((p) =>
+            rows.push([p.ref, p.value, p.leads.join(' · '), p.note])
+          );
+        fold(
+          ['R8', 'R9', 'R10', 'R11'],
+          'R8–R11',
+          '4.7 kΩ',
+          'upright, +5 V lead in row K · tens pull-ups'
+        );
+        fold(
+          ['R4', 'R5', 'R6', 'R7'],
+          'R4–R7',
+          '4.7 kΩ',
+          'upright, body in column 10 · units pull-ups'
+        );
+        fold(
+          ['R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R18'],
+          'R12–R18',
+          '330 Ω',
+          'flat, rows J–N · tens a b c d e f g'
+        );
+        fold(
+          ['R19', 'R20', 'R21', 'R22', 'R23', 'R24', 'R25'],
+          'R19–R25',
+          '330 Ω',
+          'flat, rows J–N · units a b c d e f g'
+        );
+        $('pbParts').innerHTML =
+          `<thead><tr><th>Part</th><th>Value</th><th>Holes</th><th>Note</th></tr></thead><tbody>` +
+          rows
+            .map(
+              (r) =>
+                `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="wrap">${r[2]}</td><td class="wrap">${r[3]}</td></tr>`
+            )
+            .join('') +
+          `</tbody>`;
+
+        // live netlist check + validation log
+        const res = BOARD.check(LAYOUT, NETLIST);
+        const vv = res.risky.filter(
+          ([, , a, b]) => [a, b].sort().join() === 'GND,VCC'
+        );
+        $('netSummary').innerHTML = res.ok
+          ? `The drawing above is generated from the same hole-by-hole data that this page checks against the intended netlist. Result: <b>${res.nets} nets · ${res.pins} pins · 0 opens · 0 shorts</b>, and no lead lands under a socket, digit or switch body.`
+          : `<b style="color:var(--bad)">Netlist check failed:</b> ${res.errors.join(' · ')}`;
+        const L = [
+          [
+            'ok',
+            'Netlist matches the schematic',
+            res.ok
+              ? `Every one of the ${res.pins} pins sits on its intended net. Each net is joined through ${res.links} bare links, the two rails and ${res.wires} insulated wires, with nothing shorted to anything else. Unused pins (RBO, the 74LS90's second NC, both decimal points, the switches' spare legs) touch nothing.`
+              : res.errors.join(' · '),
+          ],
+          [
+            'ok',
+            '74LS90 in BCD mode',
+            'QA (pin 12) feeds CKB (pin 1) on each counter and the clock goes into CKA (pin 14), so each chip counts 0–9 in 8421 BCD. It advances on the falling edge.',
+          ],
+          [
+            'ok',
+            'Units → tens carry',
+            'Units QD (pin 11) drives tens CKA. QD falls only on the 9 → 0 step, so the tens counter advances exactly once every ten counts.',
+          ],
+          [
+            'ok',
+            'Reset and set-to-9 inputs',
+            'R9₁/R9₂ (pins 6, 7) go to GND. R0₂ (pin 3) is tied to +5 V and R0₁ (pin 2) of both chips sits on the RESET line. A TTL input left open reads <i>high</i>, which would hold both counters at 0, so R3 must pull it down hard: 470 Ω × 2 inputs × 0.4 mA = 0.38 V, under the 0.8 V low limit.',
+          ],
+          [
+            'fix',
+            'Added: 4.7 kΩ pull-ups on all 8 BCD lines',
+            'The tutorial wires the 74LS90 straight into the decoder. An LS-TTL output high is only guaranteed 2.7 V (about 3.4 V typical), and a CD4513 at 5 V needs 3.5 V to read a 1. Without pull-ups, digits can read wrong or flicker. With R4–R11 the lines reach almost 5 V. A low output sinks about 1 mA extra, well within what the 74LS90 can handle.',
+          ],
+          [
+            'ok',
+            'CD4513 control pins',
+            'LT (3) and BI (4) go to +5 V (lamp test and blanking off). LE (5) goes low, so the latch is transparent. RBI (8) goes low, so the tens digit shows its 0 (<b>05</b>, as you chose). RBO (10) is an output and stays unconnected. Codes 10–15 blank the digit, so random power-up states show nothing until the first count or RESET.',
+          ],
+          [
+            'ok',
+            'Segment map and display type',
+            'CD4513 a–g = pins 15, 14, 13, 12, 11, 17, 16 → 5161AS a–g = pins 7, 6, 4, 2, 1, 9, 10. COM (3, 8) goes to GND. The CD4513 sources current, so it needs common cathode, and the AS suffix is common cathode. 6 and 9 show with tails.',
+          ],
+          [
+            'ok',
+            'Segment current · 330 Ω',
+            'The CD4513 output sits about 0.9 V below the supply at 10 mA (datasheet typical), so (4.2 − 1.9) / 330 ≈ 7 mA per segment. That\'s bright on a 0.56" digit, under the 25 mA per-output limit, and only about 6 mW dissipated in each output (50 mW limit). "88" draws about 100 mA for the displays.',
+          ],
+          [
+            'ok',
+            'NE555 one-shot',
+            "R1 holds TRIG (pin 2) high. A low pulse from the button or the IR module drives OUT high for 1.1 × 220 kΩ × 1 µF ≈ 0.24 s. Any other trigger edges in that window are ignored, which swallows a whole 67 ms NEC frame. RESET (pin 4) is wired to VCC. The count lands as the pulse ends, so there's a quarter-second delay by design.",
+          ],
+          [
+            'fix',
+            "Added: C7 + R26 so a long press can't double-count",
+            'Wired straight to TRIG as in the tutorial, a press held longer than 0.24 s lets the one-shot finish while TRIG is still low. The bounce on release then fires it again, and one press gives two counts (the bench simulator reproduced this). Now the button feeds TRIG through C7 (100 nF) and has its own 100 kΩ pull-up (R26). The press drags TRIG low for about 0.4 ms, so holding does nothing. On release, C7 keeps TRIG above the threshold for about 14 ms, longer than any bounce. Use a ceramic here: an electrolytic would be reverse-biased whenever the IR module pulls TRIG low.',
+          ],
+          [
+            'ok',
+            'IR module and button share TRIG',
+            'Both only ever pull TRIG low (the module output is active-low with its own pull-up), so wiring them together is safe. Any 38 kHz remote works on any button. Held, a remote repeats about every 108 ms, which comes out at about 3 counts/s.',
+          ],
+          [
+            'warn',
+            'C1 is an SMD electrolytic under U1',
+            '+ goes to E11 (pins 6/7) and − (striped end) to G11 (GND). It goes on before the U1 socket, because the socket covers it. The timing node stays between 0 and 3.3 V, so the polarity never reverses.',
+          ],
+          [
+            'ok',
+            'Supply · 5 V USB-C only',
+            "The 74LS90 needs 4.75–5.25 V (7 V absolute maximum). The CD4513 runs on 3–18 V and the NE555 on 4.5–16 V. The USB-C breakout needs 5.1 kΩ from CC1 to GND and from CC2 to GND, or a C-to-C charger won't switch on VBUS. The whole board peaks at about 120 mA.",
+          ],
+          [
+            'ok',
+            'Decoupling',
+            "C3 sits across U1's supply at the notch. C4 covers both 74LS90s and C5 sits between the decoders, beside U4 VSS. C6 (10 µF) is at the input. LS-TTL pulls a current spike on every edge, and without these the counters can double-count.",
+          ],
+          [
+            'warn',
+            `${vv.length} spots where +5 V and GND are neighbours`,
+            `Probe these pairs for a short before first power-up: ${vv.map(([a, b]) => a + '–' + b).join(', ')}. Most are the decoders' LT/BI pins next to the ground rail and the display commons under the +5 V rail. Overall, ${res.risky.length} neighbouring pads carry different signals next to a bare link, so look over every link with a loupe after soldering.`,
+          ],
+          [
+            'warn',
+            'Sockets',
+            "DIP-8 and DIP-14 sockets are standard. If you don't have DIP-18s, use two 9-way female header strips, or a DIP-20 cut down. Mark pin 1 on each. The decoders lie sideways with their notches toward column 1.",
+          ],
+        ];
+        $('vlog').innerHTML = L.map(
+          ([k, h, p]) =>
+            `<div class="item"><span class="tag ${k}">${{ ok: 'OK', warn: 'Check', fix: 'Added', bad: 'Fail' }[k]}</span><div><h3>${h}</h3><p>${p}</p></div></div>`
+        ).join('');
+
+        // parts list
+        const bom = [
+          [
+            'FR2 perfboard 80 × 55 mm',
+            1,
+            'order (3 bought)',
+            'rows A–T × columns 1–30',
+          ],
+          ['74LS90 decade counter, DIP-14', 2, 'order', 'U2 units, U3 tens'],
+          [
+            'CD4513BE decoder/driver, DIP-18',
+            2,
+            'order (4 bought)',
+            'U4 tens, U5 units',
+          ],
+          ['NE555 timer, DIP-8', 1, 'on hand', 'U1'],
+          [
+            '0.56" 5161AS common-cathode digit',
+            2,
+            'order (4 bought)',
+            'DS1, DS2',
+          ],
+          ['IR receiver module (38 kHz)', 1, 'order', 'off-board, 3 wires'],
+          [
+            'USB-C female breakout',
+            1,
+            'order',
+            '+ 2 × 5.1 kΩ on CC1/CC2 → GND',
+          ],
+          ['1 µF electrolytic, SMD', 1, 'order (5 bought)', 'C1, timing'],
+          ['10 nF ceramic (103)', 1, 'on hand', 'C2'],
+          ['100 nF ceramic (104)', 4, 'on hand', 'C3, C4, C5, C7'],
+          ['10 µF electrolytic', 1, 'on hand', 'C6, bulk'],
+          ['330 Ω', 14, 'resistor kit', 'R12–R25, segments'],
+          ['4.7 kΩ', 8, 'resistor kit', 'R4–R11, pull-ups'],
+          [
+            '5.1 kΩ',
+            2,
+            'resistor kit',
+            'USB-C CC pull-downs (4.7 kΩ also works)',
+          ],
+          [
+            '10 kΩ · 220 kΩ · 470 Ω · 100 kΩ',
+            '1 each',
+            'resistor kit',
+            'R1, R2, R3, R26',
+          ],
+          ['6 × 6 mm tactile switch', 2, 'on hand', 'SW1 COUNT, SW2 RESET'],
+          [
+            'Sockets: DIP-8 ×1, DIP-14 ×2, DIP-18 ×2',
+            5,
+            'on hand / headers',
+            'see the socket note above',
+          ],
+          [
+            'Bare tinned wire + thin insulated wire',
+            '—',
+            'jumper kit',
+            'rails, links, 36 solder-side wires',
+          ],
+          [
+            'Not used here: CD4017BE/BD, 3 × 7 cm boards',
+            '—',
+            'order',
+            'LED chaser / spares',
+          ],
+        ];
+        $('bom').innerHTML =
+          `<thead><tr><th>Part</th><th>Qty</th><th>Source</th><th>Use</th></tr></thead><tbody>` +
+          bom
+            .map(
+              (r) =>
+                `<tr><td class="wrap">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="wrap">${r[3]}</td></tr>`
+            )
+            .join('') +
+          `</tbody>`;
+
+        draw();
+        if (location.hash === '#solder') $('pbBot').click();
+      })();
+
+      /* Event-driven bench simulator: switch bounce + NEC IR frames → NE555 one-shot → 74LS90 ×2 (falling edge) → displays. */
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const R2S = [100e3, 150e3, 220e3, 330e3, 470e3, 1e6],
+          C1 = 1e-6;
+        const fmtR = (r) => (r >= 1e6 ? r / 1e6 + ' MΩ' : r / 1e3 + ' kΩ');
+        let R2 = 220e3,
+          V = 5,
+          units = 0,
+          tens = 0,
+          total = 0;
+        let trigLow = 0; // number of sources currently pulling TRIG low (switch, IR)
+        let out = false,
+          tEnd = 0,
+          rstHeld = false;
+        const q = []; // future events {t, f}
+        const trace = []; // {t, trig, out} level changes
+        const marks = []; // count instants
+        const now = () => performance.now();
+        const T = () => 1.1 * R2 * C1 * 1000; // ms
+        const at = (t, f) => {
+          q.push({ t, f });
+          q.sort((a, b) => a.t - b.t);
+        };
+        const log = (t) => {
+          trace.push({ t, trig: trigLow > 0, out });
+          while (trace.length > 4000) trace.shift();
+        };
+
+        function setTrig(t, delta) {
+          const was = trigLow > 0;
+          trigLow = Math.max(0, trigLow + delta);
+          const low = trigLow > 0;
+          if (low && !was && !out) {
+            out = true;
+            tEnd = t + T();
+            at(tEnd, timeout);
+            SCH.setClk(true);
+          }
+          if (!low && was && out && t >= tEnd) fall(t); // trigger held past the timeout: output drops on release
+          log(t);
+        }
+        function timeout(t) {
+          if (out && t >= tEnd - 0.01 && trigLow === 0) fall(t);
+        }
+        function fall(t) {
+          out = false;
+          SCH.setClk(false);
+          log(t);
+          if (rstHeld) return;
+          units = (units + 1) % 10;
+          total++;
+          if (units === 0) {
+            tens = (tens + 1) % 10;
+            SCH.setCarry(true);
+            setTimeout(() => SCH.setCarry(false), 160);
+          }
+          marks.push(t);
+          show();
+        }
+
+        // COUNT reaches TRIG through C7 (100 nF): the first contact closure drags TRIG to 0 V and R1 pulls it back past
+        // 1/3 VCC in R1·C7·ln 1.5 ≈ 0.4 ms. Later bounces, holding, and the release bounce only move TRIG by the little
+        // voltage the button node has regained through R26 (100 kΩ · 100 nF = 10 ms), so they never cross the threshold.
+        let swDown = false,
+          swReady = 0;
+        function swPress(t) {
+          if (t < swReady) return;
+          at(t, (tt) => setTrig(tt, 1));
+          at(t + 0.4, (tt) => setTrig(tt, -1));
+        }
+        // NEC: 9 ms burst, 4.5 ms gap, 32 bits (560 µs burst + 560/1690 µs gap), stop burst; repeats every 108 ms: 9 ms burst, 2.25 ms gap, 560 µs burst
+        const ir = { low: false, holding: false, next: 0 };
+        function burst(t, len) {
+          at(t, (tt) => {
+            ir.low = true;
+            setTrig(tt, 1);
+          });
+          at(t + len, (tt) => {
+            ir.low = false;
+            setTrig(tt, -1);
+          });
+        }
+        function necFrame(t0) {
+          burst(t0, 9);
+          let t = t0 + 13.5;
+          const code = 0x20df10ef;
+          for (let i = 0; i < 32; i++) {
+            burst(t, 0.56);
+            t += 0.56 + ((code >>> i) & 1 ? 1.69 : 0.56);
+          }
+          burst(t, 0.56);
+        }
+        function necRepeat(t0) {
+          burst(t0, 9);
+          burst(t0 + 11.25, 0.56);
+        }
+        function irPress(t) {
+          ir.holding = true;
+          necFrame(t);
+          ir.next = t + 108;
+          schedRepeat();
+        }
+        function schedRepeat() {
+          if (!ir.holding) return;
+          at(ir.next, (tt) => {
+            if (!ir.holding) return;
+            necRepeat(tt);
+            ir.next = tt + 108;
+            schedRepeat();
+          });
+        }
+
+        function show() {
+          $('rN').textContent = `${tens}${units}`;
+          $('rNs').textContent = `counts since reset: ${total}`;
+          const b = (n) => n.toString(2).padStart(4, '0');
+          $('rB').textContent = `${b(tens)} ${b(units)}`;
+          SCH.setDigits(tens, units);
+          document.dispatchEvent(
+            new CustomEvent('bcd-digits', { detail: [tens, units] })
+          );
+          currents();
+        }
+        // CD4513 typical V_OH drop at 5 V vs source current (datasheet: 0.43 V @0, 0.76 @5 mA, 0.88 @10, 1.06 @15, 1.30 @20)
+        const drop = (i) =>
+          i < 5
+            ? 0.43 + 0.066 * i
+            : i < 10
+              ? 0.76 + 0.024 * (i - 5)
+              : i < 15
+                ? 0.88 + 0.036 * (i - 10)
+                : 0.88 + 0.036 * 5 + 0.048 * (i - 15);
+        function segCurrent() {
+          let i = 7;
+          for (let k = 0; k < 20; k++)
+            i = Math.max(0, ((V - drop(i) - 1.9) / 330) * 1000);
+          return i;
+        }
+        function currents() {
+          const i = segCurrent(),
+            lit =
+              (BOARD.SEGS[tens] || '').length +
+              (BOARD.SEGS[units] || '').length;
+          const lows = [tens, units].reduce(
+            (a, n) => a + (4 - n.toString(2).split('1').length + 1),
+            0
+          ); // Q outputs low → pull-up current
+          $('rI').textContent = i.toFixed(1) + ' mA';
+          const ro = $('roI');
+          ro.classList.toggle('warn', i < 3.5);
+          $('rIn').textContent =
+            i < 3.5
+              ? 'dim; raise the supply or use 220 Ω'
+              : 'per lit segment · 25 mA max';
+          const tot = lit * i + 18 + 3 + 1.5 + (lows * (V - 0.35)) / 4.7;
+          $('rIt').textContent = Math.round(tot) + ' mA';
+          $('rItn').textContent =
+            `${lit} segments lit · "88" ≈ ${Math.round(14 * i + 18 + 3 + 1.5 + 1)} mA`;
+        }
+        function timing() {
+          const t = T();
+          $('rT').textContent = (t / 1000).toFixed(t < 100 ? 3 : 2) + ' s';
+          const ro = $('roT');
+          ro.classList.remove('warn', 'bad');
+          if (t < 70) {
+            ro.classList.add('bad');
+            $('rTn').textContent =
+              'shorter than one remote frame: one press can count twice';
+          } else if (t > 600) {
+            ro.classList.add('warn');
+            $('rTn').textContent = 'sluggish: quick taps get swallowed';
+          } else
+            $('rTn').textContent =
+              'longer than bounce and one IR frame, so each press counts once';
+          const period = Math.max(108, Math.ceil(t / 108) * 108);
+          $('rRep').textContent = (1000 / period).toFixed(1) + ' /s';
+          $('r2Out').textContent = fmtR(R2);
+        }
+
+        // trace drawing
+        const cv = $('trace'),
+          ctx = cv.getContext('2d');
+        function drawTrace(tn) {
+          const dpr = window.devicePixelRatio || 1,
+            w = cv.clientWidth,
+            h = cv.clientHeight;
+          if (cv.width !== Math.round(w * dpr)) {
+            cv.width = Math.round(w * dpr);
+            cv.height = Math.round(h * dpr);
+          }
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, w, h);
+          const span = 2000,
+            x = (t) => 74 + ((t - (tn - span)) / span) * (w - 84);
+          const css = getComputedStyle(document.documentElement);
+          const lanes = [
+            ['TRIG (pin 2)', 30, 'trig', css.getPropertyValue('--n-tim')],
+            ['555 OUT', 74, 'out', css.getPropertyValue('--n-clk')],
+          ];
+          ctx.font = '11px ' + css.getPropertyValue('--sans');
+          ctx.fillStyle = css.getPropertyValue('--soft');
+          lanes.forEach(([name, y0, key, col]) => {
+            ctx.fillText(name, 8, y0 + 4);
+            // TRIG is drawn active-low (down = pulled low); OUT active-high
+            const lvl = (s) =>
+              key === 'trig' ? (s ? y0 + 12 : y0 - 12) : s ? y0 - 12 : y0 + 12;
+            let s0 = trace.filter((e) => e.t < tn - span).pop();
+            let st = s0 ? s0[key] : false;
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(x(tn - span), lvl(st));
+            trace.forEach((e) => {
+              if (e.t < tn - span || e[key] === st) return;
+              ctx.lineTo(x(e.t), lvl(st));
+              st = e[key];
+              ctx.lineTo(x(e.t), lvl(st));
+            });
+            ctx.lineTo(x(tn), lvl(st));
+            ctx.stroke();
+          });
+          ctx.fillStyle = css.getPropertyValue('--n-bcd');
+          marks.forEach((t) => {
+            if (t > tn - span) {
+              ctx.beginPath();
+              ctx.arc(x(t), 104, 3.5, 0, 7);
+              ctx.fill();
+            }
+          });
+          ctx.fillStyle = css.getPropertyValue('--soft');
+          ctx.fillText('count', 8, 108);
+        }
+
+        function frame() {
+          const tn = now();
+          while (q.length && q[0].t <= tn) {
+            const e = q.shift();
+            e.f(e.t);
+          }
+          if (out && trigLow === 0 && tn >= tEnd) fall(tEnd);
+          drawTrace(tn);
+          requestAnimationFrame(frame);
+        }
+
+        // inputs (pointer + keyboard), hold-aware
+        const hold = (el, down, up) => {
+          let on = false;
+          const d = (e) => {
+            if (on) return;
+            on = true;
+            el.classList.add('down');
+            down();
+            if (e.pointerId !== undefined) el.setPointerCapture?.(e.pointerId);
+          };
+          const u = () => {
+            if (!on) return;
+            on = false;
+            el.classList.remove('down');
+            up();
+          };
+          el.addEventListener('pointerdown', d);
+          el.addEventListener('pointerup', u);
+          el.addEventListener('pointercancel', u);
+          el.addEventListener('lostpointercapture', u);
+          el.addEventListener('keydown', (e) => {
+            if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
+              e.preventDefault();
+              d(e);
+            }
+          });
+          el.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') u();
+          });
+          el.addEventListener('contextmenu', (e) => e.preventDefault());
+        };
+        hold(
+          $('bCount'),
+          () => {
+            swDown = true;
+            SCH.press(1, true);
+            swPress(now());
+          },
+          () => {
+            swDown = false;
+            SCH.press(1, false);
+            swReady = now() + 15;
+          }
+        );
+        hold(
+          $('bIR'),
+          () => irPress(now()),
+          () => {
+            ir.holding = false;
+          }
+        );
+        hold(
+          $('bReset'),
+          () => {
+            rstHeld = true;
+            units = 0;
+            tens = 0;
+            total = 0;
+            SCH.press(2, true);
+            show();
+          },
+          () => {
+            rstHeld = false;
+            SCH.press(2, false);
+          }
+        );
+        $('r2').addEventListener('input', (e) => {
+          R2 = R2S[+e.target.value];
+          timing();
+        });
+        $('vcc').addEventListener('input', (e) => {
+          V = +e.target.value;
+          $('vccOut').textContent = V.toFixed(2) + ' V';
+          currents();
+        });
+        timing();
+        show();
+        log(now());
+        requestAnimationFrame(frame);
+      })();
+    </script>
+  </body>
+</html>

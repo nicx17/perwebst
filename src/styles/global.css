@@ -48,7 +48,7 @@ html[data-theme='ivory'] {
   --motion-slow: 380ms;
   --motion-hover: 340ms;
   --motion-enter: 300ms;
-  --motion-nav: 180ms;
+  --motion-nav: 220ms;
   --motion-stagger-1: 55ms;
   --motion-stagger-2: 110ms;
   --motion-stagger-3: 165ms;
@@ -187,9 +187,16 @@ body,
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden;
   background-color: var(--bg-primary);
+}
+
+/* Smooth in-page anchor scrolling, but not while Astro swaps pages: the
+   router's scroll-to-top / history restore must land instantly. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-astro-transition]) {
+    scroll-behavior: smooth;
+  }
 }
 
 #scene-bg {
@@ -278,27 +285,6 @@ body::after {
   width: min(var(--page-max), 100% - 2rem);
   margin: 0 auto;
   padding: 1.4rem 0 3rem;
-  animation: pageEnter var(--motion-nav) var(--ease-sleek);
-  will-change: opacity, transform;
-  transition:
-    opacity var(--motion-nav) var(--ease-sleek),
-    transform var(--motion-nav) var(--ease-sleek);
-}
-
-html.is-nav-exiting .page-shell {
-  opacity: 0.65;
-  transform: translate3d(0, 2px, 0);
-}
-
-@keyframes pageEnter {
-  from {
-    opacity: 0.9;
-    transform: translate3d(0, 2px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
 }
 
 .page-shell-plain {
@@ -1591,12 +1577,89 @@ header.page-header h1 {
   transform: translate3d(0, 0, 0);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+/* Already on screen after a client-side navigation: show without re-animating
+   (set by scroll-reveal.ts). */
+[data-reveal][data-reveal-instant],
+[data-reveal-stagger][data-reveal-instant] > *,
+:is(.article-content, .project-detail-content) h2[data-reveal-instant]::after {
+  transition: none;
+}
+
+/* ── Client-Side Navigation ──
+   The ClientRouter crossfades the root snapshot. Identical pixels (topbar,
+   background, footer) blend into themselves and stay perfectly still, so only
+   the content visibly changes. Old and new must share duration and easing, or
+   the chrome dims mid-transition. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--motion-nav);
+  animation-timing-function: var(--ease-sleek);
+}
+
+/* First-load entrance animations would replay on every swap and make each
+   navigation feel like a reload. After a client-side navigation
+   (data-client-nav, set by page-transition.ts) the content area gets one
+   short rise instead. */
+html[data-client-nav]
+  :is(
+    .home-hero h1,
+    .home-hero .subtitle,
+    .home-links .home-link,
+    .project-grid > *,
+    .app-content > *,
+    .project-detail-card,
+    .project-hero
+  ) {
+  animation: none;
+}
+
+/* No fill mode: a lingering transform would turn .app-content into the
+   containing block for any fixed-position descendants. */
+html[data-client-nav] .app-content {
+  animation: contentSwapIn calc(var(--motion-nav) + 80ms) var(--ease-sleek);
+}
+
+@keyframes contentSwapIn {
+  from {
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+/* Slim loading bar, shown only for navigations slower than ~150ms
+   (page-transition.ts); typical swaps never trigger it. */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--ambient-a), var(--button-bg-active));
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  transition: opacity var(--motion-medium) ease;
+}
+
+.nav-progress[data-state='loading'] {
+  opacity: 1;
+  transform: scaleX(0.6);
+  animation: navProgress 6s cubic-bezier(0.1, 0.7, 0.2, 1) both;
+}
+
+@keyframes navProgress {
+  from {
+    transform: scaleX(0.04);
   }
 
-  .page-shell,
+  to {
+    transform: scaleX(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-content,
+  .nav-progress,
   .theme-toggle[data-theme-switching='true'],
   .theme-toggle[data-theme-switching='true']::before,
   .home-links .home-link,

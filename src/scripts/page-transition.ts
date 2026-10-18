@@ -1,3 +1,5 @@
+import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
+
 (() => {
   if (globalThis.__persPageTransitionInitialized) {
     return;
@@ -5,100 +7,47 @@
   globalThis.__persPageTransitionInitialized = true;
 
   /**
-   * Page Transition orchestrates a manual exit animation when navigating between pages.
-   * It targets standard links and applies a CSS class to the root element to trigger
-   * transitions defined in CSS (e.g., opacity or scale shifts).
+   * Page Transition coordinates navigation feedback for Astro's ClientRouter so
+   * page switches feel like an app rather than a reload:
+   *
+   * - Documents reached via client-side navigation are flagged with
+   *   `data-client-nav` on <html>. CSS uses it to skip the first-load entrance
+   *   animations and run a single content transition instead, while the
+   *   persisted chrome (topbar, background) stays perfectly still.
+   * - A slim progress bar appears only when a navigation is slow (e.g. a
+   *   Worker cold start), so typical swaps never flash a loading state.
    */
-  const root = document.documentElement;
-  const NAV_EXIT_RESET_MS = 900;
-  let exitResetTimer = 0;
+  const PROGRESS_DELAY_MS = 150;
+  let progressTimer = 0;
+
+  const getProgressBar = () => document.getElementById('nav-progress');
+
+  const startProgress = () => {
+    globalThis.clearTimeout(progressTimer);
+    progressTimer = globalThis.setTimeout(() => {
+      getProgressBar()?.setAttribute('data-state', 'loading');
+    }, PROGRESS_DELAY_MS);
+  };
+
+  const stopProgress = () => {
+    globalThis.clearTimeout(progressTimer);
+    progressTimer = 0;
+    getProgressBar()?.removeAttribute('data-state');
+  };
 
   /**
-   * Logic to determine if a click on an anchor should trigger an animated navigation.
-   * Filters out external links, downloads, hash links, and special key combinations (Cmd/Ctrl).
+   * Astro replaces all <html> attributes with the incoming document's during a
+   * swap, so the flag must be written onto the new document before it lands.
    */
-  const shouldHandle = (
-    anchor: HTMLAnchorElement | null,
-    event: MouseEvent
-  ) => {
-    if (!anchor || event.defaultPrevented) return false;
-    if (event.button !== 0) return false;
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-      return false;
-    if (anchor.target && anchor.target !== '_self') return false;
-    if (anchor.hasAttribute('download')) return false;
-
-    const href = anchor.getAttribute('href');
-    if (!href || href.startsWith('#')) return false;
-
-    const url = new URL(anchor.href, globalThis.location.href);
-    if (url.origin !== globalThis.location.origin) return false;
-    if (url.href === globalThis.location.href) return false;
-
-    return true;
+  const flagClientNavigation = (event: Event) => {
+    const { newDocument } = event as TransitionBeforeSwapEvent;
+    newDocument.documentElement.dataset.clientNav = '';
   };
 
-  const markNavigation = () => {
-    // Trigger the CSS exit animation.
-    root.classList.add('is-nav-exiting');
+  document.addEventListener('astro:before-preparation', startProgress);
+  document.addEventListener('astro:before-swap', flagClientNavigation);
+  document.addEventListener('astro:after-swap', stopProgress);
 
-    if (exitResetTimer) {
-      globalThis.clearTimeout(exitResetTimer);
-    }
-
-    /**
-     * Stale State Guard:
-     * If navigation is canceled (e.g. 404, network error, or user stop),
-     * we must clear the 'is-nav-exiting' tag after a timeout so the UI doesn't
-     * remain stuck in a transitioned-out/hidden state.
-     */
-    exitResetTimer = globalThis.setTimeout(() => {
-      root.classList.remove('is-nav-exiting');
-      exitResetTimer = 0;
-    }, NAV_EXIT_RESET_MS);
-  };
-
-  /** Global click listener for progressive enhancement of link navigation. */
-  document.addEventListener('click', (event: MouseEvent) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return;
-
-    const anchor = target.closest('a[href]');
-    if (!(anchor instanceof HTMLAnchorElement)) return;
-    if (!shouldHandle(anchor, event)) return;
-
-    markNavigation();
-  });
-
-  const clearExitState = () => {
-    root.classList.remove('is-nav-exiting');
-    if (exitResetTimer) {
-      globalThis.clearTimeout(exitResetTimer);
-      exitResetTimer = 0;
-    }
-  };
-
-  // Restoration Handling:
-  // When a user goes "Back" or "Forward", the browser might restore a page
-  // from the Back-Forward Cache (bfcache). We must ensure visibility is reset.
-  globalThis.addEventListener('pageshow', () => {
-    clearExitState();
-  });
-
-  // Ensure state is clean before the page is hidden.
-  globalThis.addEventListener('pagehide', () => {
-    clearExitState();
-  });
-
-  // Re-enable visibility if the user switches back to this tab.
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      clearExitState();
-    }
-  });
-
-  // Astro client-side navigations can preserve shell elements across swaps.
-  // Clear the exit state as soon as the new page has been prepared and loaded.
-  document.addEventListener('astro:after-swap', clearExitState);
-  document.addEventListener('astro:page-load', clearExitState);
+  // A page restored from the back-forward cache may have been frozen mid-load.
+  globalThis.addEventListener('pageshow', stopProgress);
 })();

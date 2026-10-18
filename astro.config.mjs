@@ -88,7 +88,12 @@ export default defineConfig({
     '/about/': { status: 301, destination: '/colophon/' },
   },
   devToolbar: { enabled: false },
-  /** Keep client-side navigation, but disable automatic link prefetching. */
+  /**
+   * Keep client-side navigation, but disable link prefetching: SSR HTML is
+   * served `max-age=0, must-revalidate` (per-request CSP nonces), so the
+   * ClientRouter's fetch() can't reuse a prefetched copy and every prefetch
+   * would just double the request.
+   */
   prefetch: false,
   /** Hybrid/Server rendering mode. */
   output: 'server',

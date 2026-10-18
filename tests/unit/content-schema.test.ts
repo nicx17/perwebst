@@ -31,6 +31,7 @@ const projectSchema = z.object({
   featured: z.boolean().default(false),
   liveUrl: HTTPS_URL.optional(),
   ogImage: z.string().optional(),
+  standalone: z.boolean().default(false),
 });
 
 type Project = z.infer<typeof projectSchema>;
@@ -44,6 +45,7 @@ const validProject: Project = {
   tags: ['TypeScript', 'Node'],
   order: 1,
   featured: false,
+  standalone: false,
 };
 
 describe('project content schema', () => {
@@ -105,6 +107,17 @@ describe('project content schema', () => {
   it('accepts featured: true', () => {
     const result = projectSchema.parse({ ...validProject, featured: true });
     expect(result.featured).toBe(true);
+  });
+
+  it('standalone defaults to false when not provided', () => {
+    const { standalone: _, ...noStandalone } = validProject as any;
+    const result = projectSchema.parse(noStandalone);
+    expect(result.standalone).toBe(false);
+  });
+
+  it('accepts standalone: true', () => {
+    const result = projectSchema.parse({ ...validProject, standalone: true });
+    expect(result.standalone).toBe(true);
   });
 
   it('rejects an invalid liveUrl', () => {

@@ -18,6 +18,7 @@
   const REVEAL_CLASS = 'is-revealed';
   const ATTR_REVEAL = 'data-reveal';
   const ATTR_STAGGER = 'data-reveal-stagger';
+  const ATTR_INSTANT = 'data-reveal-instant';
   const STAGGER_BASE_MS = 65;
   const ROOT_MARGIN = '0px 0px -60px 0px';
   const THRESHOLD = 0.08;
@@ -28,6 +29,24 @@
 
   const applyReveal = (el: Element) => {
     el.classList.add(REVEAL_CLASS);
+  };
+
+  const isInViewport = (el: Element) => {
+    const rect = el.getBoundingClientRect();
+    return rect.top < globalThis.innerHeight && rect.bottom > 0;
+  };
+
+  /**
+   * After a client-side navigation the page transition already animates the
+   * incoming content, so anything on screen is shown as-is (CSS drops the
+   * transition via ATTR_INSTANT) instead of fading in a second time.
+   */
+  const revealInstantly = (el: Element) => {
+    el.setAttribute(ATTR_INSTANT, '');
+    el.classList.add(REVEAL_CLASS);
+    if (el.hasAttribute(ATTR_STAGGER)) {
+      el.querySelectorAll(`:scope > *`).forEach(applyReveal);
+    }
   };
 
   const applyStaggeredReveal = (container: Element) => {
@@ -74,6 +93,9 @@
       return;
     }
 
+    const isClientNavigation =
+      document.documentElement.hasAttribute('data-client-nav');
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -93,17 +115,23 @@
       { rootMargin: ROOT_MARGIN, threshold: THRESHOLD }
     );
 
-    revealEls.forEach((el) => observer.observe(el));
-    staggerEls.forEach((el) => observer.observe(el));
-    contentHeadings.forEach((el) => observer.observe(el));
+    [...revealEls, ...staggerEls, ...contentHeadings].forEach((el) => {
+      if (isClientNavigation && isInViewport(el)) {
+        revealInstantly(el);
+      } else {
+        observer.observe(el);
+      }
+    });
   };
 
-  // Run on initial load and after Astro client-side navigations
+  // Run on initial load and after Astro client-side navigations.
+  // `astro:after-swap` fires after scroll restoration but before the new view
+  // is revealed, so on-screen elements are settled before anyone sees them.
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initReveal, { once: true });
   } else {
     initReveal();
   }
 
-  document.addEventListener('astro:page-load', initReveal);
+  document.addEventListener('astro:after-swap', initReveal);
 })();

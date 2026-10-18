@@ -1,3 +1,4 @@
+import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
 import { isActiveRoute } from '../utils/nav-state';
 
 (() => {
@@ -11,8 +12,7 @@ import { isActiveRoute } from '../utils/nav-state';
   }
   globalThis.__persNavStateInitialized = true;
 
-  const syncNavState = () => {
-    const { pathname } = globalThis.location;
+  const syncNavState = (pathname = globalThis.location.pathname) => {
     document
       .querySelectorAll<HTMLElement>('[data-nav-link]')
       .forEach((link) => {
@@ -33,12 +33,27 @@ import { isActiveRoute } from '../utils/nav-state';
       });
   };
 
+  /**
+   * Highlight the destination tab as soon as a navigation starts, like a native
+   * tab bar, instead of waiting for the next page to arrive. If the navigation
+   * is abandoned, the next page load reconciles the state again.
+   */
+  const syncToDestination = (event: Event) => {
+    const { to } = event as TransitionBeforePreparationEvent;
+    if (to.origin === globalThis.location.origin) {
+      syncNavState(to.pathname);
+    }
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncNavState, { once: true });
+    document.addEventListener('DOMContentLoaded', () => syncNavState(), {
+      once: true,
+    });
   } else {
     syncNavState();
   }
 
-  document.addEventListener('astro:page-load', syncNavState);
-  globalThis.addEventListener('pageshow', syncNavState);
+  document.addEventListener('astro:before-preparation', syncToDestination);
+  document.addEventListener('astro:page-load', () => syncNavState());
+  globalThis.addEventListener('pageshow', () => syncNavState());
 })();

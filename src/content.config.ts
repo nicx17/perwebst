@@ -38,6 +38,11 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     liveUrl: HTTPS_URL.optional(),
     ogImage: z.string().optional(),
+    /**
+     * The project page is a self-contained static site in public/projects/<slug>/
+     * that shadows the Astro route, so links to it must do a full page load.
+     */
+    standalone: z.boolean().default(false),
   }),
 });
 
