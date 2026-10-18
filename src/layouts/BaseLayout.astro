@@ -187,6 +187,22 @@ const currentYear = new Date().getFullYear();
             t.dataset.sceneQuality = s;
           }
         } catch {}
+        // Full load from another page of this site (e.g. back from a standalone
+        // project page), not a reload or an outside landing: skip the
+        // first-visit intro so the switch reads as one app. Must run before
+        // first paint; page-transition.ts covers ClientRouter swaps.
+        try {
+          const activation = globalThis.navigation?.activation;
+          const fromSite = activation
+            ? activation.from !== null
+            : document.referrer.startsWith(location.origin + '/');
+          const type =
+            activation?.navigationType ??
+            performance.getEntriesByType('navigation')[0]?.type;
+          if (fromSite && type !== 'reload') {
+            document.documentElement.dataset.siteNav = '';
+          }
+        } catch {}
       })();
     </script>
     <script>
@@ -204,6 +220,15 @@ const currentYear = new Date().getFullYear();
     <script>
       import '../scripts/image-zoom.ts';
     </script>
+    <!-- Fetch the scene photo during head parsing: CSS only requests it at the
+         first style pass, so a full-load page switch could otherwise reveal the
+         page before the photo is in memory. Same URL as --scene-image-avif. -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href={`/backgrounds/light/${lightImage}.avif?v=20260404hq`}
+    />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -342,18 +367,24 @@ const currentYear = new Date().getFullYear();
       )}
     </main>
 
-    <a
-      href={lightUnsplash.url}
-      class="bg-credit"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Background by {lightUnsplash.author}
-    </a>
+    <footer class="site-meta">
+      <a
+        href={lightUnsplash.url}
+        class="bg-credit"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Background by {lightUnsplash.author}
+      </a>
 
-    <div class="site-footer">&copy; {currentYear} Nick Cardoso</div>
+      <div class="site-footer">&copy; {currentYear} Nick Cardoso</div>
+    </footer>
 
     <style>
+      /* Desktop: the two labels float in the bottom corners. */
+      .site-meta {
+        display: contents;
+      }
       .bg-credit,
       .site-footer {
         position: fixed;
@@ -390,6 +421,21 @@ const currentYear = new Date().getFullYear();
         color: var(--text-main);
         background: var(--button-bg-hover);
         border-color: var(--button-border-strong);
+      }
+      /* Phones: floating labels would sit over the text the whole time you
+         read, so they become a row at the end of the page instead. */
+      @media (max-width: 720px) {
+        .site-meta {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0 0.5rem 1.5rem;
+        }
+        .bg-credit,
+        .site-footer {
+          position: static;
+        }
       }
     </style>
   </body>

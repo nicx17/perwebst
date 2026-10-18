@@ -13,6 +13,29 @@
     <meta name="theme-color" content="#ece9e3" />
     <link rel="icon" type="image/png" href="/project-icons/de-1.png" />
     <title>BCD Counter 00–99</title>
+    <!-- Hold first paint until the script-drawn content exists (#page-ready
+         sits after the last script), so a page switch never reveals a
+         half-built page. -->
+    <link rel="expect" href="#page-ready" blocking="render" />
+    <script>
+      /* Arrived from another page of this site (not a reload or an outside
+         landing): skip the first-visit intro so the switch reads as one app.
+         Mirrors the head script in src/layouts/BaseLayout.astro. */
+      (() => {
+        try {
+          const activation = globalThis.navigation?.activation;
+          const fromSite = activation
+            ? activation.from !== null
+            : document.referrer.startsWith(location.origin + '/');
+          const type =
+            activation?.navigationType ??
+            performance.getEntriesByType('navigation')[0]?.type;
+          if (fromSite && type !== 'reload') {
+            document.documentElement.dataset.siteNav = '';
+          }
+        } catch {}
+      })();
+    </script>
     <style>
       /* nickcardoso.com look: ivory paper, serif display type, frosted cards, pill controls, warm/cool ambient glow. */
       :root {
@@ -254,6 +277,9 @@
       }
 
       /* fixed corner pills, as on every site page */
+      .site-meta {
+        display: contents;
+      }
       .bg-credit,
       .site-footer {
         position: fixed;
@@ -303,6 +329,31 @@
         }
         .site-footer {
           right: 0.75rem;
+        }
+        /* Floating labels would sit over the text the whole time you read, so
+           on phones they become a row at the end of the page (as on the main
+           site). */
+        .site-meta {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1.5rem;
+        }
+        .bg-credit,
+        .site-footer {
+          position: static;
+        }
+        /* The card spans the full screen width, bleeding back through the
+           body's side padding (same expressions as body). Rounded corners and
+           side borders would only frame a sliver of background at the edges;
+           the top and bottom borders still separate it from the page. */
+        .shell {
+          margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+          margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+          border-left: 0;
+          border-right: 0;
+          border-radius: 0;
         }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -643,6 +694,12 @@
       }
       .formula {
         font: 0.8rem/1.6 var(--mono);
+        color: var(--muted);
+        margin: 0;
+      }
+      /* Prose notes beside the formulas: same muted voice, body font. */
+      .note {
+        font: 0.88rem/1.6 var(--sans);
         color: var(--muted);
         margin: 0;
       }
@@ -1102,6 +1159,53 @@
       svg .pbg {
         opacity: 0.7;
       }
+      /* Page switches (between the DE 1 pages and to/from the main site):
+         fade the new page in over the old one instead of hard-cutting to a
+         half-painted page. The old side stays opaque, so the shared chrome
+         (nav, background) stays perfectly still, and a late-starting fade on
+         this heavy page can't wash the frame out (the default plus-lighter
+         crossfade does). Matches src/styles/global.css. */
+      @view-transition {
+        navigation: auto;
+      }
+      ::view-transition-group(root) {
+        animation-duration: 220ms;
+      }
+      ::view-transition-old(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      ::view-transition-new(root) {
+        animation: view-fade-in 220ms var(--ease) both;
+        mix-blend-mode: normal;
+      }
+      @keyframes view-fade-in {
+        from {
+          opacity: 0;
+        }
+      }
+      /* Arrived from another page of the site (data-site-nav, set in <head>):
+         skip the first-visit intro; the content gets one short rise instead.
+         No fill mode, so no transform lingers on .content afterwards. */
+      html[data-site-nav] .content > * {
+        animation: none;
+      }
+      html[data-site-nav] .content {
+        animation: content-swap-in 300ms var(--ease);
+      }
+      @keyframes content-swap-in {
+        from {
+          transform: translate3d(0, 10px, 0);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-group(*),
+        ::view-transition-old(*),
+        ::view-transition-new(*),
+        html[data-site-nav] .content {
+          animation: none !important;
+        }
+      }
     </style>
     <script>
       /* Same day-of-month background rotation as src/layouts/BaseLayout.astro: keep the lists in sync. */
@@ -1146,6 +1250,14 @@
           '--scene-image',
           `image-set(url("${base}.avif${v}") type("image/avif"), url("${base}.webp${v}") type("image/webp"), url("${base}.jpg${v}") type("image/jpeg"))`
         );
+        // Fetch the photo now: CSS only requests it at the first style pass,
+        // so a page switch could otherwise reveal this page without it.
+        const preload = document.createElement('link');
+        preload.rel = 'preload';
+        preload.as = 'image';
+        preload.type = 'image/avif';
+        preload.href = `${base}.avif${v}`;
+        document.head.append(preload);
 
         const clean = name.replace('-unsplash', '');
         const cut = clean.lastIndexOf('-');
@@ -1180,8 +1292,8 @@
         <nav class="topbar" aria-label="DE 1 circuits">
           <span class="brand">DE 1</span>
           <div class="tabs">
-            <a class="tab" href="./">LED chaser</a>
-            <a class="tab" href="bcd-counter.html" aria-current="page"
+            <a class="tab" href="../">LED chaser</a>
+            <a class="tab" href="./" aria-current="page"
               >BCD counter</a
             >
           </div>
@@ -1448,7 +1560,7 @@
                 aria-label="Perfboard layout of the BCD counter on an 80 by 55 millimetre board"
               ></svg>
             </div>
-            <p class="formula" id="pbHint">
+            <p class="note" id="pbHint">
               Component side: parts as you place them. Faint dashed lines are
               bare links underneath.
             </p>
@@ -1552,21 +1664,23 @@
           </section>
         </main>
         <footer class="foot">
-          <span>Project 2 of 2 · <a href="./">← LED chaser</a></span
+          <span>Project 2 of 2 · <a href="../">← LED chaser</a></span
           ><span><a href="/projects/">All projects</a></span>
         </footer>
       </div>
     </div>
-    <a
-      class="bg-credit"
-      href="https://unsplash.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Background from Unsplash</a
-    >
-    <div class="site-footer">
-      <span>&copy; <span data-year>2026</span> Nick Cardoso</span>
-    </div>
+    <footer class="site-meta">
+      <a
+        class="bg-credit"
+        href="https://unsplash.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Background from Unsplash</a
+      >
+      <div class="site-footer">
+        <span>&copy; <span data-year>2026</span> Nick Cardoso</span>
+      </div>
+    </footer>
     <script>
       document.querySelector('[data-year]').textContent =
         new Date().getFullYear();
@@ -4325,5 +4439,6 @@
         requestAnimationFrame(frame);
       })();
     </script>
+    <div id="page-ready" hidden></div>
   </body>
 </html>

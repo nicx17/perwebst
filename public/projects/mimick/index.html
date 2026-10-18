@@ -6,6 +6,37 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <title>Mimick — Immich Desktop Client for Linux</title>
+    <!-- Hold first paint until the end-of-body script has applied the theme
+         and reveal state (#page-ready sits after it), so a page switch never
+         reveals a blank or wrongly themed page. -->
+    <link rel="expect" href="#page-ready" blocking="render">
+    <script>
+        (() => {
+            // Saved theme before first paint, so midnight visitors don't get
+            // an ivory flash (the toggle script at the end of <body> syncs the
+            // buttons and handles clicks).
+            try {
+                if (localStorage.getItem("mimick-theme") === "midnight") {
+                    document.documentElement.dataset.theme = "midnight";
+                }
+            } catch {}
+            // Arrived from another page of this site (not a reload or an
+            // outside landing): the reveal script shows what's on screen
+            // instead of fading it in. Mirrors src/layouts/BaseLayout.astro.
+            try {
+                const activation = globalThis.navigation?.activation;
+                const fromSite = activation
+                    ? activation.from !== null
+                    : document.referrer.startsWith(location.origin + "/");
+                const type =
+                    activation?.navigationType ??
+                    performance.getEntriesByType("navigation")[0]?.type;
+                if (fromSite && type !== "reload") {
+                    document.documentElement.dataset.siteNav = "";
+                }
+            } catch {}
+        })();
+    </script>
     <meta name="description"
         content="Mimick is a native GTK4 desktop client for Immich on Linux, with background folder sync, offline-safe upload queues, and OCR search.">
     <link rel="canonical" href="https://nickcardoso.com/projects/mimick/">
@@ -212,10 +243,12 @@
 
         /* ---------- layout ---------- */
         .wrap {
+            /* Read by the phone rules below to bleed cards to the edges. */
+            --wrap-pad: 24px;
             width: 100%;
             max-width: 1180px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 var(--wrap-pad);
         }
 
         section {
@@ -1424,7 +1457,7 @@
 
         @media (max-width: 480px) {
             .wrap {
-                padding: 0 18px;
+                --wrap-pad: 18px;
             }
 
             .hero {
@@ -1559,12 +1592,106 @@
         .mimick-lightbox.is-active img {
             transform: scale(1);
         }
+        /* ---------- phones: cards run edge to edge ---------- */
+        /* Once the grids stack to one column, cards span the full screen width
+           instead of floating inside the .wrap gutter. Rounded corners and side
+           borders would only frame a sliver of background at the edges. */
+        @media (max-width: 600px) {
+
+            .feature,
+            .detail,
+            .tile,
+            .specs,
+            .install-card {
+                margin-inline: calc(-1 * var(--wrap-pad));
+                border-left: 0;
+                border-right: 0;
+                border-radius: 0;
+            }
+        }
+
+        /* ---------- phones: frosted strip behind the floating controls ---------- */
+        /* Text scrolling under the back button and theme toggle blurs out
+           instead of colliding with them. Fades in over the first 40px of
+           scroll so the top of the page looks unchanged; without scroll-driven
+           animations it simply stays on. Matches the main site's nav. */
+        .top-scrim {
+            display: none;
+        }
+
+        @media (max-width: 720px) {
+            .top-scrim {
+                display: block;
+                position: fixed;
+                inset: 0 0 auto;
+                height: 92px;
+                z-index: 55;
+                pointer-events: none;
+                background: color-mix(in srgb, var(--bg) 60%, transparent);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                mask-image: linear-gradient(to bottom, #000 70%, transparent);
+            }
+
+            @supports (animation-timeline: scroll()) {
+                .top-scrim {
+                    animation: scrim-in linear both;
+                    animation-timeline: scroll(root);
+                    animation-range: 0 40px;
+                }
+            }
+        }
+
+        @keyframes scrim-in {
+            from {
+                opacity: 0;
+            }
+        }
+
+        /* ---------- page switches ---------- */
+        /* Fade this page in over the previous one instead of hard-cutting to
+           a half-painted page. The old side stays opaque, so a late-starting
+           fade can't wash the frame out (the default plus-lighter crossfade
+           does). Matches src/styles/global.css. */
+        @view-transition {
+            navigation: auto;
+        }
+
+        ::view-transition-group(root) {
+            animation-duration: 220ms;
+        }
+
+        ::view-transition-old(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-new(root) {
+            animation: view-fade-in 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+            mix-blend-mode: normal;
+        }
+
+        @keyframes view-fade-in {
+            from {
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            ::view-transition-group(*),
+            ::view-transition-old(*),
+            ::view-transition-new(*) {
+                animation: none !important;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="aurora" aria-hidden="true"><i></i><i></i></div>
     <div class="grain" aria-hidden="true"></div>
+    <div class="top-scrim" aria-hidden="true"></div>
 
     <!-- back to projects -->
     <a class="back" href="/projects/" aria-label="Back to projects">
@@ -2472,8 +2599,27 @@
                 },
                 { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
             );
-            document
-                .querySelectorAll("[data-anim]")
+            // Arriving from another page of the site, show what's already on
+            // screen as-is: fading it in would make the switch look like a
+            // reload. Measure first, then write, to avoid layout thrash.
+            const animated = [...document.querySelectorAll("[data-anim]")];
+            const onScreen = root.hasAttribute("data-site-nav")
+                ? animated.filter((el) => {
+                    const r = el.getBoundingClientRect();
+                    return r.top < innerHeight && r.bottom > 0;
+                })
+                : [];
+            onScreen.forEach((el) => {
+                el.style.transition = "none";
+                el.classList.add("in");
+            });
+            if (onScreen.length) {
+                // Commit the revealed style, then restore hover transitions.
+                void document.body.offsetHeight;
+                onScreen.forEach((el) => el.style.removeProperty("transition"));
+            }
+            animated
+                .filter((el) => !onScreen.includes(el))
                 .forEach((el) => io.observe(el));
 
             // Copy buttons
@@ -2530,6 +2676,7 @@
         })();
     </script>
 
+    <div id="page-ready" hidden></div>
 </body>
 
 </html>

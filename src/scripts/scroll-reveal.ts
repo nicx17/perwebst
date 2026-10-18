@@ -37,7 +37,7 @@
   };
 
   /**
-   * After a client-side navigation the page transition already animates the
+   * When arriving from another page of the site the page transition animates the
    * incoming content, so anything on screen is shown as-is (CSS drops the
    * transition via ATTR_INSTANT) instead of fading in a second time.
    */
@@ -93,8 +93,8 @@
       return;
     }
 
-    const isClientNavigation =
-      document.documentElement.hasAttribute('data-client-nav');
+    const arrivedFromSite =
+      document.documentElement.hasAttribute('data-site-nav');
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -116,7 +116,7 @@
     );
 
     [...revealEls, ...staggerEls, ...contentHeadings].forEach((el) => {
-      if (isClientNavigation && isInViewport(el)) {
+      if (arrivedFromSite && isInViewport(el)) {
         revealInstantly(el);
       } else {
         observer.observe(el);

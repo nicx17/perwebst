@@ -186,17 +186,11 @@ body,
   min-height: 100%;
 }
 
+/* No global `scroll-behavior: smooth`: it would animate the router's scroll
+   restores. In-page anchor jumps opt in from page-transition.ts. */
 html {
   overflow-x: hidden;
   background-color: var(--bg-primary);
-}
-
-/* Smooth in-page anchor scrolling, but not while Astro swaps pages: the
-   router's scroll-to-top / history restore must land instantly. */
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-astro-transition]) {
-    scroll-behavior: smooth;
-  }
 }
 
 #scene-bg {
@@ -1325,10 +1319,30 @@ header.page-header h1 {
   overflow-wrap: break-word;
 }
 
+.project-detail-content h1,
 .project-detail-content h2,
 .project-detail-content h3 {
   letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-tight);
   overflow-wrap: anywhere;
+}
+
+/* Links in write-ups match the standalone project pages: ink-coloured text
+   with a quiet underline that firms up on hover, instead of the browser's
+   default blue. Linked badge images get no underline. */
+.project-detail-content a {
+  color: inherit;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-hover);
+  transition: text-decoration-color var(--motion-fast) ease;
+}
+
+.project-detail-content a:hover {
+  text-decoration-color: currentColor;
+}
+
+.project-detail-content a:has(> img) {
+  text-decoration: none;
 }
 
 .article-content {
@@ -1409,7 +1423,9 @@ header.page-header h1 {
   }
 
   .page-shell {
-    width: min(var(--page-max), 100% - 1rem);
+    /* Read by .project-detail-card to bleed back out to the screen edges. */
+    --page-gutter: 0.5rem;
+    width: min(var(--page-max), 100% - 2 * var(--page-gutter));
     padding-top: 0.8rem;
   }
 
@@ -1420,6 +1436,31 @@ header.page-header h1 {
   .app-topbar-plain {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  /* The pinned nav gets a frosted backing so text scrolling beneath blurs out
+     instead of colliding with the tabs. It spans the full screen width, fades
+     at its lower edge, and fades in over the first 40px of scroll so the top
+     of the page looks unchanged. Without scroll-driven animations it simply
+     stays on. */
+  .app-topbar-plain::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--page-gutter));
+    z-index: -1;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--bg-primary) 60%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .app-topbar-plain::before {
+      animation: navBackdropIn linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 40px;
+    }
   }
 
   .app-brand {
@@ -1542,8 +1583,15 @@ header.page-header h1 {
     -webkit-backdrop-filter: none;
   }
 
+  /* Project pages: the card spans the full screen width, so the reading
+     column isn't pinched by a gutter on both sides. Rounded corners and side
+     borders would only frame a sliver of background at the edges, so they go;
+     the top and bottom borders still separate it from the page. */
   .project-detail-card {
-    padding: 1.04rem 0.95rem 1.1rem;
+    margin-inline: calc(-1 * var(--page-gutter));
+    border-inline: 0;
+    border-radius: 0;
+    padding: 1.04rem 1rem 1.1rem;
   }
 
   .page-shell-plain .project-card,
@@ -1586,22 +1634,48 @@ header.page-header h1 {
 }
 
 /* ── Client-Side Navigation ──
-   The ClientRouter crossfades the root snapshot. Identical pixels (topbar,
-   background, footer) blend into themselves and stay perfectly still, so only
-   the content visibly changes. Old and new must share duration and easing, or
-   the chrome dims mid-transition. */
-::view-transition-group(root),
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: var(--motion-nav);
-  animation-timing-function: var(--ease-sleek);
+   Page switches fade the new root snapshot in over the old one, which stays
+   fully opaque underneath. Identical pixels (topbar, background, footer) blend
+   into themselves and stay perfectly still, so only the content visibly
+   changes. The browser default fades both sides with plus-lighter blending
+   instead; when a busy page delays the compositor, those two fades start out
+   of sync and the frame washes out mid-transition. With the old side opaque, a
+   late start just shows the old page a moment longer.
+
+   Full document loads (to and from the standalone pages in
+   public/projects/) get the same transition via cross-document view
+   transitions; those pages opt in with matching rules. Without it the browser
+   hard-cuts to a half-painted page. */
+@view-transition {
+  navigation: auto;
 }
 
-/* First-load entrance animations would replay on every swap and make each
-   navigation feel like a reload. After a client-side navigation
-   (data-client-nav, set by page-transition.ts) the content area gets one
-   short rise instead. */
-html[data-client-nav]
+::view-transition-group(root) {
+  animation-duration: var(--motion-nav);
+}
+
+::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: viewFadeIn var(--motion-nav) var(--ease-sleek) both;
+  mix-blend-mode: normal;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* First-load entrance animations would replay on every switch and make each
+   navigation feel like a reload. When arriving from another page of the site
+   (data-site-nav: set by page-transition.ts on router swaps, and by
+   BaseLayout's head script on full loads) the content area gets one short
+   rise instead. */
+html[data-site-nav]
   :is(
     .home-hero h1,
     .home-hero .subtitle,
@@ -1616,8 +1690,14 @@ html[data-client-nav]
 
 /* No fill mode: a lingering transform would turn .app-content into the
    containing block for any fixed-position descendants. */
-html[data-client-nav] .app-content {
+html[data-site-nav] .app-content {
   animation: contentSwapIn calc(var(--motion-nav) + 80ms) var(--ease-sleek);
+}
+
+@keyframes navBackdropIn {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes contentSwapIn {
@@ -1789,6 +1869,9 @@ html[data-client-nav] .app-content {
   vertical-align: middle;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
+  /* Inside authored flex rows (e.g. a row of screenshots), let images shrink
+     to fit instead of holding their width and pushing the page sideways. */
+  min-width: 0;
 }
 
 .project-detail-content p:has(img:not([src*='shields.io'])) {
@@ -1866,6 +1949,8 @@ html[data-client-nav] .app-content {
   font-size: var(--text-xs);
   font-family: monospace;
   color: var(--text-main);
+  /* Long paths and identifiers break rather than push the page sideways. */
+  overflow-wrap: anywhere;
 }
 
 /* Scrollbar for Code Blocks */
@@ -1882,6 +1967,33 @@ html[data-client-nav] .app-content {
 }
 .project-detail-content pre::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.4);
+}
+
+/* Write-up typography on phones. Placed after the base content rules so the
+   same-specificity overrides below win. The rest of the mobile UI steps down
+   to --text-sm, which is too small for long prose, so write-ups stay at full
+   reading size; headings and inline code scale with it. Lists and table cells
+   give back horizontal room. */
+@media (max-width: 720px) {
+  .project-detail-content {
+    font-size: var(--text-base);
+  }
+
+  .project-detail-content :not(pre) > code {
+    font-size: 0.85em;
+  }
+
+  .project-detail-content :is(ul, ol) {
+    padding-left: 1.25rem;
+  }
+
+  /* `anywhere` (unlike `break-word`) also lowers the table's minimum width,
+     so wide tables shrink to the screen; words only break when they must. */
+  .project-detail-content th,
+  .project-detail-content td {
+    padding: 0.6rem 0.75rem;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* Copy Code Button */
