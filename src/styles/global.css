@@ -33,7 +33,6 @@ html[data-theme='ivory'] {
   --page-max: 1520px;
   --page-max-plain: 1360px;
   --home-links-max: 1400px;
-  --reading-max: 1080px;
   --downsampling-mode: boxcar;
   --downsampling-factor: 1;
   --downsampling-step: calc(var(--downsampling-factor) * 1px);
@@ -1138,10 +1137,6 @@ header.page-header h1 {
   gap: 0.7rem 1rem;
   margin: 0.5rem 0 1.3rem;
   color: var(--text-muted);
-}
-
-.article {
-  max-width: var(--reading-max);
 }
 
 .project-detail-card {

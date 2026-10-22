@@ -197,7 +197,7 @@
       /* shell */
       /* site nav (same pills as BaseLayout's plain topbar) */
       .site-top {
-        max-width: 1180px;
+        max-width: 1360px;
         margin: 0 auto 1.1rem;
         display: flex;
         justify-content: center;
@@ -236,7 +236,7 @@
         box-shadow: 0 18px 34px -24px var(--shadow);
       }
       .page {
-        max-width: 1180px;
+        max-width: 1360px;
         margin: 0 auto;
       }
 
@@ -1293,15 +1293,14 @@
           <span class="brand">DE 1</span>
           <div class="tabs">
             <a class="tab" href="../">LED chaser</a>
-            <a class="tab" href="./" aria-current="page"
-              >BCD counter</a
-            >
+            <a class="tab" href="./" aria-current="page">BCD counter</a>
+            <a class="tab" href="../max7219-matrix/">LED matrix</a>
           </div>
         </nav>
 
         <main class="content">
           <header class="hero">
-            <div class="eyebrow">Digital electronics · project 2 of 2</div>
+            <div class="eyebrow">Digital electronics · project 2 of 3</div>
             <h1>Two-digit BCD counter, 00 → 99</h1>
             <p class="lede">
               Two 74LS90 decade counters in BCD mode count pulses from an NE555
@@ -1664,7 +1663,9 @@
           </section>
         </main>
         <footer class="foot">
-          <span>Project 2 of 2 · <a href="../">← LED chaser</a></span
+          <span
+            >Project 2 of 3 · <a href="../">← LED chaser</a> ·
+            <a href="../max7219-matrix/">LED matrix →</a></span
           ><span><a href="/projects/">All projects</a></span>
         </footer>
       </div>

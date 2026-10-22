@@ -1,0 +1,3917 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="MAX7219 driving a 1088AS 8 × 8 LED matrix with no microcontroller: bits keyed in by hand through an NE555 one-shot clock, 5 V from USB-C, checked against the datasheets."
+    />
+    <meta name="theme-color" content="#ece9e3" />
+    <link rel="icon" type="image/png" href="/project-icons/de-1.png" />
+    <title>LED Matrix by Hand</title>
+    <link rel="expect" href="#page-ready" blocking="render" />
+    <script>
+      /* Arrived from another page of this site (not a reload or an outside
+         landing): skip the first-visit intro so the switch reads as one app.
+         Mirrors the head script in src/layouts/BaseLayout.astro. */
+      (() => {
+        try {
+          const activation = globalThis.navigation?.activation;
+          const fromSite = activation
+            ? activation.from !== null
+            : document.referrer.startsWith(location.origin + '/');
+          const type =
+            activation?.navigationType ??
+            performance.getEntriesByType('navigation')[0]?.type;
+          if (fromSite && type !== 'reload') {
+            document.documentElement.dataset.siteNav = '';
+          }
+        } catch {}
+      })();
+    </script>
+    <style>
+      /* nickcardoso.com look: ivory paper, serif display type, frosted cards, pill controls, warm/cool ambient glow. */
+      :root {
+        color-scheme: light;
+        --bg: #ece9e3;
+        --glass: rgba(249, 246, 241, 0.84);
+        --glass-strong: rgba(255, 252, 247, 0.78);
+        --ink: #181d25;
+        --muted: #495566;
+        --soft: #5f6f83;
+        --rule: rgba(72, 92, 119, 0.18);
+        --rule-strong: rgba(72, 92, 119, 0.34);
+        --btn: rgba(249, 246, 241, 0.7);
+        --btn-hover: rgba(255, 255, 255, 0.86);
+        --btn-active: #253243;
+        --btn-ink: #3f4e62;
+        --btn-ink-active: #f4f7fb;
+        --warm: rgba(244, 190, 130, 0.42);
+        --cool: rgba(126, 156, 198, 0.24);
+        --glow: rgba(129, 160, 205, 0.2);
+        --sheen: rgba(255, 255, 255, 0.56);
+        --shadow: rgba(39, 49, 64, 0.2);
+        --grid: rgba(72, 92, 119, 0.07);
+        --serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+        --sans:
+          system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
+        --mono:
+          ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+        --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+        /* signal colours, shared by schematic, pinouts, tables and trace */
+        --n-vcc: #c0392b;
+        --n-gnd: #1f2a36;
+        --n-clk: #c96a1b;
+        --n-tim: #2f6fb0;
+        --n-din: #2b7a4b;
+        --n-load: #8a4fb5;
+        --n-dig: #b0417a;
+        --n-seg: #0f7c86;
+        --ok: #2b7a4b;
+        --warn: #a86a12;
+        --bad: #b8322a;
+        --add: #2f6fb0;
+        --hot: #c96a1b;
+        --led: #ff3b2f;
+        --led-off: #f3dcd8;
+        --seg-on: #ff3b2f;
+        --seg-off: #3a2426;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      html {
+        background: var(--bg);
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font: 16px/1.6 var(--sans);
+        background: transparent;
+        position: relative;
+        isolation: isolate;
+        padding: 18px max(16px, env(safe-area-inset-right, 0px)) 48px
+          max(16px, env(safe-area-inset-left, 0px));
+      }
+      /* site scene: rotating Unsplash photo + ivory wash + drifting orbs (mirrors global.css) */
+      #scene-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background-color: var(--bg);
+        background-image: var(--scene-image, none);
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        pointer-events: none;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: rgba(236, 233, 227, 0.15);
+      }
+      .ambient-orb {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        filter: blur(118px);
+        opacity: 0.72;
+        will-change: transform;
+      }
+      .ambient-orb-one {
+        width: clamp(280px, 36vw, 520px);
+        height: clamp(280px, 36vw, 520px);
+        top: -8%;
+        right: -6%;
+        background: radial-gradient(circle, var(--warm), transparent 72%);
+        animation: drift1 28s ease-in-out infinite;
+      }
+      .ambient-orb-two {
+        width: clamp(220px, 28vw, 420px);
+        height: clamp(220px, 28vw, 420px);
+        bottom: -4%;
+        left: -8%;
+        background: radial-gradient(circle, var(--cool), transparent 72%);
+        animation: drift2 24s ease-in-out infinite;
+      }
+      @keyframes drift1 {
+        25% {
+          transform: translate3d(8vw, -6vh, 0) scale(1.08);
+        }
+        50% {
+          transform: translate3d(-4vw, 4vh, 0) scale(0.95);
+        }
+        75% {
+          transform: translate3d(5vw, 8vh, 0) scale(1.04);
+        }
+      }
+      @keyframes drift2 {
+        25% {
+          transform: translate3d(-6vw, 5vh, 0) scale(0.96);
+        }
+        50% {
+          transform: translate3d(7vw, -3vh, 0) scale(1.06);
+        }
+        75% {
+          transform: translate3d(-3vw, -7vh, 0) scale(0.98);
+        }
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 16px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* shell */
+      /* site nav (same pills as BaseLayout's plain topbar) */
+      .site-top {
+        max-width: 1360px;
+        margin: 0 auto 1.1rem;
+        display: flex;
+        justify-content: center;
+      }
+      .site-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .site-nav .tab {
+        padding: 0.62rem 0.92rem;
+        font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+      }
+      .nav-back {
+        display: inline-flex;
+        align-items: center;
+        margin: 0 0 1.25rem;
+        text-decoration: none;
+        border: 1px solid rgba(72, 92, 119, 0.22);
+        border-radius: 1rem / 0.9rem;
+        background: var(--btn);
+        color: var(--btn-ink);
+        padding: 0.36rem 0.68rem;
+        transition:
+          color 0.26s,
+          border-color 0.26s,
+          background-color 0.26s,
+          transform 0.34s var(--ease),
+          box-shadow 0.34s var(--ease);
+      }
+      .nav-back:hover {
+        color: var(--ink);
+        border-color: var(--rule-strong);
+        background: var(--btn-hover);
+        transform: translateY(-2px) scale(1.012);
+        box-shadow: 0 18px 34px -24px var(--shadow);
+      }
+      .page {
+        max-width: 1360px;
+        margin: 0 auto;
+      }
+
+      /* shell: translucent project-detail-card glass */
+      .shell {
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 84%, transparent);
+        border-radius: 1.3rem;
+        overflow: hidden;
+        background:
+          linear-gradient(
+            168deg,
+            color-mix(in srgb, var(--btn) 72%, transparent),
+            color-mix(in srgb, var(--glass-strong) 92%, transparent)
+          ),
+          radial-gradient(
+            circle at 8% 0%,
+            color-mix(in srgb, var(--glow) 84%, transparent),
+            transparent 62%
+          );
+        box-shadow:
+          0 24px 60px -36px var(--shadow),
+          inset 0 1px 0 color-mix(in srgb, var(--sheen) 88%, transparent);
+      }
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .brand {
+        font: 400 1.15rem var(--serif);
+        letter-spacing: 0.02em;
+        color: var(--ink);
+      }
+
+      /* fixed corner pills, as on every site page */
+      .site-meta {
+        display: contents;
+      }
+      .bg-credit,
+      .site-footer {
+        position: fixed;
+        bottom: 1.25rem;
+        z-index: 50;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--ink);
+        text-decoration: none;
+        opacity: 0.85;
+        padding: 0.45rem 0.85rem;
+        background: rgba(248, 245, 240, 0.66);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        transition:
+          opacity 0.26s,
+          background-color 0.26s,
+          border-color 0.26s;
+      }
+      .bg-credit {
+        left: 1.25rem;
+      }
+      .site-footer {
+        right: 1.25rem;
+      }
+      .bg-credit:hover,
+      .site-footer:hover {
+        opacity: 1;
+        background: var(--btn-hover);
+        border-color: var(--rule-strong);
+      }
+      @media (max-width: 720px) {
+        .ambient-orb {
+          filter: none;
+          opacity: 0.63;
+        }
+        .bg-credit,
+        .site-footer {
+          bottom: 0.75rem;
+        }
+        .bg-credit {
+          left: 0.75rem;
+        }
+        .site-footer {
+          right: 0.75rem;
+        }
+        /* Floating labels would sit over the text the whole time you read, so
+           on phones they become a row at the end of the page (as on the main
+           site). */
+        .site-meta {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1.5rem;
+        }
+        .bg-credit,
+        .site-footer {
+          position: static;
+        }
+        /* The card spans the full screen width, bleeding back through the
+           body's side padding (same expressions as body). Rounded corners and
+           side borders would only frame a sliver of background at the edges;
+           the top and bottom borders still separate it from the page. */
+        .shell {
+          margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+          margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+          border-left: 0;
+          border-right: 0;
+          border-radius: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ambient-orb {
+          animation: none;
+        }
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tab {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: var(--btn-ink);
+        border: 1px solid rgba(72, 92, 119, 0.22);
+        border-radius: 999px;
+        background: var(--btn);
+        padding: 7px 13px;
+        font: 600 0.85rem var(--sans);
+        letter-spacing: 0.02em;
+        transition:
+          transform 0.34s var(--ease),
+          background-color 0.26s,
+          color 0.26s,
+          box-shadow 0.34s var(--ease);
+      }
+      .tab:hover {
+        color: var(--ink);
+        background: var(--btn-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 18px 32px -20px var(--shadow);
+      }
+      .tab[aria-current='page'] {
+        color: var(--btn-ink-active);
+        background: var(--btn-active);
+        border-color: var(--btn-active);
+      }
+      .content {
+        padding: clamp(18px, 3vw, 34px) clamp(14px, 3vw, 34px) 40px;
+        display: grid;
+        gap: 34px;
+      }
+      .content > * {
+        animation: rise 0.56s var(--ease) both;
+        min-width: 0;
+      }
+
+      /* type */
+      h1,
+      h2,
+      h3 {
+        font-family: var(--serif);
+        font-weight: 400;
+        color: var(--ink);
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(2.1rem, 6vw, 3.4rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      h2 {
+        font-size: clamp(1.45rem, 3.2vw, 1.8rem);
+        line-height: 1.2;
+        position: relative;
+        padding-bottom: 0.5rem;
+        justify-self: start;
+      }
+      h2::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 64%;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          rgba(244, 190, 130, 0.9),
+          rgba(126, 156, 198, 0.7)
+        );
+      }
+      h3 {
+        font-size: 1.15rem;
+      }
+      .eyebrow {
+        font: 600 0.75rem var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--soft);
+      }
+      .lede {
+        max-width: 70ch;
+        color: var(--muted);
+        margin: 0;
+      }
+      .sec {
+        display: grid;
+        gap: 16px;
+      }
+      .sec > p {
+        margin: 0;
+      }
+      code,
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.86em;
+      }
+      :not(pre) > code {
+        background: var(--glass);
+        border: 1px solid var(--rule);
+        padding: 0.1rem 0.35rem;
+        border-radius: 6px;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--rule-strong);
+      }
+      a:hover {
+        text-decoration-color: currentColor;
+      }
+
+      /* hero */
+      .hero {
+        display: grid;
+        gap: 12px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      span.chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--btn) 82%, transparent);
+        color: var(--soft);
+        padding: 3px 10px;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+      }
+      span.chip b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* cards */
+      .card {
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 84%, transparent);
+        border-radius: 1.3rem;
+        padding: 18px;
+        background:
+          linear-gradient(
+            168deg,
+            color-mix(in srgb, var(--btn) 72%, transparent),
+            color-mix(in srgb, var(--glass-strong) 92%, transparent)
+          ),
+          radial-gradient(
+            circle at 8% 0%,
+            color-mix(in srgb, var(--glow) 84%, transparent),
+            transparent 62%
+          );
+        box-shadow:
+          0 24px 60px -36px var(--shadow),
+          inset 0 1px 0 color-mix(in srgb, var(--sheen) 88%, transparent);
+        min-width: 0;
+      }
+      .plate {
+        padding: 10px;
+        overflow-x: auto;
+        background-color: #fbfaf7;
+        background-image:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .plate svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .callout {
+        border-left: 3px solid rgba(244, 190, 130, 0.95);
+        padding: 12px 16px;
+        border-radius: 0 12px 12px 0;
+        background: var(--glass);
+        max-width: 78ch;
+        margin: 0;
+        color: var(--muted);
+      }
+      .callout b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* controls */
+      .seg {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .btn,
+      .seg button {
+        font: 700 0.78rem var(--sans);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 8px 14px;
+        min-height: 36px;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 1px solid
+          color-mix(in srgb, rgba(72, 92, 119, 0.22) 82%, transparent);
+        color: var(--btn-ink);
+        background: linear-gradient(
+          155deg,
+          color-mix(in srgb, var(--btn) 82%, transparent),
+          color-mix(in srgb, var(--glass-strong) 90%, transparent)
+        );
+        transition:
+          transform 0.4s var(--ease),
+          box-shadow 0.4s var(--ease),
+          background-color 0.26s,
+          color 0.26s;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .btn:hover,
+      .seg button:hover {
+        color: var(--ink);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 36px -26px var(--shadow);
+      }
+      .btn:active,
+      .btn.down {
+        transform: translateY(1px) scale(0.98);
+      }
+      .seg button[aria-pressed='true'],
+      .btn.primary {
+        background: var(--btn-active);
+        color: var(--btn-ink-active);
+        border-color: var(--btn-active);
+      }
+      .btn:focus-visible,
+      .seg button:focus-visible,
+      input:focus-visible,
+      .tab:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--warm) 70%, transparent);
+      }
+      .ctl {
+        display: grid;
+        gap: 7px;
+      }
+      .ctl label,
+      .lbl {
+        font: 600 0.72rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--soft);
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      /* readouts */
+      .bench {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        gap: 18px;
+      }
+      @media (max-width: 860px) {
+        .bench {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+      }
+      .readouts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        overflow: hidden;
+        margin: 0;
+      }
+      .ro {
+        background: color-mix(in srgb, #fffdf9 88%, transparent);
+        padding: 10px 12px;
+        display: grid;
+        gap: 2px;
+        margin: 0;
+      }
+      .ro dt {
+        font: 600 0.68rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--soft);
+      }
+      .ro dd {
+        margin: 0;
+        font: 500 1.1rem var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .ro small {
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
+      .ro.warn dd {
+        color: var(--warn);
+      }
+      .ro.bad dd {
+        color: var(--bad);
+      }
+      .formula {
+        font: 0.8rem/1.6 var(--mono);
+        color: var(--muted);
+        margin: 0;
+      }
+      .note {
+        font-family: var(--sans);
+        font-size: 0.86rem;
+        color: var(--muted);
+        margin: 0;
+      }
+      .note b {
+        color: var(--ink);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .kdot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+        flex: none;
+      }
+
+      /* validation log */
+      .log {
+        display: grid;
+        border-top: 1px solid var(--rule);
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr);
+        gap: 14px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .tag {
+        font: 700 0.66rem var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        justify-self: start;
+        align-self: start;
+        background: color-mix(in srgb, currentColor 7%, transparent);
+      }
+      .tag.ok {
+        color: var(--ok);
+      }
+      .tag.warn {
+        color: var(--warn);
+      }
+      .tag.fix {
+        color: var(--add);
+      }
+      .tag.bad {
+        color: var(--bad);
+      }
+      .item h3 {
+        font: 600 1rem var(--sans);
+        margin: 0 0 2px;
+      }
+      .item p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 78ch;
+      }
+      @media (max-width: 520px) {
+        .item {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+
+      /* tables */
+      .tblwrap {
+        overflow-x: auto;
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+      }
+      .pins {
+        width: 100%;
+        border-collapse: collapse;
+        font: 0.8rem var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .pins th,
+      .pins td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--rule);
+        text-align: left;
+        white-space: nowrap;
+      }
+      .pins th {
+        color: var(--soft);
+        font: 600 0.68rem var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        background: color-mix(in srgb, var(--glass) 60%, transparent);
+      }
+      .pins tr:last-child td {
+        border-bottom: 0;
+      }
+      .pins tr.hlrow td {
+        background: color-mix(in srgb, var(--warm) 40%, transparent);
+      }
+      .pins td.wrap {
+        white-space: normal;
+        min-width: 18ch;
+      }
+      .pins td.sans {
+        font-family: var(--sans);
+      }
+      .sub {
+        font: 600 1rem var(--sans);
+        margin: 0;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+        gap: 18px;
+      }
+      .two > div {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-width: 0;
+      }
+      .grid-figs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+        gap: 18px;
+      }
+      .grid-figs figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+        overflow-x: auto;
+      }
+      .grid-figs svg {
+        display: block;
+        width: 100%;
+        min-width: 480px;
+        height: auto;
+      }
+      .grid-figs figcaption {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      ol.steps {
+        margin: 0;
+        padding-left: 1.4em;
+        display: grid;
+        gap: 9px;
+        max-width: 80ch;
+        color: var(--muted);
+      }
+      ol.steps b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .foot {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 16px 18px;
+        border-top: 1px solid var(--rule);
+        color: var(--soft);
+        font-size: 0.85rem;
+      }
+
+      /* shared svg text */
+      svg text {
+        fill: var(--ink);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        body::before,
+        body::after,
+        .content > * {
+          animation: none;
+        }
+        .btn,
+        .seg button,
+        .tab {
+          transition: none;
+        }
+      }
+
+      /* schematic */
+      #sch {
+        min-width: 900px;
+      }
+      #sch .wire {
+        fill: none;
+        stroke: var(--n-gnd);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition:
+          opacity 0.15s,
+          stroke-width 0.15s;
+      }
+      #sch .w-vcc {
+        stroke: var(--n-vcc);
+      }
+      #sch .w-clk {
+        stroke: var(--n-clk);
+      }
+      #sch .w-tim {
+        stroke: var(--n-tim);
+      }
+      #sch .w-din {
+        stroke: var(--n-din);
+      }
+      #sch .w-load {
+        stroke: var(--n-load);
+      }
+      #sch .w-dig {
+        stroke: var(--n-dig);
+      }
+      #sch .w-seg {
+        stroke: var(--n-seg);
+      }
+      #sch .hot {
+        stroke-width: 3.4;
+        filter: drop-shadow(0 0 4px rgba(201, 106, 27, 0.55));
+      }
+      #sch .w-load.hot {
+        filter: drop-shadow(0 0 4px rgba(138, 79, 181, 0.55));
+      }
+      #sch .w-din.hot {
+        filter: drop-shadow(0 0 3px rgba(43, 122, 75, 0.5));
+      }
+      #sch .dot {
+        fill: var(--n-gnd);
+        transition: opacity 0.15s;
+      }
+      #sch .box {
+        fill: #fffdf9;
+        stroke: var(--n-gnd);
+        stroke-width: 1.8;
+      }
+      #sch .mframe {
+        fill: #fffdf9;
+        stroke: var(--rule-strong);
+        stroke-width: 1.4;
+        stroke-dasharray: 5 4;
+      }
+      #sch .pn {
+        fill: var(--soft);
+        font-size: 10px;
+      }
+      #sch .ref {
+        font-weight: 700;
+        font-size: 12.5px;
+      }
+      #sch .val {
+        fill: var(--muted);
+        font-size: 11px;
+      }
+      #sch .fixl {
+        fill: var(--add);
+        font-size: 10.5px;
+        font-family: var(--sans);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      #sch .ttl {
+        font-family: var(--serif);
+        font-size: 17px;
+      }
+      #sch .cap {
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        fill: var(--soft);
+      }
+      #sch .led {
+        fill: var(--led-off);
+        stroke: rgba(120, 40, 36, 0.35);
+        stroke-width: 1;
+        transition: fill 0.08s;
+      }
+      #sch .sw-act {
+        transition: transform 0.08s;
+        transform-box: fill-box;
+      }
+      #sch .pressed .sw-act {
+        transform: translateY(5px);
+      }
+      #sch .lever {
+        stroke: var(--n-gnd);
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+      #sch.focus .wire:not(.hl),
+      #sch.focus .dot:not(.hl) {
+        opacity: 0.14;
+      }
+      #sch.focus .wire.hl {
+        stroke-width: 3.2;
+      }
+
+      /* bench */
+      .sr {
+        display: grid;
+        grid-template-columns: repeat(16, minmax(0, 1fr));
+        gap: 3px;
+      }
+      .sr span {
+        display: grid;
+        gap: 1px;
+        text-align: center;
+        border-radius: 7px;
+        padding: 5px 0 4px;
+        font: 600 1rem var(--mono);
+        border: 1px solid var(--rule);
+        background: #fffdf9;
+        transition: background-color 0.2s;
+      }
+      .sr span small {
+        font: 500 0.58rem var(--mono);
+        color: var(--soft);
+      }
+      .sr span.dc {
+        background: color-mix(in srgb, var(--soft) 8%, #fffdf9);
+        color: var(--soft);
+      }
+      .sr span.ad {
+        background: color-mix(in srgb, var(--n-load) 10%, #fffdf9);
+      }
+      .sr span.da {
+        background: color-mix(in srgb, var(--n-seg) 10%, #fffdf9);
+      }
+      .sr span.new {
+        box-shadow: 0 0 0 2px var(--n-clk) inset;
+      }
+      .srcap {
+        display: grid;
+        grid-template-columns: 4fr 4fr 8fr;
+        gap: 3px;
+        font: 600 0.62rem var(--sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--soft);
+        text-align: center;
+      }
+      .mxwrap {
+        display: grid;
+        grid-template-columns: minmax(150px, 230px) minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+      @media (max-width: 520px) {
+        .mxwrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .mx {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 5px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #1a1416;
+        aspect-ratio: 1;
+        max-width: 230px;
+        width: 100%;
+      }
+      .mx i {
+        border-radius: 50%;
+        background: var(--seg-off);
+        aspect-ratio: 1;
+        display: block;
+      }
+      .guide {
+        border: 1px solid color-mix(in srgb, var(--n-clk) 40%, transparent);
+        background: color-mix(in srgb, var(--warm) 30%, #fffdf9);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .guide b {
+        font-weight: 700;
+      }
+      .guide .gerr {
+        color: var(--bad);
+        display: block;
+        margin-top: 3px;
+        font-size: 0.84rem;
+      }
+      .guide .gok {
+        color: var(--ok);
+        display: block;
+        margin-top: 3px;
+        font-size: 0.84rem;
+      }
+      .evlog {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 3px;
+        font: 0.78rem/1.45 var(--mono);
+        color: var(--muted);
+      }
+      .evlog li:first-child {
+        color: var(--ink);
+      }
+      .evlog .x {
+        color: var(--bad);
+      }
+
+      /* key-in */
+      .keyin {
+        display: grid;
+        grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+      @media (max-width: 860px) {
+        .keyin {
+          grid-template-columns: 1fr;
+        }
+      }
+      .ed {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4px;
+        padding: 10px;
+        border-radius: 12px;
+        background: #1a1416;
+        touch-action: none;
+        max-width: 264px;
+      }
+      .ed button {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 0;
+        padding: 0;
+        background: var(--seg-off);
+        cursor: pointer;
+      }
+      .ed button.on {
+        background: var(--led);
+        box-shadow: 0 0 6px rgba(255, 59, 47, 0.6);
+      }
+      .ed button:focus-visible {
+        outline: 2px solid var(--warm);
+        outline-offset: 1px;
+      }
+      .bits i {
+        font-style: normal;
+        display: inline-block;
+        min-width: 1ch;
+        text-align: center;
+      }
+      .bits i.done {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .bits i.next {
+        background: var(--n-clk);
+        color: #fff;
+        border-radius: 3px;
+      }
+      .bits .gap {
+        display: inline-block;
+        width: 0.7ch;
+      }
+      .sheet tr {
+        cursor: pointer;
+      }
+      .sheet tr.cur td {
+        background: color-mix(in srgb, var(--warm) 45%, transparent);
+      }
+      .sheet tr.past td {
+        color: var(--soft);
+      }
+      .sheet tr.test td:first-child {
+        color: var(--soft);
+      }
+      /* Page switches (between the DE 1 pages and to/from the main site):
+         fade the new page in over the old one instead of hard-cutting to a
+         half-painted page. The old side stays opaque, so the shared chrome
+         (nav, background) stays perfectly still, and a late-starting fade on
+         this heavy page can't wash the frame out (the default plus-lighter
+         crossfade does). Matches src/styles/global.css. */
+      @view-transition {
+        navigation: auto;
+      }
+      ::view-transition-group(root) {
+        animation-duration: 220ms;
+      }
+      ::view-transition-old(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      ::view-transition-new(root) {
+        animation: view-fade-in 220ms var(--ease) both;
+        mix-blend-mode: normal;
+      }
+      @keyframes view-fade-in {
+        from {
+          opacity: 0;
+        }
+      }
+      /* Arrived from another page of the site (data-site-nav, set in <head>):
+         skip the first-visit intro; the content gets one short rise instead.
+         No fill mode, so no transform lingers on .content afterwards. */
+      html[data-site-nav] .content > * {
+        animation: none;
+      }
+      html[data-site-nav] .content {
+        animation: content-swap-in 300ms var(--ease);
+      }
+      @keyframes content-swap-in {
+        from {
+          transform: translate3d(0, 10px, 0);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-group(*),
+        ::view-transition-old(*),
+        ::view-transition-new(*),
+        html[data-site-nav] .content {
+          animation: none !important;
+        }
+      }
+    </style>
+    <script>
+      /* Same day-of-month background rotation as src/layouts/BaseLayout.astro: keep the lists in sync. */
+      (() => {
+        const images = [
+          'antonius-harel-2rkqE7SgcE8-unsplash',
+          'antonius-harel-VbOjY42c6a4-unsplash',
+          'antonius-harel-WsaPcg512jE-unsplash',
+          'asi-mong-Gf5Q_5UF3vs-unsplash',
+          'dirk-lach-_uamwvb8UlI-unsplash',
+          'eve-9xY__xnwCy0-unsplash',
+          'eve-Fp96C-6Wd6o-unsplash',
+          'eve-WK9sTh1FiSs-unsplash',
+          'eve-bKOpGRbHBGs-unsplash',
+          'eve-jCBLFtjpXfw-unsplash',
+          'eve-lP_4h4oVO1E-unsplash',
+          'eve-lxepp3ZUxTs-unsplash',
+          'hassaan-here-bKfkhVRAJTQ-unsplash',
+          'iklas-FeNrGgQ1Tu8-unsplash',
+          'iklas-xjSu2KbJlAg-unsplash',
+          'iklas-y9Ujplj3KIU-unsplash',
+          'makesumo-doKatAORoIs-unsplash',
+          'mohammad-alizade-nIlwOYUbQEA-unsplash',
+          'mymind-KnUX9qtR_4E-unsplash',
+          'pawel-czerwinski-z4n8CGRuzOA-unsplash',
+          'plufow-le-studio-aE8Mx8-vQss-unsplash',
+          'radoslav-bali-Bp2sWPJGPHs-unsplash',
+          'radoslav-bali-rhnZzt9XblE-unsplash',
+          'rohit-choudhari-_E6sXQHsgQc-unsplash',
+          'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
+          'sean-fahrenbruch-_07FxAO8oG0-unsplash',
+          'sean-fahrenbruch-g95tsUeCohM-unsplash',
+          'sean-sinclair-C_NJKfnTR5A-unsplash',
+        ];
+        const overrides = { 6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash' };
+        const now = new Date();
+        const name =
+          overrides[now.getDay()] ?? images[now.getDate() % images.length];
+        const base = `/backgrounds/light/${name}`;
+        const v = '?v=20260404hq';
+        document.documentElement.style.setProperty(
+          '--scene-image',
+          `image-set(url("${base}.avif${v}") type("image/avif"), url("${base}.webp${v}") type("image/webp"), url("${base}.jpg${v}") type("image/jpeg"))`
+        );
+        // Fetch the photo now: CSS only requests it at the first style pass,
+        // so a page switch could otherwise reveal this page without it.
+        const preload = document.createElement('link');
+        preload.rel = 'preload';
+        preload.as = 'image';
+        preload.type = 'image/avif';
+        preload.href = `${base}.avif${v}`;
+        document.head.append(preload);
+
+        const clean = name.replace('-unsplash', '');
+        const cut = clean.lastIndexOf('-');
+        const author = clean
+          .slice(0, cut)
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+        document.addEventListener('DOMContentLoaded', () => {
+          const credit = document.querySelector('.bg-credit');
+          if (!credit) return;
+          credit.href = `https://unsplash.com/photos/${clean}`;
+          credit.textContent = `Background by ${author}`;
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="scene-bg" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-one" aria-hidden="true"></div>
+    <div class="ambient-orb ambient-orb-two" aria-hidden="true"></div>
+    <header class="site-top">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="tab" href="/">Home</a>
+        <a class="tab" href="/projects/" aria-current="page">Projects</a>
+        <a class="tab" href="/colophon/">Colophon</a>
+      </nav>
+    </header>
+    <div class="page">
+      <a class="nav-back" href="/projects/">&lt;- Back to Projects</a>
+      <div class="shell">
+        <nav class="topbar" aria-label="DE 1 circuits">
+          <span class="brand">DE 1</span>
+          <div class="tabs">
+            <a class="tab" href="../">LED chaser</a>
+            <a class="tab" href="../bcd-counter/">BCD counter</a>
+            <a class="tab" href="./" aria-current="page">LED matrix</a>
+          </div>
+        </nav>
+        <main class="content">
+          <header class="hero">
+            <div class="eyebrow">
+              Digital electronics · project 3 of 3 · checked against the MAX7219
+              &amp; 1088AS datasheets
+            </div>
+            <h1>8 × 8 LED matrix, one bit at a time</h1>
+            <p class="lede">
+              A MAX7219 drives a 1088AS 8 × 8 matrix with no microcontroller.
+              You do the microcontroller's job yourself. A switch sets DIN, a
+              button clocks that bit in through an NE555 one-shot, and a second
+              button latches the 16-bit word. Sixteen presses write one row, and
+              the chip keeps the picture for as long as it has power. Power is 5
+              V from the USB-C breakout.
+            </p>
+            <div class="chips">
+              <span class="chip"><b>5 V</b> USB-C</span
+              ><span class="chip"><b>1×</b> MAX7219CNG</span
+              ><span class="chip"><b>1×</b> NE555</span>
+              <span class="chip"><b>1×</b> 1088AS 8×8</span
+              ><span class="chip"><b>3</b> switches</span
+              ><span class="chip">no microcontroller</span>
+            </div>
+          </header>
+
+          <section class="sec">
+            <h2>Connection diagram</h2>
+            <div class="card plate">
+              <svg
+                id="sch"
+                viewBox="0 0 1120 680"
+                role="img"
+                aria-label="Schematic: USB-C 5 V supply; NE555 one-shot clocked by the CLK button through a 100 nF coupling capacitor, output pulled up by 4.7 kilohms into MAX7219 CLK; DIN switch and LOAD button to +5 V with 10 kilohm pull-downs; MAX7219 DIG0 to DIG7 to 1088AS rows 1 to 8, SEG DP and A to G to columns 1 to 8"
+              ></svg>
+            </div>
+            <div class="legend">
+              <span
+                ><i class="kdot" style="background: var(--n-vcc)"></i>+5 V</span
+              ><span
+                ><i class="kdot" style="background: var(--n-gnd)"></i>GND</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-clk)"></i>CLK
+                (lights while the 555 pulse is high)</span
+              ><span
+                ><i class="kdot" style="background: var(--n-tim)"></i>555 timing
+                &amp; trigger, ISET</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-din)"></i>DIN</span
+              ><span
+                ><i class="kdot" style="background: var(--n-load)"></i
+                >LOAD</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-dig)"></i>rows (DIG,
+                cathodes)</span
+              ><span
+                ><i class="kdot" style="background: var(--n-seg)"></i>columns
+                (SEG, anodes)</span
+              >
+            </div>
+            <p class="callout">
+              <b>The matrix wiring is chosen on purpose.</b> DIG0–DIG7 go to
+              rows 1–8, so register 0x01–0x08 is row 1–8. SEG DP, A, B … G go to
+              columns 1–8, so data bit D7 is the leftmost dot and D0 the
+              rightmost. The byte you key in looks exactly like the row it
+              draws.
+            </p>
+            <p class="callout">
+              <b>Details that matter</b> (each is explained under Validation): a
+              pull-up (R4) on the 555 output, a coupling capacitor (C6) between
+              the CLK button and pin 2, a 52 ms one-shot, 12 kΩ on ISET, DIN and
+              LOAD switched to +5 V so a closed switch is a 1, and the wake-up
+              command sent last. Power comes straight from a USB-C breakout,
+              with no regulator.
+            </p>
+          </section>
+
+          <section class="bench">
+            <div class="card panel">
+              <h2>Bench</h2>
+              <p class="note">
+                This is the circuit above, running on the datasheet's rules. Set
+                DIN, press CLK to shift that bit in, then press LOAD to latch
+                the last 16 bits. Keys: <b>0</b> / <b>1</b> set DIN,
+                <b>Space</b> is CLK, <b>L</b> is LOAD.
+              </p>
+              <div class="ctl">
+                <span class="lbl">Inputs</span>
+                <div class="seg">
+                  <button
+                    type="button"
+                    class="btn"
+                    id="bDin"
+                    aria-pressed="false"
+                  >
+                    DIN · 0
+                  </button>
+                  <button type="button" class="btn primary" id="bClk">
+                    CLK
+                  </button>
+                  <button type="button" class="btn" id="bLoad">LOAD</button>
+                </div>
+              </div>
+              <div class="ctl">
+                <span class="lbl">CLK button wiring</span>
+                <div class="seg" id="trigSeg">
+                  <button type="button" data-m="fixed" aria-pressed="true">
+                    Fixed · through C6</button
+                  ><button type="button" data-m="raw" aria-pressed="false">
+                    Without C6 · straight to pin 2
+                  </button>
+                </div>
+                <p class="note" id="trigNote"></p>
+              </div>
+              <div class="ctl">
+                <span class="lbl">Power &amp; playback</span>
+                <div class="seg">
+                  <button type="button" class="btn" id="bPower">
+                    Unplug &amp; replug</button
+                  ><button type="button" class="btn" id="bPlay">
+                    Play the key-in sheet
+                  </button>
+                </div>
+                <p class="note">
+                  Power-up state from the datasheet: shutdown, scan 1 digit,
+                  minimum intensity, no decode. The row registers aren't
+                  cleared, so they start with random dots.
+                </p>
+              </div>
+              <p class="formula">
+                one-shot t = 1.1 · R2 · C1 = 1.1 · 47 kΩ · 1 µF ≈ 52 ms<br />I<sub
+                  >seg</sub
+                >
+                ≈ 40 mA peak (R5 12 kΩ) · each row lit 1/8 of the time
+              </p>
+            </div>
+            <div class="card panel">
+              <h2>Readouts</h2>
+              <div class="ctl">
+                <span class="lbl"
+                  >16-bit shift register
+                  <span id="srCount">0 bits since LOAD</span></span
+                >
+                <div class="srcap">
+                  <span>don't care</span><span>address</span
+                  ><span>data · D7 = left dot</span>
+                </div>
+                <div class="sr" id="sr"></div>
+                <p class="formula" id="srNote">LOAD now would latch: –</p>
+              </div>
+              <div id="guideBar" class="guide" hidden></div>
+              <div class="mxwrap">
+                <div
+                  class="mx"
+                  id="mx"
+                  role="img"
+                  aria-label="Simulated 8 by 8 matrix"
+                ></div>
+                <dl class="readouts">
+                  <div class="ro" id="roMode">
+                    <dt>Mode</dt>
+                    <dd id="rMode">–</dd>
+                    <small id="rModeN"></small>
+                  </div>
+                  <div class="ro">
+                    <dt>Scan limit</dt>
+                    <dd id="rScan">–</dd>
+                    <small>register 0x0B</small>
+                  </div>
+                  <div class="ro">
+                    <dt>Intensity</dt>
+                    <dd id="rInt">–</dd>
+                    <small>register 0x0A</small>
+                  </div>
+                  <div class="ro">
+                    <dt>Decode</dt>
+                    <dd id="rDec">–</dd>
+                    <small>register 0x09</small>
+                  </div>
+                  <div class="ro">
+                    <dt>Supply</dt>
+                    <dd id="rI">–</dd>
+                    <small>MAX7219, average</small>
+                  </div>
+                  <div class="ro" id="roP">
+                    <dt>Chip power</dt>
+                    <dd id="rP">–</dd>
+                    <small id="rPn">DIP-24, 75 °C/W</small>
+                  </div>
+                </dl>
+              </div>
+              <div>
+                <span class="lbl" style="margin-bottom: 6px"
+                  >Logic trace · last 2 s</span
+                ><canvas
+                  id="trace"
+                  height="150"
+                  style="
+                    width: 100%;
+                    height: 150px;
+                    display: block;
+                    border: 1px solid var(--rule);
+                    border-radius: 12px;
+                    background: #fbfaf7;
+                  "
+                ></canvas>
+              </div>
+              <ol class="evlog" id="evlog" aria-live="polite"></ol>
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Draw it, then key it in</h2>
+            <p class="lede">
+              Click or drag to draw. The sheet turns the picture into the exact
+              bits to enter, leftmost bit first. Turn on the guide and the bench
+              tells you the next bit and catches mistakes. Click any row to
+              start the guide there.
+            </p>
+            <div class="keyin">
+              <div class="card panel">
+                <div class="ed" id="ed" aria-label="8 by 8 drawing grid"></div>
+                <div class="seg" id="presets">
+                  <button type="button" data-p="heart">Heart</button
+                  ><button type="button" data-p="smile">Smiley</button
+                  ><button type="button" data-p="arrow">Arrow</button>
+                  <button type="button" data-p="clear">Clear</button
+                  ><button type="button" data-p="invert">Invert</button>
+                </div>
+                <div class="seg">
+                  <button
+                    type="button"
+                    class="btn primary"
+                    id="bGuide"
+                    aria-pressed="false"
+                  >
+                    Guide me on the bench
+                  </button>
+                </div>
+                <p class="note">
+                  Rows T1 and T2 are the display test. Steps 1–12 are the real
+                  sequence: 12 commands, 192 CLK presses. Step 1 is optional,
+                  because no-decode is already the power-up default.
+                </p>
+              </div>
+              <div class="tblwrap">
+                <table class="pins sheet" id="sheet"></table>
+              </div>
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Validation</h2>
+            <p class="lede" id="netSummary">Running the netlist check…</p>
+            <div class="log" id="vlog"></div>
+          </section>
+
+          <section class="sec">
+            <h2>Pinouts</h2>
+            <p class="lede">
+              Chips seen from above with the notch at the top: pin 1 is
+              top-left, and the numbers run down the left side and back up the
+              right. The matrix is drawn from the front (LED side). Each pin
+              shows where it goes in this build.
+            </p>
+            <div class="grid-figs" id="pinouts"></div>
+            <div class="legend">
+              <span
+                ><i class="kdot" style="background: var(--n-vcc)"></i>+5 V</span
+              ><span
+                ><i class="kdot" style="background: var(--n-gnd)"></i>GND</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-clk)"></i>CLK</span
+              ><span
+                ><i class="kdot" style="background: var(--n-tim)"></i>timing,
+                trigger, ISET</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-din)"></i>DIN</span
+              ><span
+                ><i class="kdot" style="background: var(--n-load)"></i
+                >LOAD</span
+              >
+              <span
+                ><i class="kdot" style="background: var(--n-dig)"></i>rows</span
+              ><span
+                ><i class="kdot" style="background: var(--n-seg)"></i
+                >columns</span
+              ><span
+                ><i class="kdot" style="background: var(--soft)"></i>not
+                connected</span
+              >
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Connection list</h2>
+            <p class="lede">
+              Every net, pin by pin. It works for breadboard or perfboard. Hover
+              a row to light that net in the diagram.
+            </p>
+            <div class="two">
+              <div>
+                <h3 class="sub">Nets</h3>
+                <div class="tblwrap">
+                  <table class="pins" id="nets"></table>
+                </div>
+              </div>
+              <div>
+                <h3 class="sub">The 16 matrix wires</h3>
+                <div class="tblwrap">
+                  <table class="pins" id="mwires"></table>
+                </div>
+              </div>
+            </div>
+            <h3 class="sub">Build and test order</h3>
+            <ol class="steps">
+              <li>
+                <b>Check the matrix first.</b> Put a meter in diode mode, red
+                probe on pin 13 and black on pin 9. One corner dot (row 1,
+                column 1) should glow faintly. That corner is your top-left. If
+                it only glows with the probes swapped, see the polarity check
+                under Validation before wiring anything.
+              </li>
+              <li>
+                <b>Power.</b> USB-C breakout VBUS to +5 V and GND to ground,
+                with 5.1 kΩ from CC1 and from CC2 to GND (some breakouts have
+                these already). Measure about 5 V, and check there's no short
+                between the rails.
+              </li>
+              <li>
+                <b>Clock section alone.</b> Build U1 with R1–R4, C1–C3, C6 and
+                SW1. For testing only, hang an LED with a 1 kΩ resistor from pin
+                3 to GND. Each press should give exactly one short blink, never
+                two. Take the LED off afterwards, because it drags the high
+                level back down.
+              </li>
+              <li>
+                <b>MAX7219 and matrix.</b> DIP-24 socket. Put C4 (100 nF) and C5
+                (10 µF) right at pins 19 and 4/9, and connect both GND pins. Fit
+                R5 from pin 18 to +5 V. Put the matrix in two 8-way female
+                header strips and run the 16 wires from the table.
+              </li>
+              <li>
+                <b>DIN and LOAD.</b> SW2 from +5 V to pin 1 with R6 to GND. SW3
+                from +5 V to pin 12 with R7 to GND. Closed means 1.
+              </li>
+              <li>
+                <b>Display test.</b> Key in T1 (<code>0000 1111 0000 0001</code
+                >) and press LOAD. All 64 dots light, even though the chip is
+                still in shutdown. Then T2 turns them off. Nothing? Count again:
+                exactly 16 bits before LOAD. Then check 5 V on pin 19 and R5 on
+                pin 18.
+              </li>
+              <li>
+                <b>Your picture.</b> Steps 1–12 from the sheet. The matrix stays
+                dark until step 12 wakes the chip, and then the whole picture
+                appears at once.
+              </li>
+              <li>
+                <b>Wrong bit?</b> Don't count backwards. Clock the whole 16-bit
+                command again from the start and press LOAD: the bad bits fall
+                out the far end. If the picture appears mirrored or upside down,
+                that's just which way you're holding the matrix. Turn the board,
+                not the matrix, because the pins aren't symmetric.
+              </li>
+            </ol>
+          </section>
+
+          <section class="sec">
+            <h2>Using a ready-made matrix module</h2>
+            <p class="lede">
+              Many 8 × 8 matrices are sold as modules: a small red board with
+              the 1088AS and a socket for the MAX7219. They work with this build
+              and save most of the wiring.
+            </p>
+            <p class="callout">
+              <b>CS is the LOAD pin.</b> The MAX7219 calls pin 12 LOAD. Its
+              sister chip, the MAX7221, calls the same pin CS, and module makers
+              print "CS" whichever chip they fit. A continuity test from the CS
+              header pin to socket pin 12 confirms it. With the notch at the
+              top, pin 12 is the bottom pin on the left side.
+            </p>
+            <div class="two">
+              <div>
+                <h3 class="sub">Use the input header</h3>
+                <ol class="steps">
+                  <li>
+                    <b>Input:</b> VCC, GND, DIN, CS, CLK. Wire the circuit to
+                    this side.
+                  </li>
+                  <li>
+                    <b>Output:</b> VCC, GND, DOUT, CS, CLK. This side only
+                    chains a second module. Data fed in here goes nowhere.
+                  </li>
+                </ol>
+                <h3 class="sub">What's already on the board</h3>
+                <p class="note">
+                  The 16 matrix connections, the ISET resistor (usually 10 kΩ,
+                  which is fine) and the supply capacitors. You only build the
+                  USB-C supply to VCC and GND, the NE555 clock section (R1–R4,
+                  C1–C3, C6, SW1) to CLK, the DIN switch and R6 to DIN, and the
+                  LOAD button and R7 to CS.
+                </p>
+              </div>
+              <div>
+                <h3 class="sub">Find which way up the picture is</h3>
+                <p class="note">
+                  Each maker wires the matrix a little differently, so the
+                  picture can come out rotated or mirrored. One test dot shows
+                  the orientation:
+                </p>
+                <ol class="steps">
+                  <li>
+                    Run the display test: <code>0x0F 0x01</code>, then
+                    <code>0x0F 0x00</code>.
+                  </li>
+                  <li>
+                    Send <code>0x0B 0x07</code> (scan all rows), then
+                    <code>0x0C 0x01</code> (wake up).
+                  </li>
+                  <li>
+                    Send <code>0x01 0x80</code>, which is
+                    <code>0000 0001 1000 0000</code>.
+                  </li>
+                </ol>
+                <p class="note">
+                  The dot that lights is row 1, leftmost. Turn the module so
+                  that dot is top-left, and the key-in sheet draws the picture
+                  the right way up.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="sec">
+            <h2>Parts</h2>
+            <div class="tblwrap"><table class="pins" id="bom"></table></div>
+          </section>
+        </main>
+        <footer class="foot">
+          <span
+            >Project 3 of 3 · <a href="../bcd-counter/">← BCD counter</a></span
+          ><span><a href="/projects/">All projects</a></span>
+        </footer>
+      </div>
+    </div>
+    <footer class="site-meta">
+      <a
+        class="bg-credit"
+        href="https://unsplash.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Background from Unsplash</a
+      >
+      <div class="site-footer">
+        <span>&copy; <span data-year>2026</span> Nick Cardoso</span>
+      </div>
+    </footer>
+    <script>
+      document.querySelector('[data-year]').textContent =
+        new Date().getFullYear();
+    </script>
+    <script>
+      /* Intended circuit, pin by pin. U1 NE555 (clock one-shot), U2 MAX7219 (DIP-24), DS1 1088AS. */
+      const DATA = (() => {
+        const ROWPIN = [9, 14, 8, 12, 1, 7, 2, 5]; // 1088AS rows 1–8: cathodes (datasheet: row cathode, column anode)
+        const COLPIN = [13, 3, 4, 10, 6, 11, 15, 16]; // 1088AS columns 1–8: anodes
+        const DIGPIN = [2, 11, 6, 7, 3, 10, 5, 8]; // MAX7219 DIG0–DIG7
+        const SEG = [
+          ['DP', 22],
+          ['A', 14],
+          ['B', 16],
+          ['C', 20],
+          ['D', 23],
+          ['E', 21],
+          ['F', 15],
+          ['G', 17],
+        ]; // no-decode data bit D7 → D0 (Table 6)
+        const MAXPINS = {
+          1: 'DIN',
+          2: 'DIG 0',
+          3: 'DIG 4',
+          4: 'GND',
+          5: 'DIG 6',
+          6: 'DIG 2',
+          7: 'DIG 3',
+          8: 'DIG 7',
+          9: 'GND',
+          10: 'DIG 5',
+          11: 'DIG 1',
+          12: 'LOAD',
+          13: 'CLK',
+          14: 'SEG A',
+          15: 'SEG F',
+          16: 'SEG B',
+          17: 'SEG G',
+          18: 'ISET',
+          19: 'V+',
+          20: 'SEG C',
+          21: 'SEG E',
+          22: 'SEG DP',
+          23: 'SEG D',
+          24: 'DOUT',
+        };
+        const N555 = {
+          1: 'GND',
+          2: 'TRIG',
+          3: 'OUT',
+          4: 'RESET',
+          5: 'CV',
+          6: 'THR',
+          7: 'DIS',
+          8: 'VCC',
+        };
+        const NETS = {
+          VCC: [
+            'J1.VBUS',
+            'U1.8',
+            'U1.4',
+            'U2.19',
+            'R1.1',
+            'R2.1',
+            'R3.1',
+            'R4.1',
+            'R5.1',
+            'SW2.1',
+            'SW3.1',
+            'C3.1',
+            'C4.1',
+            'C5.1',
+          ],
+          GND: [
+            'J1.GND',
+            'U1.1',
+            'U2.4',
+            'U2.9',
+            'C1.2',
+            'C2.2',
+            'C3.2',
+            'C4.2',
+            'C5.2',
+            'SW1.2',
+            'R6.2',
+            'R7.2',
+          ],
+          CLK: ['U1.3', 'R4.2', 'U2.13'],
+          TRIG: ['U1.2', 'R1.2', 'C6.1'],
+          SWB: ['SW1.1', 'R3.2', 'C6.2'],
+          TIM: ['U1.6', 'U1.7', 'R2.2', 'C1.1'],
+          CV: ['U1.5', 'C2.1'],
+          DIN: ['U2.1', 'SW2.2', 'R6.1'],
+          LOAD: ['U2.12', 'SW3.2', 'R7.1'],
+          ISET: ['U2.18', 'R5.2'],
+        };
+        DIGPIN.forEach(
+          (p, i) => (NETS['ROW' + (i + 1)] = [`U2.${p}`, `DS1.${ROWPIN[i]}`])
+        );
+        SEG.forEach(
+          ([, p], j) =>
+            (NETS['COL' + (j + 1)] = [`U2.${p}`, `DS1.${COLPIN[j]}`])
+        );
+        const NC = ['U2.24'];
+        const PACKAGES = { J1: ['VBUS', 'GND'], U1: 8, U2: 24, DS1: 16 };
+        [
+          'R1',
+          'R2',
+          'R3',
+          'R4',
+          'R5',
+          'R6',
+          'R7',
+          'C1',
+          'C2',
+          'C3',
+          'C4',
+          'C5',
+          'C6',
+          'SW1',
+          'SW2',
+          'SW3',
+        ].forEach((r) => (PACKAGES[r] = 2));
+        const VAL = {
+          R1: '10 kΩ',
+          R2: '47 kΩ',
+          R3: '100 kΩ',
+          R4: '4.7 kΩ',
+          R5: '12 kΩ',
+          R6: '10 kΩ',
+          R7: '10 kΩ',
+          C1: '1 µF',
+          C2: '10 nF',
+          C3: '100 nF',
+          C4: '100 nF',
+          C5: '10 µF',
+          C6: '100 nF',
+          SW1: 'CLK button',
+          SW2: 'DIN switch',
+          SW3: 'LOAD button',
+        };
+        const POLAR = { C1: 1, C5: 1 };
+        const pinName = (id) => {
+          const [r, p] = id.split('.');
+          if (r === 'U2') return `U2-${p} ${MAXPINS[p]}`;
+          if (r === 'U1') return `U1-${p} ${N555[p]}`;
+          if (r === 'DS1') {
+            const ri = ROWPIN.indexOf(+p);
+            return `DS1-${p} ${ri >= 0 ? 'row ' + (ri + 1) : 'col ' + (COLPIN.indexOf(+p) + 1)}`;
+          }
+          if (r === 'J1') return `J1 ${p}`;
+          return `${r}${POLAR[r] ? (p === '1' ? '+' : '−') : ''} ${VAL[r]}`;
+        };
+        return {
+          ROWPIN,
+          COLPIN,
+          DIGPIN,
+          SEG,
+          MAXPINS,
+          N555,
+          NETS,
+          NC,
+          PACKAGES,
+          VAL,
+          POLAR,
+          pinName,
+        };
+      })();
+
+      /* Netlist check: every pin of every part on exactly one net, and the roles that matter for this circuit. */
+      function checkNetlist() {
+        const { NETS, NC, PACKAGES, MAXPINS, ROWPIN, COLPIN, DIGPIN, SEG } =
+          DATA;
+        const errors = [],
+          seen = {};
+        Object.entries(NETS).forEach(([n, ids]) =>
+          ids.forEach((id) => {
+            if (seen[id]) errors.push(`${id} is on both ${seen[id]} and ${n}`);
+            seen[id] = n;
+          })
+        );
+        NC.forEach((id) => {
+          if (seen[id])
+            errors.push(`${id} should be open but is on ${seen[id]}`);
+          seen[id] = 'NC';
+        });
+        let pins = 0;
+        Object.entries(PACKAGES).forEach(([ref, k]) => {
+          const list = Array.isArray(k)
+            ? k
+            : Array.from({ length: k }, (_, i) => String(i + 1));
+          list.forEach((p) => {
+            pins++;
+            if (!seen[`${ref}.${p}`])
+              errors.push(`${ref}.${p} is not connected to anything`);
+          });
+        });
+        Object.keys(seen).forEach((id) => {
+          const [r, p] = id.split('.');
+          const k = PACKAGES[r];
+          if (!k || (Array.isArray(k) ? !k.includes(p) : !(+p >= 1 && +p <= k)))
+            errors.push(`${id} is not a real pin`);
+        });
+        const on = (id, n) => {
+          if (seen[id] !== n)
+            errors.push(
+              `${id} should be on ${n}, found ${seen[id] || 'nothing'}`
+            );
+        };
+        ['U2.19', 'U1.8', 'U1.4', 'R5.1'].forEach((id) => on(id, 'VCC'));
+        ['U2.4', 'U2.9', 'U1.1'].forEach((id) => on(id, 'GND'));
+        on('U2.18', 'ISET');
+        on('U2.13', 'CLK');
+        on('U1.3', 'CLK');
+        on('U2.1', 'DIN');
+        on('U2.12', 'LOAD');
+        on('U1.2', 'TRIG');
+        // rows: a DIG pin (sinks) on a matrix cathode; register 0x0n = row n
+        const map = [];
+        for (let i = 0; i < 8; i++) {
+          const ids = NETS['ROW' + (i + 1)],
+            u = ids.find((x) => x.startsWith('U2.')),
+            d = ids.find((x) => x.startsWith('DS1.'));
+          const name = MAXPINS[u.split('.')[1]],
+            dp = +d.split('.')[1];
+          if (!/^DIG /.test(name))
+            errors.push(`ROW${i + 1} is driven by ${name}, not a digit driver`);
+          if (ROWPIN.indexOf(dp) < 0)
+            errors.push(
+              `ROW${i + 1} lands on matrix pin ${dp}, which is not a cathode (row) pin`
+            );
+          const dig = +name.slice(4);
+          if (dig + 1 !== ROWPIN.indexOf(dp) + 1)
+            errors.push(
+              `register 0x0${dig + 1} would draw row ${ROWPIN.indexOf(dp) + 1}`
+            );
+          map.push(dig);
+        }
+        // columns: a SEG pin (sources) on a matrix anode; data bit D(7−j) = column j+1
+        for (let j = 0; j < 8; j++) {
+          const ids = NETS['COL' + (j + 1)],
+            u = ids.find((x) => x.startsWith('U2.')),
+            d = ids.find((x) => x.startsWith('DS1.'));
+          const name = MAXPINS[u.split('.')[1]],
+            dp = +d.split('.')[1];
+          if (!/^SEG /.test(name))
+            errors.push(
+              `COL${j + 1} is driven by ${name}, not a segment driver`
+            );
+          if (COLPIN.indexOf(dp) !== j)
+            errors.push(
+              `COL${j + 1} lands on matrix pin ${dp}, which is not column ${j + 1}'s anode`
+            );
+          if (name.slice(4) !== SEG[j][0])
+            errors.push(
+              `column ${j + 1} should get SEG ${SEG[j][0]} (bit D${7 - j})`
+            );
+        }
+        if (new Set(map).size !== 8)
+          errors.push('two rows share a digit driver');
+        const dsPins = Object.keys(seen).filter((x) =>
+          x.startsWith('DS1.')
+        ).length;
+        return {
+          ok: errors.length === 0,
+          errors,
+          nets: Object.keys(NETS).length,
+          pins,
+          dsPins,
+        };
+      }
+
+      /* Schematic. Exposes SCH.setClk, setDin, setLoad, press, setLeds, focus. */
+      const SCH = (() => {
+        const svg = document.getElementById('sch');
+        const CLS = (n) =>
+          n === 'VCC'
+            ? 'w-vcc'
+            : n === 'CLK'
+              ? 'w-clk'
+              : n === 'DIN'
+                ? 'w-din'
+                : n === 'LOAD'
+                  ? 'w-load'
+                  : /^ROW/.test(n)
+                    ? 'w-dig'
+                    : /^COL/.test(n)
+                      ? 'w-seg'
+                      : n && n !== 'GND'
+                        ? 'w-tim'
+                        : '';
+        let o = '';
+        const P = (pts) => pts.map((p) => p.join(',')).join(' ');
+        // W(points, net, id, colourNet): net tags the copper for highlighting; colourNet only colours (used for part bodies)
+        const W = (pts, n = '', id = '', col = n) =>
+          (o += `<polyline class="wire ${CLS(col)}"${n ? ` data-net="${n}"` : ''}${id ? ` id="${id}"` : ''} points="${P(pts)}"/>`);
+        const D = (x, y, n = '') =>
+          (o += `<circle class="dot"${n ? ` data-net="${n}"` : ''} cx="${x}" cy="${y}" r="3.3"/>`);
+        const t = (x, y, s, cls = '', a = 'start', id = '') =>
+          (o += `<text x="${x}" y="${y}" class="${cls}" text-anchor="${a}"${id ? ` id="${id}"` : ''}>${s}</text>`);
+        const zig = (x1, y1, x2, y2, n = 6, amp = 6) => {
+          const pts = [[x1, y1]],
+            dx = (x2 - x1) / n,
+            dy = (y2 - y1) / n,
+            vert = x1 === x2;
+          for (let i = 0; i < n; i++)
+            pts.push([
+              x1 + dx * (i + 0.5) + (vert ? (i % 2 ? -amp : amp) : 0),
+              y1 + dy * (i + 0.5) + (vert ? 0 : i % 2 ? -amp : amp),
+            ]);
+          pts.push([x2, y2]);
+          return pts;
+        };
+        const resV = (x, y1, y2, b1, b2, n1, n2, amp = 6) => {
+          W(
+            [
+              [x, y1],
+              [x, b1],
+            ],
+            n1
+          );
+          W(zig(x, b1, x, b2, 6, amp), '', '', n2);
+          W(
+            [
+              [x, b2],
+              [x, y2],
+            ],
+            n2
+          );
+        };
+        const capV = (x, y1, y2, m, n1, n2, polar = false, w = 11) => {
+          W(
+            [
+              [x, y1],
+              [x, m - 4],
+            ],
+            n1
+          );
+          W(
+            [
+              [x - w, m - 4],
+              [x + w, m - 4],
+            ],
+            '',
+            '',
+            n1
+          );
+          W(
+            [
+              [x - w, m + 4],
+              [x + w, m + 4],
+            ],
+            '',
+            '',
+            n2
+          );
+          W(
+            [
+              [x, m + 4],
+              [x, y2],
+            ],
+            n2
+          );
+          if (polar) t(x - w - 3, m - 7, '+', 'pn', 'end');
+        };
+        const vcc = (x, y) => {
+          W(
+            [
+              [x, y],
+              [x, y - 14],
+            ],
+            'VCC'
+          );
+          o += `<line x1="${x - 7}" y1="${y - 14}" x2="${x + 7}" y2="${y - 14}" stroke="var(--n-vcc)" stroke-width="2"/>`;
+          t(x, y - 18, '+5', 'pn', 'middle');
+        };
+        const gnd = (x, y, len = 12) => {
+          W(
+            [
+              [x, y],
+              [x, y + len],
+            ],
+            'GND'
+          );
+          [12, 7, 3].forEach(
+            (h, i) =>
+              (o += `<line x1="${x - h}" y1="${y + len + i * 4}" x2="${x + h}" y2="${y + len + i * 4}" stroke="var(--n-gnd)" stroke-width="1.8"/>`)
+          );
+        };
+        const contacts = (x, m) =>
+          (o += `<circle cx="${x}" cy="${m - 9}" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/><circle cx="${x}" cy="${m + 9}" r="2.6" fill="#fffdf9" stroke="var(--n-gnd)" stroke-width="1.6"/>`);
+        const labels = (x, m, label, left, dx) => {
+          if (left) {
+            t(x - 8, m + 4, label[0], 'ref', 'end');
+            t(x - 8, m + 17, label[1], 'val', 'end');
+          } else {
+            t(x + dx, m + 4, label[0], 'ref');
+            t(x + dx, m + 17, label[1], 'val');
+          }
+        };
+        const pushV = (x, y1, y2, id, label, n1, n2, left = false) => {
+          const m = (y1 + y2) / 2;
+          W(
+            [
+              [x, y1],
+              [x, m - 9],
+            ],
+            n1
+          );
+          W(
+            [
+              [x, m + 9],
+              [x, y2],
+            ],
+            n2
+          );
+          contacts(x, m);
+          o += `<g id="${id}"><g class="sw-act"><line x1="${x + 12}" y1="${m - 15}" x2="${x + 12}" y2="${m + 3}" stroke="var(--n-gnd)" stroke-width="1.8"/><line x1="${x + 6}" y1="${m - 15}" x2="${x + 18}" y2="${m - 15}" stroke="var(--n-gnd)" stroke-width="1.8"/></g></g>`;
+          labels(x, m, label, left, 22);
+        };
+        const toggleV = (x, y1, y2, id, label, n1, n2, left = false) => {
+          const m = (y1 + y2) / 2;
+          W(
+            [
+              [x, y1],
+              [x, m - 9],
+            ],
+            n1
+          );
+          W(
+            [
+              [x, m + 9],
+              [x, y2],
+            ],
+            n2
+          );
+          contacts(x, m);
+          o += `<line id="${id}" class="lever" x1="${x}" y1="${m + 7}" x2="${x}" y2="${m - 12}" transform="rotate(32 ${x} ${m + 7})"/>`;
+          labels(x, m, label, left, 16);
+        };
+        const pinL = (x, y, n, name, net) => {
+          W(
+            [
+              [x - 14, y],
+              [x, y],
+            ],
+            net
+          );
+          t(x - 4, y - 4, n, 'pn', 'end');
+          t(x + 5, y + 4, name, 'pn');
+        };
+        const pinR = (x, y, n, name, net) => {
+          W(
+            [
+              [x, y],
+              [x + 14, y],
+            ],
+            net
+          );
+          t(x + 4, y - 4, n, 'pn');
+          t(x - 5, y + 4, name, 'pn', 'end');
+        };
+        const pinT = (x, y, n, name, net) => {
+          W(
+            [
+              [x, y - 12],
+              [x, y],
+            ],
+            net
+          );
+          t(x + 3, y - 3, n, 'pn');
+          t(x, y + 13, name, 'pn', 'middle');
+        };
+        const pinB = (x, y, n, name, net) => {
+          W(
+            [
+              [x, y],
+              [x, y + 12],
+            ],
+            net
+          );
+          t(x + 3, y + 10, n, 'pn');
+          t(x, y - 5, name, 'pn', 'middle');
+        };
+
+        // ---- supply ------------------------------------------------------------
+        W(
+          [
+            [58, 36],
+            [866, 36],
+          ],
+          'VCC'
+        );
+        t(110, 28, '+5 V', 'ref');
+        o += `<rect class="box" x="26" y="250" width="64" height="84" rx="3"/>`;
+        t(58, 274, 'J1', 'ref', 'middle');
+        t(58, 292, 'USB-C', 'val', 'middle');
+        t(58, 308, '5 V', 'val', 'middle');
+        W(
+          [
+            [58, 250],
+            [58, 36],
+          ],
+          'VCC'
+        );
+        D(58, 36, 'VCC');
+        gnd(58, 334, 14);
+        t(26, 380, 'CC1, CC2:', 'pn');
+        t(26, 393, '5.1 kΩ → GND', 'pn');
+        t(26, 406, 'on the breakout', 'pn');
+
+        // ---- CLK button → one-shot ---------------------------------------------
+        t(92, 120, 'CLOCK', 'cap');
+        t(92, 134, 'one press = one bit', 'pn');
+        const TX = 230;
+        resV(TX, 36, 190, 70, 130, 'VCC', 'TRIG');
+        D(TX, 36, 'VCC');
+        t(TX - 10, 96, 'R1', 'ref', 'end');
+        t(TX - 10, 111, '10 k', 'val', 'end');
+        W(
+          [
+            [TX, 190],
+            [286, 190],
+          ],
+          'TRIG'
+        );
+        D(TX, 190, 'TRIG');
+        capV(TX, 190, 262, 226, 'TRIG', 'SWB');
+        t(TX + 15, 223, 'C6', 'ref');
+        t(TX + 15, 238, '100 n', 'val');
+        t(TX + 15, 252, 'added', 'fixl');
+        D(TX, 262, 'SWB');
+        W(
+          [
+            [TX, 262],
+            [170, 262],
+          ],
+          'SWB'
+        );
+        resV(170, 212, 262, 218, 254, 'VCC', 'SWB', 5);
+        vcc(170, 212);
+        t(158, 236, 'R3', 'ref', 'end');
+        t(158, 251, '100 k', 'val', 'end');
+        pushV(TX, 262, 340, 'schSW1', ['SW1', 'CLK'], 'SWB', 'GND', true);
+        gnd(TX, 340, 10);
+
+        const BX = 300,
+          BY = 110,
+          BW = 124,
+          BH = 170;
+        o += `<rect class="box" x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="3"/>`;
+        t(BX + BW / 2, 208, 'NE555', 'ttl', 'middle');
+        t(BX + BW / 2, 224, 'U1 · one-shot', 'pn', 'middle');
+        pinL(BX, 190, 2, 'TRIG', 'TRIG');
+        pinT(330, BY, 8, 'VCC', 'VCC');
+        W(
+          [
+            [330, BY - 12],
+            [330, 36],
+          ],
+          'VCC'
+        );
+        D(330, 36, 'VCC');
+        pinT(394, BY, 4, 'RST', 'VCC');
+        W(
+          [
+            [394, BY - 12],
+            [394, 36],
+          ],
+          'VCC'
+        );
+        D(394, 36, 'VCC');
+        pinB(330, BY + BH, 1, 'GND', 'GND');
+        gnd(330, BY + BH + 12, 6);
+        pinB(394, BY + BH, 5, 'CV', 'CV');
+        capV(394, BY + BH + 12, 336, 314, 'CV', 'GND');
+        gnd(394, 336, 2);
+        t(409, 311, 'C2', 'ref');
+        t(409, 326, '10 n', 'val');
+        pinR(BX + BW, 135, 7, 'DIS', 'TIM');
+        pinR(BX + BW, 160, 6, 'THR', 'TIM');
+        pinR(BX + BW, 240, 3, 'OUT', 'CLK');
+        const RX = 462;
+        W(
+          [
+            [BX + BW + 14, 135],
+            [RX, 135],
+          ],
+          'TIM'
+        );
+        W(
+          [
+            [BX + BW + 14, 160],
+            [RX, 160],
+          ],
+          'TIM'
+        );
+        W(
+          [
+            [RX, 135],
+            [RX, 160],
+          ],
+          'TIM'
+        );
+        D(RX, 135, 'TIM');
+        D(RX, 160, 'TIM');
+        resV(RX, 36, 135, 62, 112, 'VCC', 'TIM');
+        D(RX, 36, 'VCC');
+        t(RX + 10, 86, 'R2', 'ref');
+        t(RX + 10, 101, '47 k', 'val');
+        capV(RX, 160, 204, 182, 'TIM', 'GND', true);
+        gnd(RX, 204, 2);
+        t(RX + 15, 179, 'C1', 'ref');
+        t(RX + 15, 194, '1 µ', 'val');
+        t(BX + BW / 2, 372, 't = 1.1 · R2 · C1 ≈ 52 ms', 'val', 'middle');
+        // OUT → CLK, with the added pull-up
+        W(
+          [
+            [BX + BW + 14, 240],
+            [626, 240],
+          ],
+          'CLK',
+          'schClk'
+        );
+        resV(530, 36, 240, 110, 170, 'VCC', 'CLK');
+        D(530, 36, 'VCC');
+        D(530, 240, 'CLK');
+        t(542, 134, 'R4', 'ref');
+        t(542, 149, '4.7 k', 'val');
+        t(542, 163, 'added', 'fixl');
+        capV(580, 36, 86, 60, 'VCC', 'GND');
+        gnd(580, 86, 2);
+        D(580, 36, 'VCC');
+        t(594, 57, 'C3', 'ref');
+        t(594, 72, '100 n', 'val');
+
+        // ---- DIN switch, LOAD button ---------------------------------------------
+        t(26, 440, 'INPUTS', 'cap');
+        t(26, 454, 'closed = 1', 'pn');
+        vcc(200, 420);
+        toggleV(200, 420, 480, 'schSW2', ['SW2', 'DIN'], 'VCC', 'DIN', true);
+        D(200, 480, 'DIN');
+        resV(200, 480, 560, 494, 546, 'DIN', 'GND');
+        gnd(200, 560, 4);
+        t(190, 522, 'R6', 'ref', 'end');
+        t(190, 537, '10 k', 'val', 'end');
+        W(
+          [
+            [200, 480],
+            [626, 480],
+          ],
+          'DIN',
+          'schDin'
+        );
+        t(440, 472, 'DIN = 0', 'val', 'middle', 'schDinV');
+        vcc(330, 520);
+        pushV(330, 520, 580, 'schSW3', ['SW3', 'LOAD'], 'VCC', 'LOAD');
+        D(330, 580, 'LOAD');
+        resV(330, 580, 650, 592, 638, 'LOAD', 'GND');
+        gnd(330, 650, 4);
+        t(342, 618, 'R7', 'ref');
+        t(342, 633, '10 k', 'val');
+        W(
+          [
+            [330, 580],
+            [626, 580],
+          ],
+          'LOAD',
+          'schLoad'
+        );
+
+        // ---- MAX7219 ---------------------------------------------------------------
+        const MX = 640,
+          MY = 120,
+          MW = 130,
+          MH = 470;
+        o += `<rect class="box" x="${MX}" y="${MY}" width="${MW}" height="${MH}" rx="3"/>`;
+        t(MX + MW / 2, 372, 'MAX7219', 'ttl', 'middle');
+        t(MX + MW / 2, 389, 'U2 · DIP-24', 'pn', 'middle');
+        pinL(MX, 240, 13, 'CLK', 'CLK');
+        pinL(MX, 480, 1, 'DIN', 'DIN');
+        pinL(MX, 580, 12, 'LOAD', 'LOAD');
+        W([
+          [MX - 14, 300],
+          [MX, 300],
+        ]);
+        t(MX - 4, 296, 24, 'pn', 'end');
+        t(MX + 5, 304, 'DOUT', 'pn');
+        o += `<path d="M${MX - 18},296 l8,8 m0,-8 l-8,8" stroke="var(--soft)" stroke-width="1.6"/>`;
+        t(MX - 22, 304, 'NC', 'pn', 'end');
+        pinT(670, MY, 19, 'V+', 'VCC');
+        W(
+          [
+            [670, MY - 12],
+            [670, 36],
+          ],
+          'VCC'
+        );
+        D(670, 36, 'VCC');
+        pinT(735, MY, 18, 'ISET', 'ISET');
+        resV(735, 36, MY - 12, 52, 96, 'VCC', 'ISET');
+        D(735, 36, 'VCC');
+        t(747, 70, 'R5', 'ref');
+        t(747, 85, '12 k', 'val');
+        pinB(722, MY + MH, 4, 'GND', 'GND');
+        gnd(722, MY + MH + 12, 6);
+        pinB(752, MY + MH, 9, 'GND', 'GND');
+        gnd(752, MY + MH + 12, 6);
+        capV(800, 36, 90, 62, 'VCC', 'GND');
+        gnd(800, 90, 2);
+        D(800, 36, 'VCC');
+        t(814, 59, 'C4', 'ref');
+        t(814, 74, '100 n', 'val');
+        capV(866, 36, 90, 62, 'VCC', 'GND', true);
+        gnd(866, 90, 2);
+        D(866, 36, 'VCC');
+        t(880, 59, 'C5', 'ref');
+        t(880, 74, '10 µ', 'val');
+
+        // ---- matrix -----------------------------------------------------------------
+        const GX = (j) => 892 + 26 * j,
+          GY = (i) => 160 + 26 * i;
+        o += `<rect class="mframe" x="876" y="146" width="214" height="210" rx="6"/>`;
+        t(983, 92, 'DS1 · 1088AS', 'ref', 'middle');
+        t(983, 107, 'rows = cathodes · columns = anodes', 'pn', 'middle');
+        t(880, 124, 'pin', 'pn', 'end');
+        t(880, 138, 'col', 'pn', 'end');
+        DATA.DIGPIN.forEach((p, i) => {
+          const y = GY(i),
+            net = 'ROW' + (i + 1);
+          pinR(MX + MW, y, p, 'DIG' + i, net);
+          W(
+            [
+              [MX + MW + 14, y],
+              [1088, y],
+            ],
+            net
+          );
+          t(836, y - 4, `row ${i + 1} → ${DATA.ROWPIN[i]}`, 'pn', 'middle');
+        });
+        DATA.SEG.forEach(([s, p], j) => {
+          const ys = 400 + 22 * j,
+            x = GX(j),
+            net = 'COL' + (j + 1);
+          pinR(MX + MW, ys, p, 'SEG ' + s, net);
+          W(
+            [
+              [MX + MW + 14, ys],
+              [x, ys],
+              [x, 146],
+            ],
+            net
+          );
+          t(x, 138, j + 1, 'pn', 'middle');
+          t(x, 124, DATA.COLPIN[j], 'pn', 'middle');
+          t(x + 4, ys - 4, 'D' + (7 - j), 'pn');
+        });
+        for (let i = 0; i < 8; i++)
+          for (let j = 0; j < 8; j++)
+            o += `<circle class="led" id="L${i}${j}" cx="${GX(j)}" cy="${GY(i)}" r="8"/>`;
+        svg.innerHTML = o;
+
+        const leds = Array.from({ length: 64 }, (_, k) =>
+          svg.querySelector(`#L${k >> 3}${k & 7}`)
+        );
+        return {
+          setClk(on) {
+            svg.querySelector('#schClk').classList.toggle('hot', on);
+          },
+          setDin(v) {
+            svg.querySelector('#schDin').classList.toggle('hot', !!v);
+            svg.querySelector('#schDinV').textContent = 'DIN = ' + v;
+            const lv = svg.querySelector('#schSW2'),
+              [x, y] = [lv.getAttribute('x1'), lv.getAttribute('y1')];
+            lv.setAttribute('transform', `rotate(${v ? 0 : 32} ${x} ${y})`);
+          },
+          setLoad(on) {
+            svg.querySelector('#schLoad').classList.toggle('hot', on);
+          },
+          press(which, on) {
+            svg
+              .querySelector('#schSW' + which)
+              ?.classList.toggle('pressed', on);
+          },
+          setLeds(lv) {
+            leds.forEach(
+              (c, k) =>
+                (c.style.fill =
+                  lv[k] > 0
+                    ? `color-mix(in srgb, var(--led) ${Math.round(35 + 65 * lv[k])}%, var(--led-off))`
+                    : '')
+            );
+          },
+          focus(net) {
+            svg.classList.toggle('focus', !!net);
+            svg
+              .querySelectorAll('.hl')
+              .forEach((e) => e.classList.remove('hl'));
+            if (net)
+              svg
+                .querySelectorAll(`[data-net="${net}"]`)
+                .forEach((e) => e.classList.add('hl'));
+          },
+        };
+      })();
+
+      /* Pinout figures: chips (top view) and the matrix (front view). */
+      (() => {
+        const K = {
+          vcc: 'var(--n-vcc)',
+          gnd: 'var(--n-gnd)',
+          clk: 'var(--n-clk)',
+          tim: 'var(--n-tim)',
+          din: 'var(--n-din)',
+          load: 'var(--n-load)',
+          dig: 'var(--n-dig)',
+          seg: 'var(--n-seg)',
+          nc: 'var(--soft)',
+        };
+        const { DIGPIN, ROWPIN, COLPIN, SEG, MAXPINS } = DATA;
+        const maxPins = Array.from({ length: 24 }, (_, i) => {
+          const p = i + 1,
+            name = MAXPINS[p];
+          const dig = DIGPIN.indexOf(p),
+            seg = SEG.findIndex((s) => s[1] === p);
+          if (dig >= 0)
+            return [name, `row ${dig + 1} · DS1 pin ${ROWPIN[dig]}`, 'dig'];
+          if (seg >= 0)
+            return [
+              name,
+              `col ${seg + 1} · DS1 pin ${COLPIN[seg]} · D${7 - seg}`,
+              'seg',
+            ];
+          return {
+            1: [name, 'SW2 to +5 V · R6 to GND', 'din'],
+            4: [name, 'GND', 'gnd'],
+            9: [name, 'GND', 'gnd'],
+            12: [name, 'SW3 to +5 V · R7 to GND', 'load'],
+            13: [name, '555 pin 3 · R4 4.7 kΩ to +5 V', 'clk'],
+            18: [name, 'R5 12 kΩ to +5 V', 'tim'],
+            19: [name, '+5 V · C4, C5 right here', 'vcc'],
+            24: [name, 'not connected', 'nc'],
+          }[p];
+        });
+        const CHIPS = [
+          {
+            name: 'MAX7219',
+            cap: 'U2 · MAX7219CNG, DIP-24 (narrow). Both GND pins must be connected.',
+            pins: maxPins,
+          },
+          {
+            name: 'NE555',
+            cap: 'U1 · NE555, DIP-8 · CLK one-shot',
+            pins: [
+              ['GND', 'GND', 'gnd'],
+              ['TRIG', 'R1 to +5 V · C6 from SW1', 'tim'],
+              ['OUT', 'U2 pin 13 (CLK) · R4 to +5 V', 'clk'],
+              ['RESET', '+5 V', 'vcc'],
+              ['CV', 'C2 10 nF to GND', 'tim'],
+              ['THR', 'pin 7 · C1 +', 'tim'],
+              ['DIS', 'pin 6 · R2 47 kΩ to +5 V', 'tim'],
+              ['VCC', '+5 V · C3', 'vcc'],
+            ],
+          },
+        ];
+        const host = document.getElementById('pinouts');
+        const t = (x, y, s, st, a = 'start', ex = '') =>
+          `<text x="${x}" y="${y}" text-anchor="${a}" style="${st}" ${ex}>${s}</text>`;
+        CHIPS.forEach((chip) => {
+          const n = chip.pins.length,
+            half = n / 2,
+            pitch = 28,
+            top = 30,
+            L = 206,
+            R = 394,
+            cx = (L + R) / 2,
+            bottom = top + 18 + half * pitch,
+            W = 600,
+            H = bottom + 16;
+          let o = `<rect x="${L}" y="${top}" width="${R - L}" height="${bottom - top}" rx="5" style="fill:#2a2e33"/>`;
+          o += `<path d="M${cx - 13},${top} a13,13 0 0 0 26,0" style="fill:#fbfaf7"/><circle cx="${L + 15}" cy="${top + 13}" r="4" style="fill:#c9ced4"/>`;
+          o += t(
+            cx,
+            (top + bottom) / 2,
+            chip.name,
+            'font:600 13px var(--mono);fill:#c9ced4;letter-spacing:.2em',
+            'middle',
+            `transform="rotate(-90 ${cx} ${(top + bottom) / 2})" dominant-baseline="middle"`
+          );
+          for (let row = 0; row < half; row++) {
+            const y = top + 9 + pitch * (row + 0.5) + 4;
+            [
+              [row, 'L'],
+              [n - 1 - row, 'R'],
+            ].forEach(([i, side]) => {
+              const [name, conn, cat] = chip.pins[i],
+                col = K[cat],
+                num = i + 1;
+              if (side === 'L')
+                o +=
+                  `<rect x="${L - 14}" y="${y - 5}" width="14" height="10" rx="1" style="fill:${col}"/>` +
+                  t(
+                    L + 8,
+                    y + 4,
+                    num,
+                    'font:500 10.5px var(--mono);fill:#9aa3ad'
+                  ) +
+                  t(
+                    L + 28,
+                    y + 4,
+                    name,
+                    'font:500 12px var(--mono);fill:#f1f3f5'
+                  ) +
+                  t(
+                    L - 20,
+                    y + 4,
+                    conn,
+                    `font:11.5px var(--sans);fill:${col}`,
+                    'end'
+                  );
+              else
+                o +=
+                  `<rect x="${R}" y="${y - 5}" width="14" height="10" rx="1" style="fill:${col}"/>` +
+                  t(
+                    R - 8,
+                    y + 4,
+                    num,
+                    'font:500 10.5px var(--mono);fill:#9aa3ad',
+                    'end'
+                  ) +
+                  t(
+                    R - 28,
+                    y + 4,
+                    name,
+                    'font:500 12px var(--mono);fill:#f1f3f5',
+                    'end'
+                  ) +
+                  t(R + 20, y + 4, conn, `font:11.5px var(--sans);fill:${col}`);
+            });
+          }
+          host.insertAdjacentHTML(
+            'beforeend',
+            `<figure class="card"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${chip.cap} top-view pinout">${o}</svg><figcaption>${chip.cap}</figcaption></figure>`
+          );
+        });
+        // 1088AS, front view: pins 1–8 along the bottom edge left → right, 9–16 along the top edge right → left
+        {
+          const W = 600,
+            H = 400,
+            pitch = 37,
+            x0 = 152,
+            w = pitch * 8,
+            y0 = 92,
+            h = 222,
+            px = (i) => x0 + pitch / 2 + i * pitch;
+          let o = `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6" style="fill:#1a1416"/>`;
+          for (let i = 0; i < 8; i++)
+            for (let j = 0; j < 8; j++)
+              o += `<circle cx="${px(j)}" cy="${y0 + 18 + i * 26.6}" r="8.5" style="fill:var(--seg-off)"/>`;
+          const lab = (p, x, y, up) => {
+            const ri = ROWPIN.indexOf(p),
+              ci = COLPIN.indexOf(p),
+              isRow = ri >= 0,
+              col = isRow ? K.dig : K.seg;
+            const u2 = isRow ? DIGPIN[ri] : SEG[ci][1],
+              nm = isRow ? 'row' + (ri + 1) : 'col' + (ci + 1);
+            let s = `<rect x="${x - 4}" y="${up ? y - 16 : y}" width="8" height="16" rx="1" style="fill:${col}"/>`;
+            const ys = up ? [y - 24, y - 38, y - 51] : [y + 30, y + 44, y + 57];
+            s +=
+              t(
+                x,
+                ys[0],
+                p,
+                'font:500 10.5px var(--mono);fill:var(--soft)',
+                'middle'
+              ) +
+              t(
+                x,
+                ys[1],
+                nm,
+                `font:700 11px var(--mono);fill:${col}`,
+                'middle'
+              ) +
+              t(
+                x,
+                ys[2],
+                'U2-' + u2,
+                `font:10px var(--mono);fill:${col}`,
+                'middle'
+              );
+            return s;
+          };
+          for (let i = 0; i < 8; i++) {
+            o +=
+              lab(i + 1, px(i), y0 + h, false) + lab(16 - i, px(i), y0, true);
+          }
+          o +=
+            t(
+              x0 - 14,
+              y0 - 38,
+              'row / col',
+              'font:600 11px var(--sans);fill:var(--muted)',
+              'end'
+            ) +
+            t(
+              x0 - 14,
+              y0 - 51,
+              'to U2 pin',
+              'font:11px var(--sans);fill:var(--muted)',
+              'end'
+            );
+          o +=
+            t(
+              x0 - 14,
+              y0 + h + 44,
+              'row / col',
+              'font:600 11px var(--sans);fill:var(--muted)',
+              'end'
+            ) +
+            t(
+              x0 - 14,
+              y0 + h + 57,
+              'to U2 pin',
+              'font:11px var(--sans);fill:var(--muted)',
+              'end'
+            );
+          o +=
+            t(
+              x0 + w + 14,
+              y0 + 20,
+              'pins 16 → 9',
+              'font:11.5px var(--sans);fill:var(--muted)'
+            ) +
+            t(
+              x0 + w + 14,
+              y0 + h - 10,
+              'pins 1 → 8',
+              'font:11.5px var(--sans);fill:var(--muted)'
+            );
+          o +=
+            t(
+              x0 + w + 14,
+              y0 + 70,
+              'diode test:',
+              'font:600 11.5px var(--sans);fill:var(--muted)'
+            ) +
+            t(
+              x0 + w + 14,
+              y0 + 86,
+              'pin 13 (+) → pin 9 (−)',
+              'font:11.5px var(--sans);fill:var(--muted)'
+            ) +
+            t(
+              x0 + w + 14,
+              y0 + 102,
+              'lights row 1 × col 1',
+              'font:11.5px var(--sans);fill:var(--led)'
+            );
+          host.insertAdjacentHTML(
+            'beforeend',
+            `<figure class="card" style="grid-column:1/-1"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="1088AS matrix pinout, front view" style="max-width:720px;margin:0 auto">${o}</svg><figcaption>DS1 · 1088AS 8 × 8, 3 mm red, front view. Pin 1 is bottom-left, on the edge printed with the part number. Rows are cathodes and go to the DIG pins. Columns are anodes and go to the SEG pins. Pin map from the 1088AS datasheet. Confirm it on your part with the diode test.</figcaption></figure>`
+          );
+        }
+      })();
+
+      /* Key-in sheet: the picture as bytes, and the commands that draw it. */
+      const SHEET = (() => {
+        const PRE = {
+          heart: [0x00, 0x66, 0xff, 0xff, 0xff, 0x7e, 0x3c, 0x18],
+          smile: [0x3c, 0x42, 0xa5, 0x81, 0xa5, 0x99, 0x42, 0x3c],
+          arrow: [0x18, 0x3c, 0x7e, 0xff, 0x18, 0x18, 0x18, 0x18],
+        };
+        let img = PRE.heart.slice();
+        try {
+          const s = JSON.parse(localStorage.getItem('max7219-img') || 'null');
+          if (Array.isArray(s) && s.length === 8) img = s.map((v) => v & 255);
+        } catch (e) {}
+        const hex = (v) => '0x' + v.toString(16).toUpperCase().padStart(2, '0');
+        const bits = (a, d) =>
+          ((a << 8) | d).toString(2).padStart(16, '0').split('').map(Number);
+        function seq() {
+          return [
+            {
+              k: 'T1',
+              a: 0x0f,
+              d: 0x01,
+              what: 'Display test on: all 64 dots',
+              test: true,
+            },
+            { k: 'T2', a: 0x0f, d: 0x00, what: 'Display test off', test: true },
+            {
+              k: '1',
+              a: 0x09,
+              d: 0x00,
+              what: 'No decode (power-up default, optional)',
+            },
+            { k: '2', a: 0x0b, d: 0x07, what: 'Scan all 8 rows' },
+            { k: '3', a: 0x0a, d: 0x08, what: 'Intensity 17/32 (medium)' },
+            ...img.map((b, i) => ({
+              k: String(4 + i),
+              a: i + 1,
+              d: b,
+              what: `Row ${i + 1}`,
+            })),
+            { k: '12', a: 0x0c, d: 0x01, what: 'Wake up: the picture appears' },
+          ].map((c) => ({
+            ...c,
+            bits: bits(c.a, c.d),
+            word: (c.a << 8) | c.d,
+          }));
+        }
+        const ed = document.getElementById('ed'),
+          table = document.getElementById('sheet');
+        let listeners = [];
+        for (let k = 0; k < 64; k++)
+          ed.insertAdjacentHTML(
+            'beforeend',
+            `<button type="button" data-k="${k}" aria-label="row ${(k >> 3) + 1} column ${(k & 7) + 1}"></button>`
+          );
+        const cells = [...ed.children];
+        function paintEditor() {
+          cells.forEach((b, k) => {
+            const on = (img[k >> 3] >> (7 - (k & 7))) & 1;
+            b.classList.toggle('on', !!on);
+            b.setAttribute('aria-pressed', !!on);
+          });
+        }
+        function set(k, on) {
+          const r = k >> 3,
+            m = 1 << (7 - (k & 7));
+          img[r] = on ? img[r] | m : img[r] & ~m;
+        }
+        let painting = null;
+        ed.addEventListener('pointerdown', (e) => {
+          const b = e.target.closest('button');
+          if (!b) return;
+          e.preventDefault();
+          const k = +b.dataset.k;
+          painting = !((img[k >> 3] >> (7 - (k & 7))) & 1);
+          set(k, painting);
+          changed();
+        });
+        ed.addEventListener('pointerover', (e) => {
+          if (painting === null) return;
+          const b = e.target.closest('button');
+          if (!b) return;
+          set(+b.dataset.k, painting);
+          changed();
+        });
+        addEventListener('pointerup', () => (painting = null));
+        ed.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.k) {
+            e.preventDefault();
+            const k = +e.target.dataset.k;
+            set(k, !((img[k >> 3] >> (7 - (k & 7))) & 1));
+            changed();
+          }
+        });
+        document.querySelectorAll('#presets button').forEach((b) =>
+          b.addEventListener('click', () => {
+            const p = b.dataset.p;
+            img =
+              p === 'clear'
+                ? Array(8).fill(0)
+                : p === 'invert'
+                  ? img.map((v) => ~v & 255)
+                  : PRE[p].slice();
+            changed();
+          })
+        );
+        function changed() {
+          try {
+            localStorage.setItem('max7219-img', JSON.stringify(img));
+          } catch (e) {}
+          paintEditor();
+          render();
+          listeners.forEach((f) => f());
+        }
+        let cur = -1,
+          bi = 0;
+        function render() {
+          const s = seq();
+          table.innerHTML =
+            `<thead><tr><th>Step</th><th>Hex</th><th>Bits · D15 → D0 (first → last)</th><th>Does</th></tr></thead><tbody>` +
+            s
+              .map((c, i) => {
+                const cls = [
+                  c.test ? 'test' : '',
+                  i === cur ? 'cur' : '',
+                  cur >= 0 && i < cur && !c.test ? 'past' : '',
+                ].join(' ');
+                const b = c.bits
+                  .map(
+                    (v, k) =>
+                      `<i class="${i === cur ? (k < bi ? 'done' : k === bi ? 'next' : '') : ''}">${v}</i>${k % 4 === 3 && k < 15 ? '<span class="gap"></span>' : ''}`
+                  )
+                  .join('');
+                return `<tr data-i="${i}" class="${cls}"><td>${c.k}</td><td>${hex(c.a)} ${hex(c.d)}</td><td class="bits">${b}</td><td class="sans">${c.what}</td></tr>`;
+              })
+              .join('') +
+            `</tbody>`;
+        }
+        table.addEventListener('click', (e) => {
+          const tr = e.target.closest('tr[data-i]');
+          if (tr) listeners.forEach((f) => f(+tr.dataset.i));
+        });
+        paintEditor();
+        render();
+        return {
+          seq,
+          img: () => img.slice(),
+          hex,
+          onChange: (f) => listeners.push(f),
+          mark(i, b) {
+            cur = i;
+            bi = b;
+            render();
+          },
+        };
+      })();
+
+      /* Bench: switch bounce → NE555 one-shot → MAX7219 shift register, registers and scan → matrix. */
+      const BENCH = (() => {
+        const $ = (id) => document.getElementById(id);
+        const now = () => performance.now();
+        const rnd = (n) => Math.floor(Math.random() * n);
+        const CODEB = [
+          0x7e, 0x30, 0x6d, 0x79, 0x33, 0x5b, 0x5f, 0x70, 0x7f, 0x7b, 0x01,
+          0x4f, 0x37, 0x0e, 0x67, 0x00,
+        ];
+        const chip = {
+          sr: 0,
+          since: 0,
+          newest: false,
+          dig: Array(8).fill(0),
+          decode: 0,
+          inten: 0,
+          scan: 0,
+          on: 0,
+          test: 0,
+        };
+        const ISEG = 40,
+          VCC = 5,
+          VLED = 2.2;
+        const hex = SHEET.hex;
+        function powerUp() {
+          Object.assign(chip, {
+            sr: rnd(65536),
+            since: 0,
+            newest: false,
+            decode: 0,
+            inten: 0,
+            scan: 0,
+            on: 0,
+            test: 0,
+          });
+          chip.dig = chip.dig.map(() => rnd(256) & rnd(256) & rnd(256));
+        }
+        function describe(a, v) {
+          if (a === 0) return 'no-op';
+          if (a <= 8) return `row ${a} ← ${v.toString(2).padStart(8, '0')}`;
+          if (a === 9)
+            return v
+              ? `decode mode ${hex(v)} (code-B font on some rows)`
+              : 'no decode';
+          if (a === 10) return `intensity ${2 * (v & 15) + 1}/32`;
+          if (a === 11) return `scan ${(v & 7) + 1} row${v & 7 ? 's' : ''}`;
+          if (a === 12)
+            return v & 1 ? 'wake up (normal operation)' : 'shutdown';
+          if (a === 15) return v & 1 ? 'display test ON' : 'display test off';
+          return 'unused address, ignored';
+        }
+        function latch() {
+          const a = (chip.sr >> 8) & 15,
+            v = chip.sr & 255;
+          if (a >= 1 && a <= 8) chip.dig[a - 1] = v;
+          else if (a === 9) chip.decode = v;
+          else if (a === 10) chip.inten = v & 15;
+          else if (a === 11) chip.scan = v & 7;
+          else if (a === 12) chip.on = v & 1;
+          else if (a === 15) chip.test = v & 1;
+          return { a, v, word: chip.sr };
+        }
+        const rowByte = (i) =>
+          (chip.decode >> i) & 1
+            ? CODEB[chip.dig[i] & 15] | (chip.dig[i] & 0x80)
+            : chip.dig[i];
+        function levels() {
+          const lv = Array(64).fill(0);
+          if (chip.test) return lv.fill(1);
+          if (!chip.on) return lv;
+          const rel = Math.min(
+            1,
+            (((2 * chip.inten + 1) / 32) * (8 / (chip.scan + 1))) / (31 / 32)
+          );
+          for (let i = 0; i <= chip.scan; i++) {
+            const b = rowByte(i);
+            for (let j = 0; j < 8; j++)
+              if ((b >> (7 - j)) & 1) lv[i * 8 + j] = Math.max(0.12, rel);
+          }
+          return lv;
+        }
+
+        // ---- display -------------------------------------------------------------
+        const srHost = $('sr'),
+          mx = $('mx');
+        srHost.innerHTML = Array.from(
+          { length: 16 },
+          (_, k) =>
+            `<span class="${k < 4 ? 'dc' : k < 8 ? 'ad' : 'da'}"><b>0</b><small>D${15 - k}</small></span>`
+        ).join('');
+        mx.innerHTML = '<i></i>'.repeat(64);
+        const srCells = [...srHost.children],
+          mxCells = [...mx.children];
+        function show() {
+          srCells.forEach((s, k) => {
+            s.firstChild.textContent = (chip.sr >> (15 - k)) & 1;
+            s.classList.toggle('new', k === 15 && chip.newest);
+          });
+          const a = (chip.sr >> 8) & 15,
+            v = chip.sr & 255;
+          $('srCount').textContent =
+            `${chip.since} bit${chip.since === 1 ? '' : 's'} since LOAD`;
+          $('srNote').textContent =
+            `LOAD now would latch ${hex(a)} ${hex(v)}: ${describe(a, v)}${chip.since < 16 ? ` (only ${chip.since} of these 16 bits are yours)` : ''}`;
+          const lv = levels();
+          mxCells.forEach((c, k) => {
+            const l = lv[k];
+            c.style.background = l
+              ? `rgba(255, 59, 47, ${(0.25 + 0.75 * l).toFixed(2)})`
+              : '';
+            c.style.boxShadow = l > 0.5 ? '0 0 7px rgba(255,59,47,.65)' : '';
+          });
+          SCH.setLeds(lv);
+          $('rMode').textContent = chip.test
+            ? 'TEST'
+            : chip.on
+              ? 'ON'
+              : 'SHUTDOWN';
+          $('rModeN').textContent = chip.test
+            ? 'overrides every register'
+            : chip.on
+              ? 'scanning'
+              : 'registers still writable';
+          $('rScan').textContent =
+            `${chip.scan + 1} row${chip.scan ? 's' : ''}`;
+          $('rInt').textContent = `${2 * chip.inten + 1}/32`;
+          $('rDec').textContent = chip.decode ? hex(chip.decode) : 'off';
+          // supply and dissipation (datasheet: PD = V+·8 mA + (V+ − VLED)·DUTY·ISEG·N, averaged over the scan)
+          let iLed = 0;
+          if (chip.test) iLed = ((ISEG * 31) / 32) * 8;
+          else if (chip.on) {
+            let lit = 0;
+            for (let i = 0; i <= chip.scan; i++)
+              lit += rowByte(i).toString(2).split('1').length - 1;
+            iLed =
+              (((ISEG * (2 * chip.inten + 1)) / 32) * lit) / (chip.scan + 1);
+          }
+          const iTot = chip.on || chip.test ? 8 + iLed : 0.15,
+            pd =
+              chip.on || chip.test
+                ? VCC * 0.008 + ((VCC - VLED) * iLed) / 1000
+                : VCC * 0.00015;
+          $('rI').textContent = iTot < 1 ? '0.15 mA' : Math.round(iTot) + ' mA';
+          $('rP').textContent = pd < 0.01 ? '≈ 0 W' : pd.toFixed(2) + ' W';
+          $('rPn').textContent =
+            `junction ≈ ${Math.round(25 + pd * 75)} °C at 25 °C room`;
+          $('roP').classList.toggle('warn', pd > 0.9);
+        }
+        const evHost = $('evlog'),
+          evs = [];
+        function ev(s, bad) {
+          evs.unshift({ s, bad });
+          evs.length = Math.min(evs.length, 6);
+          evHost.innerHTML = evs
+            .map((e) => `<li class="${e.bad ? 'x' : ''}">${e.s}</li>`)
+            .join('');
+        }
+
+        // ---- 555 one-shot ------------------------------------------------------------
+        let mode = 'fixed',
+          din = 0,
+          trigLow = 0,
+          out = false,
+          tEnd = 0,
+          loadHi = false,
+          btnDown = false,
+          swClosed = false,
+          swReady = 0,
+          playing = false;
+        const q = [];
+        const at = (t, f) => {
+          q.push({ t, f });
+          q.sort((a, b) => a.t - b.t);
+        };
+        const trace = [];
+        const log = (t) => {
+          trace.push({ t, trig: trigLow > 0, out, din, load: loadHi });
+          while (trace.length > 4000) trace.shift();
+        };
+        const T = () => (mode === 'fixed' ? 51.7 : 10);
+        function setTrig(t, d) {
+          const was = trigLow > 0;
+          trigLow = Math.max(0, trigLow + d);
+          const low = trigLow > 0;
+          if (low && !was && !out) rise(t, T());
+          else if (!low && was && out && t >= tEnd) fall(t); // trigger held past the timeout: OUT drops on release
+          log(t);
+        }
+        function rise(t, len) {
+          out = true;
+          tEnd = t + len;
+          at(tEnd, timeout);
+          SCH.setClk(true);
+          clockIn(t);
+          log(t);
+        }
+        function timeout(t) {
+          if (out && t >= tEnd - 0.01 && trigLow === 0) fall(t);
+        }
+        function fall(t) {
+          out = false;
+          SCH.setClk(false);
+          log(t);
+        }
+        function clockIn(t) {
+          chip.sr = ((chip.sr << 1) | din) & 0xffff;
+          chip.since++;
+          chip.newest = true;
+          if (mode === 'raw' && !btnDown && !playing)
+            ev(
+              `extra CLK from release bounce: bit ${din} shifted in again, so everything moved one place`,
+              true
+            );
+          window.GUIDE?.onClock(din);
+          show();
+        }
+        // the CLK button. Fixed: C6 passes only the first contact (TRIG low ≈ 0.4 ms), bounce and holding never reach pin 2.
+        // Without C6: the contact drives pin 2 directly, bounce and all.
+        const sw = (t, c) => {
+          if (c === swClosed) return;
+          swClosed = c;
+          setTrig(t, c ? 1 : -1);
+        };
+        function clkDown(t) {
+          btnDown = true;
+          SCH.press(1, true);
+          if (mode === 'fixed') {
+            if (t >= swReady) {
+              at(t, (tt) => setTrig(tt, 1));
+              at(t + 0.4, (tt) => setTrig(tt, -1));
+            }
+            return;
+          }
+          at(t, (tt) => sw(tt, true));
+          let u = t;
+          for (let k = 0, n = 1 + rnd(3); k < n; k++) {
+            u += 0.2 + Math.random() * 0.8;
+            at(u, (tt) => sw(tt, false));
+            u += 0.1 + Math.random() * 0.5;
+            at(u, (tt) => sw(tt, true));
+          }
+        }
+        function clkUp(t) {
+          btnDown = false;
+          SCH.press(1, false);
+          if (mode === 'fixed') {
+            swReady = t + 11;
+            return;
+          } // C6 needs ~11 ms through R3 before a new press can pull pin 2 below 1/3 V+
+          at(t + 3.5, (tt) => sw(tt, false));
+          let u = t + 3.5;
+          if (Math.random() < 0.85)
+            for (let k = 0, n = 1 + rnd(3); k < n; k++) {
+              u += 0.3 + Math.random() * 1.5;
+              at(u, (tt) => sw(tt, true));
+              u += 0.1 + Math.random() * 0.4;
+              at(u, (tt) => sw(tt, false));
+            }
+        }
+        // LOAD: bounce gives several rising edges, each latches the same 16 bits
+        function loadDown(t) {
+          loadHi = true;
+          SCH.setLoad(true);
+          SCH.press(3, true);
+          const r = latch();
+          chip.since = 0;
+          chip.newest = false;
+          log(t);
+          const n = playing ? 0 : rnd(3);
+          let u = t;
+          for (let k = 0; k < n; k++) {
+            u += 0.3 + Math.random();
+            at(u, (tt) => {
+              loadHi = false;
+              log(tt);
+            });
+            u += 0.2 + Math.random() * 0.5;
+            at(u, (tt) => {
+              loadHi = true;
+              latch();
+              log(tt);
+            });
+          }
+          ev(
+            `LOAD ↑${n ? ` ×${n + 1} (bounce, same word each time)` : ''} latched ${hex(r.a)} ${hex(r.v)}: ${describe(r.a, r.v)}`
+          );
+          window.GUIDE?.onLoad(r);
+          show();
+        }
+        function loadUp(t) {
+          loadHi = false;
+          SCH.setLoad(false);
+          SCH.press(3, false);
+          log(t);
+        }
+        function setDin(v, t = now()) {
+          din = v;
+          $('bDin').textContent = 'DIN · ' + v;
+          $('bDin').setAttribute('aria-pressed', !!v);
+          SCH.setDin(v);
+          log(t);
+          window.GUIDE?.render();
+        }
+
+        // ---- trace -------------------------------------------------------------------
+        const cv = $('trace'),
+          ctx = cv.getContext('2d');
+        function drawTrace(tn) {
+          const dpr = window.devicePixelRatio || 1,
+            w = cv.clientWidth,
+            h = cv.clientHeight;
+          if (!w) return;
+          if (cv.width !== Math.round(w * dpr)) {
+            cv.width = Math.round(w * dpr);
+            cv.height = Math.round(h * dpr);
+          }
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, w, h);
+          const span = 2000,
+            x = (t) => 92 + ((t - (tn - span)) / span) * (w - 100);
+          const css = getComputedStyle(document.documentElement);
+          const lanes = [
+            ['TRIG · pin 2', 24, 'trig', '--n-tim', true],
+            ['CLK · 555 out', 60, 'out', '--n-clk'],
+            ['DIN', 96, 'din', '--n-din'],
+            ['LOAD', 132, 'load', '--n-load'],
+          ];
+          ctx.font = '11px ' + css.getPropertyValue('--sans');
+          lanes.forEach(([name, y0, key, col, low]) => {
+            ctx.fillStyle = css.getPropertyValue('--soft');
+            ctx.fillText(name, 8, y0 + 4);
+            const lvl = (s) => ((low ? !s : !!s) ? y0 - 10 : y0 + 10);
+            const before = trace.filter((e) => e.t < tn - span).pop();
+            let st = before ? before[key] : key === 'din' ? din : false;
+            ctx.strokeStyle = css.getPropertyValue(col);
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(x(tn - span), lvl(st));
+            trace.forEach((e) => {
+              if (e.t < tn - span || e[key] === st) return;
+              ctx.lineTo(x(e.t), lvl(st));
+              st = e[key];
+              ctx.lineTo(x(e.t), lvl(st));
+            });
+            ctx.lineTo(x(tn), lvl(st));
+            ctx.stroke();
+          });
+        }
+        function frame() {
+          const tn = now();
+          while (q.length && q[0].t <= tn) {
+            const e = q.shift();
+            e.f(e.t);
+          }
+          if (out && trigLow === 0 && tn >= tEnd) fall(tEnd);
+          drawTrace(tn);
+          requestAnimationFrame(frame);
+        }
+
+        // ---- inputs ------------------------------------------------------------------
+        const hold = (el, down, up, key) => {
+          let on = false;
+          const d = (e) => {
+            if (on) return;
+            on = true;
+            el.classList.add('down');
+            down(now());
+            if (e && e.pointerId !== undefined)
+              el.setPointerCapture?.(e.pointerId);
+          };
+          const u = () => {
+            if (!on) return;
+            on = false;
+            el.classList.remove('down');
+            up(now());
+          };
+          el.addEventListener('pointerdown', d);
+          el.addEventListener('pointerup', u);
+          el.addEventListener('pointercancel', u);
+          el.addEventListener('lostpointercapture', u);
+          el.addEventListener('keydown', (e) => {
+            if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
+              e.preventDefault();
+              d(e);
+            }
+          });
+          el.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') u();
+          });
+          el.addEventListener('contextmenu', (e) => e.preventDefault());
+          return { d, u };
+        };
+        const clkH = hold($('bClk'), clkDown, clkUp),
+          loadH = hold($('bLoad'), loadDown, loadUp);
+        $('bDin').addEventListener('click', () => setDin(din ^ 1));
+        document.addEventListener('keydown', (e) => {
+          if (
+            e.target.closest('input, textarea, [contenteditable]') ||
+            e.repeat ||
+            e.ctrlKey ||
+            e.metaKey ||
+            e.altKey
+          )
+            return;
+          if (e.key === '0' || e.key === '1') setDin(+e.key);
+          else if (e.key === ' ' && !e.target.closest('button')) {
+            e.preventDefault();
+            clkH.d();
+          } else if (e.key === 'l' || e.key === 'L') loadH.d();
+        });
+        document.addEventListener('keyup', (e) => {
+          if (e.key === ' ' && !e.target.closest('button')) clkH.u();
+          else if (e.key === 'l' || e.key === 'L') loadH.u();
+        });
+        const notes = {
+          fixed:
+            "C6 passes only the first touch of the contacts, so pin 2 sees one 0.4 ms dip per press. Bounce, holding and release can't reach it. The one-shot gives one 52 ms clock pulse.",
+          raw: "Button wired straight to pin 2 with a 10 ms pulse. Hold the button a moment and watch the trace: the 555 output stays high until you let go, then release bounce fires it again. That's two bits for one press.",
+        };
+        function setMode(m) {
+          mode = m;
+          q.length = 0;
+          trigLow = 0;
+          swClosed = false;
+          if (out) fall(now());
+          playing = false;
+          $('bPlay').textContent = 'Play the key-in sheet';
+          document
+            .querySelectorAll('#trigSeg button')
+            .forEach((b) => b.setAttribute('aria-pressed', b.dataset.m === m));
+          $('trigNote').textContent = notes[m];
+        }
+        document
+          .querySelectorAll('#trigSeg button')
+          .forEach((b) =>
+            b.addEventListener('click', () => setMode(b.dataset.m))
+          );
+        $('bPower').addEventListener('click', () => {
+          powerUp();
+          ev(
+            'power cycled: shutdown, scan 1 row, intensity 1/32, random bits in the row registers'
+          );
+          window.GUIDE?.reset();
+          show();
+        });
+        // playback: clocks the sheet in at about 25 bits per second, from the guide's current step
+        $('bPlay').addEventListener('click', () => {
+          if (playing) {
+            playing = false;
+            q.length = 0;
+            $('bPlay').textContent = 'Play the key-in sheet';
+            return;
+          }
+          playing = true;
+          $('bPlay').textContent = 'Stop';
+          const s = SHEET.seq(),
+            from = window.GUIDE ? GUIDE.start() : 2;
+          let t = now() + 60;
+          s.slice(from).forEach((c) => {
+            c.bits.forEach((b) => {
+              at(t, (tt) => {
+                if (playing) setDin(b, tt);
+              });
+              at(t + 8, (tt) => {
+                if (playing && !out) rise(tt, 12);
+              });
+              t += 40;
+            });
+            at(t, (tt) => {
+              if (playing) loadDown(tt);
+            });
+            at(t + 20, (tt) => {
+              if (playing) loadUp(tt);
+            });
+            t += 90;
+          });
+          at(t, () => {
+            playing = false;
+            $('bPlay').textContent = 'Play the key-in sheet';
+          });
+        });
+
+        powerUp();
+        setMode('fixed');
+        setDin(0);
+        show();
+        log(now());
+        requestAnimationFrame(frame);
+        return { chip, levels, show };
+      })();
+
+      /* Guide: walks the key-in sheet on the bench, bit by bit. */
+      var GUIDE = (() => {
+        const $ = (id) => document.getElementById(id);
+        let on = false,
+          ci = 2,
+          bi = 0,
+          msg = '',
+          cls = '';
+        const seq = () => SHEET.seq();
+        function render() {
+          const bar = $('guideBar'),
+            b = $('bGuide');
+          if (!bar) return;
+          b.setAttribute('aria-pressed', on);
+          b.textContent = on ? 'Stop the guide' : 'Guide me on the bench';
+          SHEET.mark(on ? ci : -1, bi);
+          bar.hidden = !on;
+          if (!on) return;
+          const s = seq(),
+            c = s[ci];
+          const din = document.getElementById('bDin').textContent.slice(-1);
+          let next;
+          if (!c)
+            next =
+              '<b>All done.</b> ' +
+              (matches()
+                ? 'The matrix matches your drawing.'
+                : "The matrix doesn't match the drawing yet. Check the event log.");
+          else if (bi < 16)
+            next = `Step <b>${c.k}</b> (${c.what}) · bit <b>${bi + 1}</b> of 16: set DIN = <b>${c.bits[bi]}</b>${+din === c.bits[bi] ? ' (already set)' : ''}, then press <b>CLK</b>.`;
+          else
+            next = `Step <b>${c.k}</b>: all 16 bits are in. Press <b>LOAD</b>.`;
+          bar.innerHTML =
+            next + (msg ? `<span class="${cls}">${msg}</span>` : '');
+        }
+        function matches() {
+          const img = SHEET.img(),
+            lv = BENCH.levels();
+          return img.every((b, i) =>
+            [...Array(8)].every(
+              (_, j) => !!((b >> (7 - j)) & 1) === lv[i * 8 + j] > 0
+            )
+          );
+        }
+        const api = {
+          render,
+          onClock(d) {
+            if (!on) return;
+            const c = seq()[ci];
+            if (!c) return;
+            if (bi >= 16) {
+              msg =
+                "That was a 17th bit, which pushed your first bit out. Clock this command's 16 bits again from bit 1.";
+              cls = 'gerr';
+              bi = 0;
+            } else if (d === c.bits[bi]) {
+              bi++;
+              msg = '';
+            } else {
+              msg = `Bit ${bi + 1} should have been ${c.bits[bi]}. No harm done: start this command again from bit 1, and the wrong bit falls out the far end.`;
+              cls = 'gerr';
+              bi = 0;
+            }
+            render();
+          },
+          onLoad(r) {
+            if (!on) return;
+            const c = seq()[ci];
+            if (!c) return;
+            if (bi === 16 && r.word === c.word) {
+              msg = `Latched ${SHEET.hex(c.a)} ${SHEET.hex(c.d)} ✓`;
+              cls = 'gok';
+              ci++;
+              bi = 0;
+            } else if (bi === 16) {
+              msg =
+                "The latched word doesn't match (extra clocks?). Clock this command again.";
+              cls = 'gerr';
+              bi = 0;
+            } else {
+              msg = `LOAD after ${bi} of 16 bits latched a junk word into ${SHEET.hex(r.a)}. Carry on with the remaining bits: LOAD doesn't clear the shift register. If the junk hit a register you won't write again, redo that one later.`;
+              cls = 'gerr';
+            }
+            render();
+          },
+          reset() {
+            bi = 0;
+            msg = '';
+            render();
+          },
+          start() {
+            return on ? ci : 2;
+          },
+        };
+        $('bGuide').addEventListener('click', () => {
+          on = !on;
+          msg = '';
+          bi = 0;
+          render();
+          if (on)
+            $('guideBar').scrollIntoView({
+              block: 'nearest',
+              behavior: 'smooth',
+            });
+        });
+        SHEET.onChange((i) => {
+          if (typeof i === 'number') {
+            ci = i;
+            on = true;
+          }
+          bi = 0;
+          msg = '';
+          render();
+        });
+        return api;
+      })();
+
+      /* Validation log, connection tables, parts list. */
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const res = checkNetlist();
+        const enc = (a, d) => ((a << 8) | d).toString(2).padStart(16, '0');
+        const fromNotes = [['0x0F 0x01', 0x0f, 0x01, '0000111100000001']];
+        const encOk = fromNotes.every(([, a, d, s]) => enc(a, d) === s);
+        // datasheet power formula: PD = V+·8 mA + (V+ − VLED)·DUTY·ISEG·N
+        const pdTest = 5.25 * 0.008 + (5.25 - 2.1) * (31 / 32) * 0.04 * 8,
+          tjTest = 25 + pdTest * 75;
+        const iTest = 8 + ((40 * 31) / 32) * 8;
+        $('netSummary').innerHTML = res.ok
+          ? `The diagram, pinouts and tables are all generated from one pin-by-pin netlist, and this page checks that netlist on load. Result: <b>${res.nets} nets · ${res.pins} pins · 0 opens · 0 shorts</b>. Every matrix row is on a digit driver and every column on a segment driver, in register and bit order.`
+          : `<b style="color:var(--bad)">Netlist check failed:</b> ${res.errors.join(' · ')}`;
+        const L = [
+          [
+            'ok',
+            'Netlist is complete',
+            res.ok
+              ? `All ${res.pins} pins (U1, U2, all 16 matrix pins, every resistor, capacitor and switch) sit on exactly one net. DOUT (pin 24) is the only open pin, which is right for a single chip. It's only needed to chain a second MAX7219.`
+              : res.errors.join(' · '),
+          ],
+          [
+            'ok',
+            'A slow, hand-made clock is fine',
+            "The datasheet only gives minimums: CLK high and low ≥ 50 ns, DIN setup 25 ns, hold 0 ns, and LOAD high ≥ 50 ns. There's no maximum, so one bit every ten seconds is as valid as one every 100 ns. DIN, CLK and LOAD also have 1 V of hysteresis, so slow edges don't chatter.",
+          ],
+          [
+            'ok',
+            'Shift on CLK ↑, latch on LOAD ↑, MSB first',
+            'Datasheet: data is "shifted into the internal 16-bit shift register with each rising edge of CLK regardless of the state of LOAD", and "the first received is D15". LOAD\'s rising edge copies whatever those 16 bits are into the addressed register. So "only the last 16 count" is right. LOAD doesn\'t clear the shift register either, which is why a slip is fixed by clocking all 16 again.',
+          ],
+          [
+            'fix',
+            'R4: 4.7 kΩ pull-up on the 555 output',
+            "The MAX7219 needs at least 3.5 V to read a 1 (V<sub>IH</sub>). A bipolar NE555's output high sits about 1.4–1.7 V below its supply, so 3.3–3.6 V at 5 V (TI lists 3.3 V typical). That's right on the threshold, so some presses would clock and some wouldn't, and bits would go missing without any sign. R4 lifts the high level to almost 5 V, and costs 1 mA while the output is low. A CMOS 555 (TLC555, ICM7555, LMC555) swings to the rail and wouldn't need it.",
+          ],
+          [
+            'fix',
+            'C6 + R3: one press is always one clock',
+            'The obvious way to clock a 555 from a button is to wire the button straight to pin 2. Then a press held longer than the pulse keeps TRIG low, so the output stays high until you let go. The bounce on release then fires the one-shot again, and one press shifts in two bits. That shifts the whole command by one place. Try it on the bench with <i>Without C6</i>. The fix is the same network the BCD counter uses. The button has its own 100 kΩ pull-up (R3) and reaches pin 2 through C6 (100 nF). A press drags TRIG low for about 0.4 ms (R1·C6·ln 1.5). Holding does nothing. On release, R3 has to recharge C6 for about 11 ms (R3·C6·ln 3) before any bounce could pull TRIG below 1/3 V+. Use a ceramic for C6.',
+          ],
+          [
+            'fix',
+            '52 ms one-shot (R2 47 kΩ, C1 1 µF)',
+            'Any pulse from about 10 ms upward works once C6 is in. 52 ms is long enough to swallow any press bounce that gets through, and short enough that a fast double tap (about 100 ms apart) still gives two clean clocks. If the one-shot swallowed a deliberate press, that bit would be lost.',
+          ],
+          [
+            'ok',
+            "DIN and LOAD don't need debouncing",
+            'DIN is only sampled at the CLK edge, and by the time you reach for CLK the switch has long settled. LOAD bounce gives a few rising edges in a row, and each one latches the same 16 bits into the same register, which changes nothing. The bench shows this as "LOAD ↑ ×3".',
+          ],
+          [
+            'fix',
+            'Switches go to +5 V with 10 kΩ pull-downs',
+            "Switches pulling a pull-up down would also work, but then closed = 0, the opposite of the bit you're entering, which is where counting mistakes start. Here SW2 connects DIN to +5 V and R6 holds it low, so closed or up = 1. SW3 does the same for LOAD, so the latch happens the moment you press instead of when you let go.",
+          ],
+          [
+            'ok',
+            'Display test first',
+            'Datasheet: "Display-test mode turns all LEDs on by overriding, but not altering, all controls and digit registers (including the shutdown register)", with 8 digits scanned at 31/32 duty. So 0x0F 0x01 lights all 64 dots straight from power-up, while the chip is still in shutdown. It stays on until you write 0x0F 0x00.',
+          ],
+          [
+            encOk ? 'ok' : 'bad',
+            'Command words decode correctly',
+            `0x0F 0x01 → <code>${enc(0x0f, 0x01)
+              .replace(/(.{4})/g, '$1 ')
+              .trim()}</code>: address in D11–D8, data in D7–D0, D15–D12 don't care. Every word in the key-in sheet is built by the same encoder and runs on the bench, so 192 presses for steps 1–12 (12 × 16) checks out.`,
+          ],
+          [
+            'fix',
+            'Wake the chip last',
+            "The datasheet: \"The display driver can be programmed while in shutdown mode.\" At power-up the chip scans one digit at minimum intensity, and the row registers aren't promised to be clear. Wake it first and row 1 shows random dots for the minutes it takes to key in the scan limit. It's also driving one digit, where Table 9 recommends at most 10 mA per segment for a 1-digit scan. At minimum intensity that's not dangerous, but there's no reason for it. Setting everything up first and sending 0x0C 0x01 last makes the whole picture appear at once.",
+          ],
+          [
+            'ok',
+            'Step 1 (decode off) is optional',
+            'At power-up the datasheet says the chip "will not decode data in the data registers", so 0x09 0x00 only repeats the default. Skip it to save 16 presses, or keep it if a clone chip acts oddly. Many low-cost MAX7219s are clones.',
+          ],
+          [
+            'ok',
+            'Matrix polarity: DIG → rows, SEG → columns',
+            `The 1088AS datasheet says <i>Row Cathode Column Anode</i>: rows 1–8 = pins 9, 14, 8, 12, 1, 7, 2, 5 and columns 1–8 = pins 13, 3, 4, 10, 6, 11, 15, 16. MAX7219 digit drivers sink current and segment drivers source it, so digits go on the cathode rows and segments on the anode columns. Wired DIG0–7 → rows 1–8 and DP, A–G → columns 1–8, register 0x0n draws row n and the byte reads left to right. ${res.ok ? 'The netlist check confirms all 16.' : ''}`,
+          ],
+          [
+            'warn',
+            'Check your matrix before wiring',
+            'Shop listings don\'t all agree on 1088AS polarity, and "1088BS" parts are the opposite way round (row anode). Use the diode test: red probe on pin 13 and black on pin 9 should light one corner dot faintly. If it only lights with the probes swapped, you have a row-anode matrix. Then swap the two groups: the DIG wires go to the column pins and the SEG wires to the row pins. The picture comes out transposed (rows become columns), but nothing gets damaged. Mount the matrix in header strips so this costs nothing.',
+          ],
+          [
+            'fix',
+            'R5: 12 kΩ rather than the usual 10 kΩ',
+            'Table 11 gives 11.8 kΩ for 40 mA with 2.0 V LEDs and 11.0 kΩ at 2.5 V. The 1088AS is 2.1–2.5 V, so 10 kΩ sets roughly 45 mA peak, a little over the 40 mA "maximum recommended segment current". 12 kΩ lands on about 40 mA. 10 kΩ still works, and almost every MAX7219 module ships with it, but don\'t go below the 9.53 kΩ minimum. Each LED is lit only 1/8 of the time, so even at full intensity the average per dot is about 5 mA, inside the matrix\'s 20 mA rating.',
+          ],
+          [
+            'ok',
+            'Power straight from USB-C',
+            `V+ range is 4.0–5.5 V and USB gives 4.75–5.25 V, so no regulator is needed. Worst case is the display test: ${Math.round(iTest)} mA for the MAX7219 (datasheet: 330 mA with all segments on) plus a few mA for the 555, so under 350 mA in total. A USB-C source must give at least 500 mA when it sees the 5.1 kΩ pull-downs on CC1 and CC2. Without those, a C-to-C cable gives no power at all.`,
+          ],
+          [
+            'ok',
+            'Chip temperature',
+            `Datasheet formula at 5.25 V, 2.1 V LEDs, 40 mA, 31/32 duty, all 8 columns (display test): P<sub>D</sub> ≈ ${pdTest.toFixed(2)} W. With the narrow DIP's 75 °C/W, the junction reaches about ${Math.round(tjTest)} °C in a 25 °C room, well under the 150 °C limit. It gets warm during the test. A normal picture at 17/32 intensity is a third of that or less. The bench shows live numbers.`,
+          ],
+          [
+            'ok',
+            'Decoupling',
+            'C4 (100 nF) and C5 (10 µF) sit at U2, as the datasheet asks ("as close to the device as possible"), with both GND pins connected. The scan switches up to 320 mA on and off 800 times a second. Keep U1\'s ground and C3 close too, so those current pulses can\'t trip pin 2 and clock in a phantom bit.',
+          ],
+          [
+            'warn',
+            'Junk at power-up is harmless',
+            'At power-up the 555 may fire once and the shift register holds random bits. Neither matters if you always clock a full 16 bits before every LOAD. The first command pushes all the junk out.',
+          ],
+          [
+            'ok',
+            '74HC165 upgrade works',
+            "The '165 changes its output a few ns after the CLK edge, and the MAX7219 needs 0 ns hold time, so it takes the old bit. That's the same trick every SPI daisy chain uses. Set the 8 DIP switches, pulse SH/LD low once, tie CLK INH low, and press CLK 8 times per byte, two bytes per command. Not drawn here.",
+          ],
+        ];
+        $('vlog').innerHTML = L.map(
+          ([k, h, p]) =>
+            `<div class="item"><span class="tag ${k}">${{ ok: 'OK', warn: 'Check', fix: 'Design', bad: 'Fail' }[k]}</span><div><h3>${h}</h3><p>${p}</p></div></div>`
+        ).join('');
+
+        // nets table
+        const color = (n) =>
+          n === 'VCC'
+            ? 'var(--n-vcc)'
+            : n === 'GND'
+              ? 'var(--n-gnd)'
+              : n === 'CLK'
+                ? 'var(--n-clk)'
+                : n === 'DIN'
+                  ? 'var(--n-din)'
+                  : n === 'LOAD'
+                    ? 'var(--n-load)'
+                    : /^ROW/.test(n)
+                      ? 'var(--n-dig)'
+                      : /^COL/.test(n)
+                        ? 'var(--n-seg)'
+                        : 'var(--n-tim)';
+        const notes = {
+          VCC: 'J1 VBUS · +5 V',
+          GND: 'J1 GND',
+          CLK: 'one clean edge per press',
+          TRIG: '555 trigger',
+          SWB: 'button node',
+          TIM: 'timing, 52 ms',
+          CV: 'control voltage',
+          DIN: 'closed = 1',
+          LOAD: 'press = latch',
+          ISET: 'sets 40 mA peak',
+        };
+        const order = [
+          'VCC',
+          'GND',
+          'CLK',
+          'TRIG',
+          'SWB',
+          'TIM',
+          'CV',
+          'DIN',
+          'LOAD',
+          'ISET',
+          ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => 'ROW' + i),
+          ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => 'COL' + i),
+        ];
+        $('nets').innerHTML =
+          `<thead><tr><th>Net</th><th>Connects</th></tr></thead><tbody>` +
+          order
+            .map(
+              (n) =>
+                `<tr data-net="${n}"><td><i class="kdot" style="background:${color(n)};margin-right:6px"></i>${n}${notes[n] ? `<br><span style="font-family:var(--sans);color:var(--soft);font-size:.72rem">${notes[n]}</span>` : ''}</td><td class="wrap">${DATA.NETS[n].map(DATA.pinName).join(' · ')}</td></tr>`
+            )
+            .join('') +
+          `<tr><td><i class="kdot" style="background:var(--soft);margin-right:6px"></i>NC</td><td class="wrap">U2-24 DOUT</td></tr></tbody>`;
+        $('nets')
+          .querySelectorAll('tr[data-net]')
+          .forEach((tr) => {
+            const on = (v) => {
+              tr.classList.toggle('hlrow', v);
+              SCH.focus(v ? tr.dataset.net : null);
+            };
+            tr.addEventListener('mouseenter', () => on(true));
+            tr.addEventListener('mouseleave', () => on(false));
+            tr.addEventListener('click', () =>
+              on(!tr.classList.contains('hlrow'))
+            );
+          });
+        // matrix wires, in MAX7219 pin order (the order you'd work round the chip)
+        const mw = [];
+        DATA.DIGPIN.forEach((p, i) =>
+          mw.push([
+            p,
+            DATA.MAXPINS[p],
+            DATA.ROWPIN[i],
+            `row ${i + 1}`,
+            `register 0x0${i + 1}`,
+            'ROW' + (i + 1),
+          ])
+        );
+        DATA.SEG.forEach(([s, p], j) =>
+          mw.push([
+            p,
+            'SEG ' + s,
+            DATA.COLPIN[j],
+            `col ${j + 1}`,
+            `bit D${7 - j}`,
+            'COL' + (j + 1),
+          ])
+        );
+        mw.sort((a, b) => a[0] - b[0]);
+        $('mwires').innerHTML =
+          `<thead><tr><th>U2 pin</th><th>Signal</th><th>DS1 pin</th><th>Matrix</th><th>Key-in</th></tr></thead><tbody>` +
+          mw
+            .map(
+              (r) =>
+                `<tr data-net="${r[5]}"><td>${r[0]}</td><td><i class="kdot" style="background:${color(r[5])};margin-right:6px"></i>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`
+            )
+            .join('') +
+          `</tbody>`;
+        $('mwires')
+          .querySelectorAll('tr[data-net]')
+          .forEach((tr) => {
+            const on = (v) => {
+              tr.classList.toggle('hlrow', v);
+              SCH.focus(v ? tr.dataset.net : null);
+            };
+            tr.addEventListener('mouseenter', () => on(true));
+            tr.addEventListener('mouseleave', () => on(false));
+          });
+
+        // parts list
+        const bom = [
+          [
+            'J1',
+            'USB-C female breakout',
+            1,
+            "VBUS → +5 V, GND → ground. 5.1 kΩ from CC1 and CC2 to GND if the board doesn't have them.",
+          ],
+          ['U1', 'NE555 timer, DIP-8', 1, 'CLK one-shot · DIP-8 socket'],
+          [
+            'U2',
+            'MAX7219CNG, DIP-24 narrow',
+            1,
+            'matrix driver · DIP-24 socket. Cheap ones are often clones: they work, but start with the display test.',
+          ],
+          [
+            'DS1',
+            '1088AS 8 × 8 matrix, 3 mm red',
+            1,
+            'row cathode, column anode · mount on 2 × 8-way female headers',
+          ],
+          ['R1', '10 kΩ (brown-black-orange)', 1, 'TRIG pull-up'],
+          ['R2', '47 kΩ (yellow-violet-orange)', 1, 'one-shot timing, 52 ms'],
+          ['R3', '100 kΩ (brown-black-yellow)', 1, 'CLK button node pull-up'],
+          [
+            'R4',
+            '4.7 kΩ (yellow-violet-red)',
+            1,
+            '555 output pull-up so CLK reaches 5 V',
+          ],
+          [
+            'R5',
+            '12 kΩ (brown-red-orange)',
+            1,
+            'ISET, about 40 mA peak (10 kΩ also works)',
+          ],
+          [
+            'R6, R7',
+            '10 kΩ (brown-black-orange)',
+            2,
+            'DIN and LOAD pull-downs',
+          ],
+          [
+            'C1',
+            '1 µF electrolytic, ≥ 10 V',
+            1,
+            'timing · + to pins 6/7 (a 1 µF ceramic also works)',
+          ],
+          ['C2', '10 nF ceramic (103)', 1, '555 control pin'],
+          ['C3, C4', '100 nF ceramic (104)', 2, 'decoupling at U1 and U2'],
+          ['C5', '10 µF electrolytic, ≥ 10 V', 1, 'bulk at U2 pin 19'],
+          [
+            'C6',
+            '100 nF ceramic (104)',
+            1,
+            'couples the CLK button to TRIG. Must be ceramic.',
+          ],
+          ['SW1, SW3', '6 × 6 mm tactile switch', 2, 'CLK and LOAD'],
+          [
+            'SW2',
+            'SPST toggle or slide switch',
+            1,
+            'DIN (one way of a DIP switch also works)',
+          ],
+          [
+            '—',
+            'Breadboard or perfboard, wire',
+            '—',
+            'plus 2 × 8-way female header strips for the matrix',
+          ],
+        ];
+        $('bom').innerHTML =
+          `<thead><tr><th>Ref</th><th>Part</th><th>Qty</th><th>Use</th></tr></thead><tbody>` +
+          bom
+            .map(
+              (r) =>
+                `<tr><td>${r[0]}</td><td class="wrap">${r[1]}</td><td>${r[2]}</td><td class="wrap">${r[3]}</td></tr>`
+            )
+            .join('') +
+          `</tbody>`;
+      })();
+    </script>
+    <div id="page-ready" hidden></div>
+  </body>
+</html>
