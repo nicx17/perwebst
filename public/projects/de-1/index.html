@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="NE555 astable clocking a CD4017 ten-LED chaser on 9 V USB-C PD, with a validated 80 × 55 mm perfboard layout."
+      content="NE555 astable clocking a CD4017 ten-LED chaser on 5 V from a USB-C breakout, with a validated 80 × 55 mm perfboard layout."
     />
     <meta name="theme-color" content="#ece9e3" />
     <link rel="icon" type="image/png" href="/project-icons/de-1.png" />
@@ -1284,7 +1284,6 @@
       <nav class="site-nav" aria-label="Primary">
         <a class="tab" href="/">Home</a>
         <a class="tab" href="/projects/" aria-current="page">Projects</a>
-        <a class="tab" href="/colophon/">Colophon</a>
       </nav>
     </header>
     <div class="page">
@@ -1309,8 +1308,8 @@
               The 555 runs as an astable clock. Each rising edge advances the
               CD4017, which drives one of its ten outputs high at a time, so a
               single LED lights and walks down the column. This is the build
-              version: USB-C PD power at 9 V, ceramic capacitors, decoupling on
-              both chips, and a three-position speed switch.
+              version: 5 V from a USB-C breakout board, ceramic capacitors, decoupling on
+              both chips, and a two-speed switch that adds a 10 µF capacitor.
             </p>
           </header>
 
@@ -1319,7 +1318,7 @@
               id="sch"
               viewBox="0 0 1080 560"
               role="img"
-              aria-label="Schematic: USB-C PD 9 V supply, LM555 astable with switchable timing capacitance clocking a CD4017 decade counter that drives ten LEDs through a shared 470 ohm resistor"
+              aria-label="Schematic: USB-C breakout 5 V supply, LM555 astable with a 1 µF timing capacitor plus a switched 10 µF clocking a CD4017 decade counter that drives ten LEDs through a shared 470 ohm resistor"
             ></svg>
           </div>
           <div class="legend">
@@ -1342,15 +1341,7 @@
                     data-c="1e-6"
                     aria-pressed="true"
                   >
-                    Centre · 1 µF
-                  </button>
-                  <button
-                    type="button"
-                    id="c47"
-                    data-c="5.7e-6"
-                    aria-pressed="false"
-                  >
-                    Left · +4.7 µF
+                    Off · 1 µF
                   </button>
                   <button
                     type="button"
@@ -1358,13 +1349,13 @@
                     data-c="1.1e-5"
                     aria-pressed="false"
                   >
-                    Right · +10 µF
+                    On · +10 µF
                   </button>
                 </div>
               </div>
               <div class="ctl">
                 <label for="vcc"
-                  >Supply voltage <output id="vccOut">9.0 V</output></label
+                  >Supply voltage <output id="vccOut">5.0 V</output></label
                 >
                 <input
                   type="range"
@@ -1372,7 +1363,7 @@
                   min="5"
                   max="15"
                   step="0.5"
-                  value="9"
+                  value="5"
                 />
               </div>
               <div class="ctl">
@@ -1395,7 +1386,7 @@
                 </div>
               </div>
               <p class="formula">
-                C = C1, or C1 + C5, or C1 + C6<br />t<sub>high</sub> =
+                C = C1 (switch off), or C1 + C5 (switch on)<br />t<sub>high</sub> =
                 0.693·(R1+R2)·C<br />t<sub>low</sub> = 0.693·R2·C<br />f = 1.44
                 / ((R1 + 2·R2)·C)
               </p>
@@ -1531,23 +1522,27 @@
               <div class="item">
                 <span class="tag ok">OK</span>
                 <div>
-                  <h3>Supply · USB-C PD trigger set to 9 V</h3>
+                  <h3>Supply · USB-C breakout at 5 V</h3>
                   <p>
-                    9 V suits both chips (LM555 up to 16 V, CD4017B 3–15 V) and
-                    drives the LEDs well. A charger without PD leaves the board
-                    at 5 V, where everything still runs but the LEDs are dimmer.
-                    Never set the board to 15 or 20 V. Check the output with a
-                    meter before connecting the circuit.
+                    5 V suits both chips (LM555 runs from 4.5 V, CD4017B from
+                    3 V), and USB's 4.75–5.25 V range stays inside both. Use a
+                    breakout with the two 5.1 kΩ CC pull-down resistors fitted,
+                    or a USB-C charger won't turn its output on. Check the
+                    output with a meter before connecting the circuit.
                   </p>
                 </div>
               </div>
               <div class="item">
-                <span class="tag ok">OK</span>
+                <span class="tag warn">Note</span>
                 <div>
                   <h3>LED drive · 470 Ω shared, no transistor</h3>
                   <p>
-                    At 9 V each LED gets roughly 7–8 mA, about 25 mW in the 4017
-                    output, well under its roughly 100 mW limit. To check,
+                    At 5 V each LED gets roughly 2–3 mA. The 4017 output's own
+                    resistance (several hundred ohms at 5 V) limits the current
+                    more than the 470 Ω does. That's only a few mW in the
+                    output, so it's safe, but the LEDs are dim. They're clearly
+                    visible indoors, and high-efficiency LEDs look brighter at
+                    this current. To check,
                     measure the voltage across the 470 Ω while one LED is lit
                     and divide by 470.
                   </p>
@@ -1556,26 +1551,27 @@
               <div class="item">
                 <span class="tag ok">OK</span>
                 <div>
-                  <h3>SW1 speed selector</h3>
+                  <h3>SW1 speed switch · 10 µF only</h3>
                   <p>
-                    C1 (1 µF) stays connected permanently. The switch only adds
-                    C5 (4.7 µF) or C6 (10 µF) in parallel with it. Centre gives
-                    about 15 Hz, left about 2.7 Hz, right about 1.4 Hz. Because
-                    the 555 is never left without a timing capacitor, the switch
-                    gap can't make it race. Use an ON-OFF-ON toggle, or an SP3T
-                    slide switch with one throw left empty.
+                    C1 (1 µF) stays connected permanently. SW1 switches a single
+                    10 µF capacitor (C5) in parallel with it. Off gives about
+                    15 Hz (fast), on gives about 1.4 Hz (slow, easy to follow by
+                    eye). Because the 555 is never left without a timing
+                    capacitor, opening the switch can't make it race. Any SPST
+                    ON-OFF switch works. With an SPDT toggle, use the middle lug
+                    and one outer lug and leave the other outer lug empty.
                   </p>
                 </div>
               </div>
               <div class="item">
                 <span class="tag warn">Note</span>
                 <div>
-                  <h3>C1, C5, C6 are electrolytics · mind the polarity</h3>
+                  <h3>C1 and C5 are electrolytics · mind the polarity</h3>
                   <p>
-                    + goes to pins 6/2 (C1 directly, C5 and C6 through the
-                    switch), − to ground. The timing node always stays between
-                    about 3 and 6 V, so the voltage never reverses. Electrolytic
-                    tolerance is often ±20 %, so the slow speeds can vary a
+                    + goes to pins 6/2 (C1 directly, C5 through the switch), −
+                    to ground. The timing node always stays between
+                    about 1.7 and 3.3 V, so the voltage never reverses. Electrolytic
+                    tolerance is often ±20 %, so the slow speed can vary a
                     little. Moving the switch while it runs can add one extra
                     step, which is harmless.
                   </p>
@@ -1648,7 +1644,7 @@
             </div>
             <div class="legend">
               <span
-                ><i class="kdot" style="background: var(--bad)"></i>+9 V</span
+                ><i class="kdot" style="background: var(--bad)"></i>+5 V</span
               >
               <span
                 ><i class="kdot" style="background: var(--ink)"></i>Ground</span
@@ -1675,7 +1671,7 @@
             <p class="lede">
               Hole grid rows A–T × columns 1–30 on the FR2 board. If your board
               has an extra row or column, leave it empty as the margin. Bare
-              wires along row B and row S are the +9 V and ground rails. Switch
+              wires along row B and row S are the +5 V and ground rails. Switch
               to the solder side to make the underside links. That view is drawn
               mirrored, exactly as you see the board turned over.
             </p>
@@ -1695,7 +1691,7 @@
               </div>
               <div class="legend">
                 <span
-                  ><i class="kdot" style="background: var(--bad)"></i>+9 V</span
+                  ><i class="kdot" style="background: var(--bad)"></i>+5 V</span
                 >
                 <span
                   ><i class="kdot" style="background: var(--ink)"></i
@@ -1770,7 +1766,7 @@
                 <b>C1.</b> This is the SMD electrolytic. Solder it on the solder
                 side, across pads K12 (+) and M12 (−, stripe end).
               </li>
-              <li><b>C5 and C6.</b> + leg in row L, striped − leg in row M.</li>
+              <li><b>C5 (10 µF).</b> + leg in L10, striped − leg in M10.</li>
               <li>
                 <b>LEDs.</b> Long leg (anode) in row P, short leg in row Q, D1
                 at column 10 through D10 at column 28.
@@ -1780,14 +1776,14 @@
                 component side.
               </li>
               <li>
-                <b>Off-board parts.</b> Connect the PD board + to B1 and − to
-                S1. Connect SW1's middle lug to J13 and its outer lugs to K14
-                and K10.
+                <b>Off-board parts.</b> Connect the USB-C breakout VBUS (+) to B1 and GND (−) to
+                S1. Connect SW1's two lugs to J13 and K10 (on an SPDT toggle:
+                middle lug to J13, one outer lug to K10).
               </li>
               <li>
                 <b>Test before inserting the chips.</b> A meter between the B
-                and S rails must not beep. Power up at 9 V and check U1 socket
-                pin 8 and U2 socket pin 16 read 9 V to ground. Power off, then
+                and S rails must not beep. Power up and check U1 socket pin 8
+                and U2 socket pin 16 read about 5 V to ground. Power off, then
                 insert the chips.
               </li>
             </ol>
@@ -1895,8 +1891,8 @@
           [60, 520],
           [1000, 520],
         ]);
-        txt(240, 30, '+V  (5–15 V)', 'val');
-        // USB-C PD trigger board
+        txt(240, 30, '+5 V (USB-C)', 'val');
+        // USB-C breakout board
         wire([
           [60, 40],
           [60, 246],
@@ -1908,7 +1904,7 @@
         out += `<rect class="chip" x="28" y="246" width="64" height="68" rx="2"/>`;
         txt(60, 266, 'J1', 'ref', 'middle');
         txt(60, 284, 'USB-C', '', 'middle');
-        txt(60, 300, 'PD 9V', 'val', 'middle');
+        txt(60, 300, '5V', 'val', 'middle');
         txt(66, 238, '+', 'ref');
         txt(66, 330, '−', 'ref');
         // C3 decoupling at U1
@@ -1947,29 +1943,21 @@
         txt(184, 478, 'C1', 'ref', 'end');
         txt(184, 494, '1µ', 'val', 'end');
         txt(188, 449, '+', 'ref', 'end');
-        // SW1: centre-off toggle adds C5 or C6 in parallel with C1
+        // SW1: on-off switch adds C5 (10 µF) in parallel with C1
         dot(250, 350);
         wire([
           [250, 350],
-          [250, 387],
+          [250, 377],
         ]);
-        out += `<circle cx="250" cy="390" r="3" fill="var(--sheet)" stroke="var(--wire)" stroke-width="2"/>`;
-        [228, 272].forEach(
-          (x) =>
-            (out += `<circle cx="${x}" cy="414" r="3" fill="var(--sheet)" stroke="var(--wire)" stroke-width="2"/>`)
-        );
-        out += `<line id="sw1lever" class="wire" x1="250" y1="390" x2="250" y2="418"/>`;
-        txt(258, 384, 'SW1', 'ref');
-        capV(228, 417, 520, 452, 462, '', 11);
-        dot(228, 520);
-        capV(272, 417, 520, 452, 462, '', 11);
-        dot(272, 520);
-        txt(240, 484, 'C5', 'ref');
-        txt(240, 500, '4.7µ', 'val');
-        txt(242, 449, '+', 'ref');
-        txt(286, 484, 'C6', 'ref');
-        txt(286, 500, '10µ', 'val');
-        txt(286, 449, '+', 'ref');
+        out += `<circle cx="250" cy="380" r="3" fill="var(--sheet)" stroke="var(--wire)" stroke-width="2"/>`;
+        out += `<circle cx="250" cy="414" r="3" fill="var(--sheet)" stroke="var(--wire)" stroke-width="2"/>`;
+        out += `<line id="sw1lever" class="wire" x1="250" y1="383" x2="268" y2="408"/>`;
+        txt(262, 384, 'SW1', 'ref');
+        capV(250, 417, 520, 452, 462, '', 11);
+        dot(250, 520);
+        txt(266, 484, 'C5', 'ref');
+        txt(266, 500, '10µ', 'val');
+        txt(264, 449, '+', 'ref');
         // 555
         out += `<rect class="chip" x="300" y="180" width="160" height="240" rx="2"/>`;
         txt(380, 296, 'NE555', 'ttl', 'middle');
@@ -2108,7 +2096,7 @@
         const R1 = 1e3,
           R2 = 47e3;
         let C = 1e-6,
-          V = 9,
+          V = 5,
           speed = 1,
           phase = 0,
           step = 0,
@@ -2135,8 +2123,7 @@
           $('rD').textContent = ((th / T) * 100).toFixed(1) + ' %';
           $('rS').textContent = fmtT(T);
           $('rW').textContent = fmtT(T * 10);
-          const end =
-            C > 1e-5 ? [270, 412] : C > 2e-6 ? [230, 412] : [250, 418];
+          const end = C > 2e-6 ? [250, 411] : [268, 408];
           $('sw1lever').setAttribute('x2', end[0]);
           $('sw1lever').setAttribute('y2', end[1]);
           const rout = V <= 10 ? 700 - (V - 5) * 70 : 350 - (V - 10) * 20;
@@ -2221,11 +2208,11 @@
               ['GND', 'Ground', 'gnd'],
               ['TRIG', 'pin 6 · R2 · C1 +', 'tim'],
               ['OUT', 'U2 pin 14 (CLK)', 'clk'],
-              ['RESET', '+9 V', 'pwr'],
+              ['RESET', '+5 V', 'pwr'],
               ['CTRL', 'C2 10 nF → GND', 'tim'],
               ['THR', 'pin 2 · SW1', 'tim'],
               ['DIS', 'R1 / R2 junction', 'tim'],
-              ['VCC', '+9 V · C3', 'pwr'],
+              ['VCC', '+5 V · C3', 'pwr'],
             ],
           },
           pinU2: {
@@ -2246,7 +2233,7 @@
               ['EN̅', 'Ground', 'gnd'],
               ['CLK', 'U1 pin 3 (OUT)', 'clk'],
               ['RST', 'Ground', 'gnd'],
-              ['VDD', '+9 V · C4', 'pwr'],
+              ['VDD', '+5 V · C4', 'pwr'],
             ],
           },
         };
@@ -2469,18 +2456,10 @@
               {
                 ref: 'C5',
                 kind: 'elec',
-                leads: ['L14', 'M14'],
-                value: '4.7 µF',
-                lab: [24, 4],
-                note: '+ in L14, stripe in M14',
-              },
-              {
-                ref: 'C6',
-                kind: 'elec',
                 leads: ['L10', 'M10'],
                 value: '10 µF',
                 lab: [24, 4],
-                note: '+ in L10, stripe in M10',
+                note: '+ in L10, stripe in M10; switched by SW1',
               },
               ...ledCols.map((c, i) => ({
                 ref: 'D' + (i + 1),
@@ -2492,27 +2471,20 @@
               })),
             ],
             offboard: [
-              { ref: 'J1', pin: '+', hole: 'B1', note: 'J1 +9 V' },
+              { ref: 'J1', pin: '+', hole: 'B1', note: 'J1 +5 V' },
               { ref: 'J1', pin: '−', hole: 'S1', note: 'J1 GND' },
               {
                 ref: 'SW1',
                 pin: 'COM',
                 hole: 'J13',
-                note: 'SW1 middle',
-                lab: [0, -11],
-              },
-              {
-                ref: 'SW1',
-                pin: 'A',
-                hole: 'K14',
-                note: 'SW1 A',
+                note: 'SW1 common',
                 lab: [0, -11],
               },
               {
                 ref: 'SW1',
                 pin: 'B',
                 hole: 'K10',
-                note: 'SW1 B',
+                note: 'SW1 → C5',
                 lab: [-11, 4],
               },
             ],
@@ -2550,7 +2522,6 @@
               { net: 'CTRL', holes: ['I9', 'J9'] },
               { net: 'OUT', holes: ['H6', 'H5'] },
               { net: 'OUT', holes: ['G19', 'G20', 'G21'] },
-              { net: 'SWA', holes: ['K14', 'L14'] },
               { net: 'SWB', holes: ['K10', 'L10'] },
               ...qHole.map((h, i) => ({ net: 'Q' + i, holes: [h, qExit[i]] })),
               ...ledCols.map((c, i) => ({
@@ -2572,7 +2543,7 @@
                 net: 'VCC',
                 path: ['J6', 'J2', 'B2'],
                 lab: [-6, 14],
-                note: '555 pin 4 → +9 V rail',
+                note: '555 pin 4 → +5 V rail',
               },
               ...qExit.map((h, i) => ({
                 id: 'L' + (i + 1),
@@ -2696,7 +2667,7 @@
           });
           const mx = xy('A15')[0] + (mirror ? -P / 2 : P / 2);
           o +=
-            T(mx, OY + P - 9, '+9 V rail · row B') +
+            T(mx, OY + P - 9, '+5 V rail · row B') +
             T(mx, OY + 18 * P + 17, 'GND rail · row S');
           // ICs
           LAYOUT.ics.forEach((ic) => {
@@ -2890,7 +2861,7 @@
           LAYOUT.offboard
             .map(
               (f) =>
-                `<tr><td>${f.ref}</td><td>${f.hole}</td><td>off-board</td><td>${f.ref === 'J1' ? (f.pin === '+' ? 'PD board +' : 'PD board −') : f.pin === 'COM' ? 'switch middle lug' : 'switch outer lug → ' + (f.pin === 'A' ? 'C5' : 'C6')}</td></tr>`
+                `<tr><td>${f.ref}</td><td>${f.hole}</td><td>off-board</td><td>${f.ref === 'J1' ? (f.pin === '+' ? 'USB-C VBUS' : 'USB-C GND') : f.pin === 'COM' ? 'switch middle lug' : 'switch other lug → C5 (10 µF)'}</td></tr>`
             )
             .join('') +
           `</tbody>`;

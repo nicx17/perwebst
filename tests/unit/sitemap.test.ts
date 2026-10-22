@@ -23,7 +23,7 @@ const buildSitemapIndexXml = (site: URL): string => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SITE = new URL('https://nickcardoso.com');
-const STATIC_ROUTES = ['/', '/colophon/', '/projects/'];
+const STATIC_ROUTES = ['/', '/projects/'];
 const PROJECT_ROUTES = [
   '/projects/hytrackv3/',
   '/projects/hytrackapi/',
@@ -50,7 +50,6 @@ describe('sitemap.xml', () => {
   it('includes all static routes as absolute URLs', () => {
     const xml = buildSitemapXml(SITE, STATIC_ROUTES);
     expect(xml).toContain('<loc>https://nickcardoso.com/</loc>');
-    expect(xml).toContain('<loc>https://nickcardoso.com/colophon/</loc>');
     expect(xml).toContain('<loc>https://nickcardoso.com/projects/</loc>');
   });
 

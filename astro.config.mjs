@@ -85,7 +85,8 @@ export default defineConfig({
   /** The base URL for the built site. */
   site,
   redirects: {
-    '/about/': { status: 301, destination: '/colophon/' },
+    '/about/': { status: 301, destination: '/' },
+    '/colophon/': { status: 301, destination: '/' },
   },
   devToolbar: { enabled: false },
   /**

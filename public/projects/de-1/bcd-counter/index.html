@@ -1283,7 +1283,6 @@
       <nav class="site-nav" aria-label="Primary">
         <a class="tab" href="/">Home</a>
         <a class="tab" href="/projects/" aria-current="page">Projects</a>
-        <a class="tab" href="/colophon/">Colophon</a>
       </nav>
     </header>
     <div class="page">
@@ -1528,8 +1527,8 @@
               <b>Decoder part:</b> use the <b>CD4513BE</b> (DIP-18).
               <b>Display check:</b> 5161<b>AS</b> = common cathode, which is
               what the CD4513 needs. A 5161BS won't light. <b>Supply:</b> 5 V
-              only. The 9 V PD board from the chaser would destroy both 74LS90s
-              (7 V absolute maximum).
+              only, from the same kind of USB-C breakout as the chaser. Never use
+              a higher supply: the 74LS90s are rated 7 V absolute maximum.
             </p>
             <div class="pb-tools">
               <div class="seg" id="pbSeg">
