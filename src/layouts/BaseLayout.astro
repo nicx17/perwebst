@@ -1,14 +1,19 @@
 ---
 /**
  * BaseLayout is the primary shell for all pages in the application.
- * It handles the global HTML structure, theme management, background image rotation,
- * and security header passthrough (nonces).
+ * It handles the global HTML structure, theme management and background image rotation.
+ * Inline scripts here are allowed by CSP hashes that src/integrations/static-headers.mjs
+ * computes from the built HTML, so editing them needs no other change.
  */
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import { getTopbarPersistKey } from '../utils/layout-shell';
-import backgroundColorsData from '../data/background-colors.json';
-import type { BackgroundColor } from '../types/client';
+import {
+  backgroundColorFor,
+  backgroundCredit,
+  selectBackground,
+} from '../utils/background-rotation';
+import { buildScenePalette, scenePaletteCss } from '../utils/scene-palette';
 interface Props {
   /** The page title used in the <title> tag and OG/Twitter metadata. */
   title: string;
@@ -37,90 +42,15 @@ const canonical = canonicalPath
 const topbarPersistKey = getTopbarPersistKey(shell);
 
 /**
- * Background selective logic based on the current day of the month.
- * This ensures a variety of imagery across the month while remaining deterministic
- * for SSR/Hydration consistency.
+ * The page is prerendered, so the background is picked at build time. CI
+ * rebuilds daily (see .github/workflows/ci.yml), which rotates it each day.
  */
-const now = new Date();
-const day = now.getDate();
-const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+const lightImage = selectBackground(new Date());
+const lightColorData = backgroundColorFor(lightImage);
+/** Colors derived from the photo, contrast-checked (see scene-palette.ts). */
+const scenePalette = buildScenePalette(lightColorData);
 
-/** Pool of background images for the ivory theme. */
-const lightImages: string[] = [
-  'antonius-harel-2rkqE7SgcE8-unsplash',
-  'antonius-harel-VbOjY42c6a4-unsplash',
-  'antonius-harel-WsaPcg512jE-unsplash',
-  'asi-mong-Gf5Q_5UF3vs-unsplash',
-  'dirk-lach-_uamwvb8UlI-unsplash',
-  'eve-9xY__xnwCy0-unsplash',
-  'eve-Fp96C-6Wd6o-unsplash',
-  'eve-WK9sTh1FiSs-unsplash',
-  'eve-bKOpGRbHBGs-unsplash',
-  'eve-jCBLFtjpXfw-unsplash',
-  'eve-lP_4h4oVO1E-unsplash',
-  'eve-lxepp3ZUxTs-unsplash',
-  'hassaan-here-bKfkhVRAJTQ-unsplash',
-  'iklas-FeNrGgQ1Tu8-unsplash',
-  'iklas-xjSu2KbJlAg-unsplash',
-  'iklas-y9Ujplj3KIU-unsplash',
-  'makesumo-doKatAORoIs-unsplash',
-  'mohammad-alizade-nIlwOYUbQEA-unsplash',
-  'mymind-KnUX9qtR_4E-unsplash',
-  'pawel-czerwinski-z4n8CGRuzOA-unsplash',
-  'plufow-le-studio-aE8Mx8-vQss-unsplash',
-  'radoslav-bali-Bp2sWPJGPHs-unsplash',
-  'radoslav-bali-rhnZzt9XblE-unsplash',
-  'rohit-choudhari-_E6sXQHsgQc-unsplash',
-  'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
-  'sean-fahrenbruch-_07FxAO8oG0-unsplash',
-  'sean-fahrenbruch-g95tsUeCohM-unsplash',
-  'sean-sinclair-C_NJKfnTR5A-unsplash',
-];
-
-/**
- * Day-of-week overrides for specific backgrounds.
- * Key: JS day-of-week number (0=Sunday, 6=Saturday).
- */
-const dayOfWeekOverrides: Record<number, string> = {
-  6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash', // Saturday
-};
-
-const lightImage =
-  dayOfWeekOverrides[dayOfWeek] ?? lightImages[day % lightImages.length]!;
-
-const backgroundColors: Record<string, BackgroundColor> =
-  backgroundColorsData as Record<string, BackgroundColor>;
-const lightColorData = backgroundColors[lightImage] || {
-  dominant: '#ece9e3',
-  average: '#ece9e3',
-  luminance: 220,
-  isDark: false,
-};
-
-const getUnsplashData = (filename: string) => {
-  const clean = filename.replace('-unsplash', '').replace(/\(\d+\)$/, '');
-  const lastDash = clean.lastIndexOf('-');
-
-  if (lastDash === -1) {
-    return {
-      url: `https://unsplash.com/photos/${clean}`,
-      author: 'Unknown',
-    };
-  }
-
-  const authorSlug = clean.slice(0, lastDash);
-  const authorName = authorSlug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-
-  return {
-    url: `https://unsplash.com/photos/${clean}`,
-    author: authorName,
-  };
-};
-
-const lightUnsplash = getUnsplashData(lightImage);
+const lightUnsplash = backgroundCredit(lightImage);
 
 const defaultOgImage = new URL(
   `/backgrounds/light/${lightImage}.jpg`,
@@ -132,10 +62,6 @@ const ogImage = ogImageProp
     ? ogImageProp
     : new URL(ogImageProp, Astro.site).toString()
   : defaultOgImage;
-
-/** Nonce provided by middleware for script/style authorization under CSP. */
-const cspNonce =
-  typeof Astro.locals.cspNonce === 'string' ? Astro.locals.cspNonce : undefined;
 
 const navItems = [
   { href: '/', label: 'Home' },
@@ -161,7 +87,7 @@ const currentYear = new Date().getFullYear();
     <ClientRouter />
 
     <!-- Trusted Types configuration for modern browser security. -->
-    <script is:inline nonce={cspNonce}>
+    <script is:inline>
       if (globalThis.trustedTypes && globalThis.trustedTypes.createPolicy) {
         try {
           if (!globalThis.trustedTypes.defaultPolicy) {
@@ -176,7 +102,7 @@ const currentYear = new Date().getFullYear();
     </script>
     <!-- Theme and quality-of-service (QoS) initialization.
          Executed inline to prevent Flash of Unstyled Content (FOUC). -->
-    <script is:inline nonce={cspNonce}>
+    <script is:inline>
       (() => {
         try {
           const t = document.documentElement;
@@ -204,20 +130,16 @@ const currentYear = new Date().getFullYear();
         } catch {}
       })();
     </script>
+    <!-- One bundle for the client scripts. Module scripts run deferred, in
+         this order, after the background-config block below is parsed. -->
     <script>
       import '../scripts/page-transition.ts';
-    </script>
-    <script>
       import '../scripts/nav-state.ts';
-    </script>
-    <script>
       import '../scripts/scroll-reveal.ts';
-    </script>
-    <script>
       import '../scripts/card-tilt.ts';
-    </script>
-    <script>
       import '../scripts/image-zoom.ts';
+      import '../scripts/theme-toggle.ts';
+      import '../scripts/background-loader.ts';
     </script>
     <!-- Fetch the scene photo during head parsing: CSS only requests it at the
          first style pass, so a full-load page switch could otherwise reveal the
@@ -237,7 +159,7 @@ const currentYear = new Date().getFullYear();
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content="#ece9e3" />
+    <meta name="theme-color" content={scenePalette.themeColor} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
@@ -248,15 +170,11 @@ const currentYear = new Date().getFullYear();
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImage} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <script>
-      import '../scripts/theme-toggle.ts';
-    </script>
     <!-- Dynamic CSS injection for background image variations.
          Variables are used by CSS to swap background quality levels (AVIF/WebP/Tiny)
          reactively based on client-side feature detection and loading state. -->
     <style
       is:inline
-      nonce={cspNonce}
       set:html={`
       :root {
         --scene-image-default: url("/backgrounds/light/${lightImage}.jpg?v=20260404hq");
@@ -274,18 +192,20 @@ const currentYear = new Date().getFullYear();
       html[data-scene-quality="webp"] { --scene-image: var(--scene-image-webp, var(--scene-image-default)); }
       html[data-scene-quality="avif"] { --scene-image: var(--scene-image-avif, var(--scene-image-default)); }
       html[data-scene-quality="default"] { --scene-image: var(--scene-image-default); }
+      ${scenePaletteCss(scenePalette)}
     `}
     ></style>
 
-    <!-- Expose the selected background config to the client-side background-loader.ts -->
+    <!-- Selected background for background-loader.ts. A JSON data block isn't
+         executed, so it needs no CSP hash even though it changes daily. -->
     <script
       is:inline
-      nonce={cspNonce}
-      set:html={`globalThis.__BACKGROUND_CONFIG={ivory:"/backgrounds/light/${lightImage}.jpg"};`}
+      type="application/json"
+      id="background-config"
+      set:html={JSON.stringify({
+        ivory: `/backgrounds/light/${lightImage}.jpg`,
+      })}
     />
-    <script>
-      import '../scripts/background-loader.ts';
-    </script>
   </head>
   <body>
     <div

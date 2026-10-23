@@ -5,6 +5,17 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Pages are prerendered and the background is picked at build time, so a
+  # daily rebuild rotates it. 00:07 UTC avoids the top-of-the-hour queue.
+  schedule:
+    - cron: '7 0 * * *'
+  workflow_dispatch:
+
+# One run per branch at a time. PR runs replace each other; main runs queue so
+# a deploy is never cancelled halfway.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   typecheck-and-build:
@@ -27,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck
         run: npm run check
 
@@ -43,3 +57,17 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+
+      # Uploads a version without deploying it; Cloudflare prints its preview
+      # URL when preview URLs are enabled on the Worker. Skipped for Dependabot
+      # and forks, which don't get the Cloudflare secrets.
+      - name: Upload preview version
+        uses: cloudflare/wrangler-action@v4
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: versions upload --message "PR #${{ github.event.pull_request.number }}"

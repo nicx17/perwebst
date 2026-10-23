@@ -1,15 +1,8 @@
 /// <reference types="astro/client" />
 
-import type { BackgroundConfig, SiteTheme } from './types/client';
-
-declare namespace App {
-  interface Locals {
-    cspNonce?: string;
-  }
-}
+import type { SiteTheme } from './types/client';
 
 declare global {
-  var __BACKGROUND_CONFIG: BackgroundConfig | undefined;
   var __persBackgroundLoaderInitialized: boolean | undefined;
   var __persNavStateInitialized: boolean | undefined;
   var __persPageTransitionInitialized: boolean | undefined;

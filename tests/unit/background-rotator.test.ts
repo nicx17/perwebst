@@ -1,256 +1,98 @@
+/**
+ * Tests for src/utils/background-rotation.ts: the pool comes from the
+ * optimizer's background-colors.json, so removing a background there removes
+ * it from the rotation with no other edits.
+ */
 import { describe, it, expect } from 'vitest';
+import backgroundColors from '../../src/data/background-colors.json';
+import {
+  backgroundCredit,
+  backgroundPool,
+  dayOfWeekOverrides,
+  selectBackground,
+} from '../../src/utils/background-rotation';
 
-// ── Replicated from src/layouts/BaseLayout.astro ──────────────────────────────
+const DAY = 86_400_000;
+/** Midnight UTC on a Monday. */
+const MONDAY = Date.UTC(2026, 9, 19);
+const SATURDAY_OVERRIDE = dayOfWeekOverrides[6]!;
 
-const lightImages: string[] = [
-  'antonius-harel-2rkqE7SgcE8-unsplash',
-  'antonius-harel-VbOjY42c6a4-unsplash',
-  'antonius-harel-WsaPcg512jE-unsplash',
-  'asi-mong-Gf5Q_5UF3vs-unsplash',
-  'dirk-lach-_uamwvb8UlI-unsplash',
-  'eve-9xY__xnwCy0-unsplash',
-  'eve-Fp96C-6Wd6o-unsplash',
-  'eve-WK9sTh1FiSs-unsplash',
-  'eve-bKOpGRbHBGs-unsplash',
-  'eve-jCBLFtjpXfw-unsplash',
-  'eve-lP_4h4oVO1E-unsplash',
-  'eve-lxepp3ZUxTs-unsplash',
-  'hassaan-here-bKfkhVRAJTQ-unsplash',
-  'iklas-FeNrGgQ1Tu8-unsplash',
-  'iklas-xjSu2KbJlAg-unsplash',
-  'iklas-y9Ujplj3KIU-unsplash',
-  'makesumo-doKatAORoIs-unsplash',
-  'mohammad-alizade-nIlwOYUbQEA-unsplash',
-  'mymind-KnUX9qtR_4E-unsplash',
-  'pawel-czerwinski-z4n8CGRuzOA-unsplash',
-  'plufow-le-studio-aE8Mx8-vQss-unsplash',
-  'radoslav-bali-Bp2sWPJGPHs-unsplash',
-  'radoslav-bali-rhnZzt9XblE-unsplash',
-  'rohit-choudhari-_E6sXQHsgQc-unsplash',
-  'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
-  'sean-fahrenbruch-_07FxAO8oG0-unsplash',
-  'sean-fahrenbruch-g95tsUeCohM-unsplash',
-  'sean-sinclair-C_NJKfnTR5A-unsplash',
-];
-
-const darkImages: string[] = [
-  'aedrian-salazar-kVENOffxjZg-unsplash',
-  'alexander-x-M4L2tlmqVus-unsplash',
-  'antonius-harel-4LY13pRPXSo-unsplash',
-  'antonius-harel-HaJoTW4ip-Y-unsplash',
-  'antonius-harel-MWzVeAb34P8-unsplash',
-  'antonius-harel-n-Tyeypj9hU-unsplash',
-  'antonius-harel-r1hj0fblqkY-unsplash',
-  'bill-hamway-24Uv4wRJ95A-unsplash',
-  'codioful-formerly-gradienta-1Ec-3-OuvPE-unsplash',
-  'codioful-formerly-gradienta-1nqc_X3IWMg-unsplash',
-  'codioful-formerly-gradienta-8u-vN2i0UjY-unsplash',
-  'codioful-formerly-gradienta-Le_f7i-y9M4-unsplash',
-  'codioful-formerly-gradienta-f5vshSox870-unsplash',
-  'dan-h-0S8XG059U68-unsplash',
-  'dan-h-I-1S7EAs0eI-unsplash',
-  'dan-h-XF6A907y0Uo-unsplash',
-];
-
-/**
- * Day-of-week overrides replicated from BaseLayout.astro.
- * Key: JS day-of-week number (0=Sunday, 6=Saturday).
- */
-const dayOfWeekOverrides: Record<number, string> = {
-  6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash', // Saturday
-};
-
-/**
- * Calendar days to test selection over a typical month.
- */
-const CALENDAR_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-
-/**
- * Replicates the selection logic in src/layouts/BaseLayout.astro
- */
-function selectImage(pool: string[], day: number, dayOfWeek?: number): string {
-  if (dayOfWeek !== undefined && dayOfWeekOverrides[dayOfWeek]) {
-    return dayOfWeekOverrides[dayOfWeek];
-  }
-  return pool[day % pool.length]!;
-}
-
-/**
- * Validates the integrity of the data pools.
- * Ensures images are correctly named and formatted as expected by the build scripts.
- */
-describe('lightImages pool', () => {
-  it('contains 28 entries', () => {
-    expect(lightImages).toHaveLength(28);
+describe('backgroundPool', () => {
+  it('is exactly the backgrounds the optimizer found', () => {
+    expect([...backgroundPool]).toEqual(Object.keys(backgroundColors).sort());
   });
 
-  it('has no empty strings', () => {
-    for (const name of lightImages) {
-      expect(name.trim().length).toBeGreaterThan(0);
+  it('has no duplicates and only Unsplash file names', () => {
+    expect(new Set(backgroundPool).size).toBe(backgroundPool.length);
+    for (const name of backgroundPool) {
+      expect(name).toMatch(/^[A-Za-z0-9_-]+-unsplash$/);
     }
   });
 
-  it('has no duplicate filenames', () => {
-    expect(new Set(lightImages).size).toBe(lightImages.length);
-  });
-
-  it('every entry ends with -unsplash', () => {
-    for (const name of lightImages) {
-      expect(name).toMatch(/-unsplash$/);
+  it('contains every day-of-week override', () => {
+    for (const name of Object.values(dayOfWeekOverrides)) {
+      expect(backgroundPool).toContain(name);
     }
   });
 });
 
-describe('darkImages pool', () => {
-  it('contains 16 entries', () => {
-    expect(darkImages).toHaveLength(16);
-  });
-
-  it('has no empty strings', () => {
-    for (const name of darkImages) {
-      expect(name.trim().length).toBeGreaterThan(0);
-    }
-  });
-
-  it('has no duplicate filenames', () => {
-    expect(new Set(darkImages).size).toBe(darkImages.length);
-  });
-
-  it('every entry ends with -unsplash', () => {
-    for (const name of darkImages) {
-      expect(name).toMatch(/-unsplash$/);
-    }
-  });
-});
-
-/**
- * Verifies the selection logic for the light theme pool.
- * selection is deterministic based on the day of the month.
- */
-describe('selectImage — light pool', () => {
-  it('returns a defined string for every calendar day (1-31)', () => {
-    for (const day of CALENDAR_DAYS) {
-      const result = selectImage(lightImages, day);
-      expect(result).toBeTypeOf('string');
-      expect(result.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('always returns a member of the light pool', () => {
-    for (const day of CALENDAR_DAYS) {
-      expect(lightImages).toContain(selectImage(lightImages, day));
-    }
-  });
-
-  it('cycles back to the pool start after one full rotation', () => {
-    const len = lightImages.length;
-    for (let day = 1; day <= 31; day++) {
-      expect(selectImage(lightImages, day)).toBe(
-        selectImage(lightImages, day + len)
+describe('selectBackground', () => {
+  it('always returns a member of the pool', () => {
+    for (let d = 0; d < 400; d++) {
+      expect(backgroundPool).toContain(
+        selectBackground(new Date(MONDAY + d * DAY))
       );
     }
   });
 
-  it('never returns the same image on two consecutive days within a 31-day window', () => {
-    for (let day = 1; day < 31; day++) {
-      expect(selectImage(lightImages, day)).not.toBe(
-        selectImage(lightImages, day + 1)
-      );
-    }
-  });
-});
-
-/**
- * Verifies the selection logic for the dark theme pool.
- */
-describe('selectImage — dark pool', () => {
-  it('returns a defined string for every calendar day (1-31)', () => {
-    for (const day of CALENDAR_DAYS) {
-      const result = selectImage(darkImages, day);
-      expect(result).toBeTypeOf('string');
-      expect(result.length).toBeGreaterThan(0);
-    }
+  it('is the same all day (UTC) and changes at UTC midnight', () => {
+    const morning = selectBackground(new Date(MONDAY + 1000));
+    expect(selectBackground(new Date(MONDAY + DAY - 1000))).toBe(morning);
+    expect(selectBackground(new Date(MONDAY + DAY + 1000))).not.toBe(morning);
   });
 
-  it('always returns a member of the dark pool', () => {
-    for (const day of CALENDAR_DAYS) {
-      expect(darkImages).toContain(selectImage(darkImages, day));
-    }
-  });
-
-  it('cycles back to the pool start after one full rotation', () => {
-    const len = darkImages.length;
-    for (let day = 1; day <= 31; day++) {
-      expect(selectImage(darkImages, day)).toBe(
-        selectImage(darkImages, day + len)
-      );
-    }
-  });
-
-  it('never returns the same image on two consecutive days within a 31-day window', () => {
-    for (let day = 1; day < 31; day++) {
-      expect(selectImage(darkImages, day)).not.toBe(
-        selectImage(darkImages, day + 1)
-      );
-    }
-  });
-});
-
-/**
- * Verifies day-of-week override behavior.
- * On Saturday (dayOfWeek=6), the pawel-czerwinski background is always shown.
- */
-describe('day-of-week overrides', () => {
-  it('returns the Saturday override regardless of the day-of-month', () => {
-    for (const day of CALENDAR_DAYS) {
-      const result = selectImage(lightImages, day, 6);
-      expect(result).toBe('pawel-czerwinski-z4n8CGRuzOA-unsplash');
-    }
-  });
-
-  it('does not override on non-Saturday days', () => {
-    // dayOfWeek 0-5 (Sunday-Friday) should use normal rotation
-    for (let dow = 0; dow <= 5; dow++) {
-      const result = selectImage(lightImages, 1, dow);
-      expect(result).toBe(lightImages[1 % lightImages.length]);
-    }
-  });
-
-  it('Saturday override image exists in the lightImages pool', () => {
-    expect(lightImages).toContain(dayOfWeekOverrides[6]);
-  });
-
-  it('all override images exist in the lightImages pool', () => {
-    for (const image of Object.values(dayOfWeekOverrides)) {
-      expect(lightImages).toContain(image);
-    }
-  });
-});
-
-/**
- * Tests for theme toggle independence.
- * This ensures that users see a unique pair of images across the month
- * when they toggle themes.
- */
-describe('independent pool cycling', () => {
-  it('light and dark pools have different lengths so they cycle independently', () => {
-    expect(lightImages.length).not.toBe(darkImages.length);
-  });
-
-  it('produces at least 16 unique light+dark pairings across a 31-day month', () => {
-    const pairs = new Set(
-      CALENDAR_DAYS.map(
-        (d) => `${selectImage(lightImages, d)}|${selectImage(darkImages, d)}`
-      )
+  it('uses the Saturday override', () => {
+    expect(selectBackground(new Date(MONDAY + 5 * DAY))).toBe(
+      SATURDAY_OVERRIDE
     );
-    expect(pairs.size).toBeGreaterThanOrEqual(16);
   });
 
-  it('the full repeat cycle (LCM) is longer than a single calendar month', () => {
-    const lcm = (a: number, b: number): number => (a * b) / gcd(a, b);
-    const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
-    const repeatAfter = lcm(lightImages.length, darkImages.length);
-    // LCM(28, 16) = 112 — well beyond the 31 days of the longest month
-    expect(repeatAfter).toBeGreaterThan(31);
+  it('ignores an override that is no longer in the pool', () => {
+    const pool = ['a-unsplash', 'b-unsplash'];
+    const saturday = selectBackground(new Date(MONDAY + 5 * DAY), pool);
+    expect(pool).toContain(saturday);
+  });
+
+  it('gives every background a turn over one cycle', () => {
+    const pool = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+    const seen = new Set<string>();
+    for (let d = 0; d < pool.length; d++) {
+      seen.add(selectBackground(new Date(MONDAY + d * DAY), pool));
+    }
+    expect(seen.size).toBe(pool.length);
+  });
+
+  it('throws when there are no backgrounds', () => {
+    expect(() => selectBackground(new Date(MONDAY), [])).toThrow(
+      /optimize:backgrounds/
+    );
+  });
+});
+
+describe('backgroundCredit', () => {
+  it.each([
+    ['sean-sinclair-C_NJKfnTR5A-unsplash', 'Sean Sinclair'],
+    // Photo IDs can contain dashes; the author must not swallow part of one.
+    ['eve-Fp96C-6Wd6o-unsplash', 'Eve'],
+    ['plufow-le-studio-aE8Mx8-vQss-unsplash', 'Plufow Le Studio'],
+    ['dirk-lach-_uamwvb8UlI-unsplash', 'Dirk Lach'],
+  ])('%s is by %s', (name, author) => {
+    expect(backgroundCredit(name).author).toBe(author);
+  });
+
+  it('links to the photo', () => {
+    expect(backgroundCredit('eve-Fp96C-6Wd6o-unsplash').url).toBe(
+      'https://unsplash.com/photos/eve-Fp96C-6Wd6o'
+    );
   });
 });

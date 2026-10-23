@@ -10,9 +10,7 @@ Source for my personal portfolio site. Links to software engineering projects, h
 
 ## Stack
 
-Astro 6 SSR with `@astrojs/node` standalone adapter, TypeScript strict mode, file-based typed content collections.
-
-Served via PM2 managed Node process, behind Cloudflare.
+Astro 7, prerendered and served from Cloudflare Workers static assets, TypeScript strict mode, file-based typed content collections. How it's built, secured and deployed: [docs/site-architecture.md](docs/site-architecture.md).
 
 ---
 

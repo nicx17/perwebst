@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NavBack from '../components/NavBack.astro';
+---
+
+<BaseLayout
+  title="Page Not Found | Nick Cardoso"
+  description="The requested page does not exist."
+  shell={false}
+>
+  <NavBack href="/" label="<- Home" />
+  <article class="article project-detail-card">
+    <header>
+      <h1>Page Not Found</h1>
+      <p class="subtitle projects-page-subtitle">
+        The URL you requested doesn't match a page on this site.
+        <a href="/projects/">Browse the projects</a> instead.
+      </p>
+    </header>
+  </article>
+</BaseLayout>

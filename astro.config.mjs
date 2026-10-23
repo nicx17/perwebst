@@ -1,12 +1,13 @@
 /**
  * Astro configuration file.
  * Handles site URL resolution (with environment variable support),
- * server-side rendering (SSR) setup via Node.js adapter,
+ * prerendering with the Cloudflare adapter (see docs/site-architecture.md),
  * and Vite-specific build optimizations.
  */
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import mdx from '@astrojs/mdx';
+import staticHeaders from './src/integrations/static-headers.mjs';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -90,21 +91,31 @@ export default defineConfig({
   },
   devToolbar: { enabled: false },
   /**
-   * Keep client-side navigation, but disable link prefetching: SSR HTML is
-   * served `max-age=0, must-revalidate` (per-request CSP nonces), so the
-   * ClientRouter's fetch() can't reuse a prefetched copy and every prefetch
-   * would just double the request.
+   * Keep client-side navigation, but disable link prefetching: HTML is
+   * served `max-age=0, must-revalidate`, so the ClientRouter's fetch() can't
+   * reuse a prefetched copy and every prefetch would just double the request.
    */
   prefetch: false,
-  /** Hybrid/Server rendering mode. */
-  output: 'server',
-  /** Cloudflare adapter. */
+  /**
+   * Pages are prerendered (the default 'static' output); routes that opt out
+   * with `export const prerender = false` (/api/csp-report) run in the Worker.
+   * Static headers, including each page's CSP, come from staticHeaders().
+   */
   adapter: cloudflare(),
-  integrations: [mdx()],
+  /** No route uses Astro sessions, so skip the adapter's SESSION KV binding. */
+  session: false,
+  integrations: [mdx(), staticHeaders()],
   /** Standardizes URLs to always have a trailing slash. */
   trailingSlash: 'always',
   vite: {
     build: {
+      /**
+       * Never inline bundled scripts: the ClientRouter waits for inline module
+       * scripts by injecting a `data:` script, which the CSP blocks. External
+       * /_astro/ scripts are allowed by 'self'. CSS keeps the default limit.
+       */
+      assetsInlineLimit: (filePath) =>
+        filePath.endsWith('.js') ? false : undefined,
       rollupOptions: {
         /** Custom warning handler to suppress known/expected noise from Astro internals. */
         onwarn(warning, defaultHandler) {

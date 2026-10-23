@@ -134,7 +134,7 @@
         inset: 0;
         z-index: -1;
         pointer-events: none;
-        background: rgba(236, 233, 227, 0.15);
+        background: var(--scene-wash, rgba(236, 233, 227, 0.15));
       }
       .ambient-orb {
         position: fixed;
@@ -1207,73 +1207,9 @@
         }
       }
     </style>
-    <script>
-      /* Same day-of-month background rotation as src/layouts/BaseLayout.astro: keep the lists in sync. */
-      (() => {
-        const images = [
-          'antonius-harel-2rkqE7SgcE8-unsplash',
-          'antonius-harel-VbOjY42c6a4-unsplash',
-          'antonius-harel-WsaPcg512jE-unsplash',
-          'asi-mong-Gf5Q_5UF3vs-unsplash',
-          'dirk-lach-_uamwvb8UlI-unsplash',
-          'eve-9xY__xnwCy0-unsplash',
-          'eve-Fp96C-6Wd6o-unsplash',
-          'eve-WK9sTh1FiSs-unsplash',
-          'eve-bKOpGRbHBGs-unsplash',
-          'eve-jCBLFtjpXfw-unsplash',
-          'eve-lP_4h4oVO1E-unsplash',
-          'eve-lxepp3ZUxTs-unsplash',
-          'hassaan-here-bKfkhVRAJTQ-unsplash',
-          'iklas-FeNrGgQ1Tu8-unsplash',
-          'iklas-xjSu2KbJlAg-unsplash',
-          'iklas-y9Ujplj3KIU-unsplash',
-          'makesumo-doKatAORoIs-unsplash',
-          'mohammad-alizade-nIlwOYUbQEA-unsplash',
-          'mymind-KnUX9qtR_4E-unsplash',
-          'pawel-czerwinski-z4n8CGRuzOA-unsplash',
-          'plufow-le-studio-aE8Mx8-vQss-unsplash',
-          'radoslav-bali-Bp2sWPJGPHs-unsplash',
-          'radoslav-bali-rhnZzt9XblE-unsplash',
-          'rohit-choudhari-_E6sXQHsgQc-unsplash',
-          'sean-fahrenbruch-KUXkBy_Q0eA-unsplash',
-          'sean-fahrenbruch-_07FxAO8oG0-unsplash',
-          'sean-fahrenbruch-g95tsUeCohM-unsplash',
-          'sean-sinclair-C_NJKfnTR5A-unsplash',
-        ];
-        const overrides = { 6: 'pawel-czerwinski-z4n8CGRuzOA-unsplash' };
-        const now = new Date();
-        const name =
-          overrides[now.getDay()] ?? images[now.getDate() % images.length];
-        const base = `/backgrounds/light/${name}`;
-        const v = '?v=20260404hq';
-        document.documentElement.style.setProperty(
-          '--scene-image',
-          `image-set(url("${base}.avif${v}") type("image/avif"), url("${base}.webp${v}") type("image/webp"), url("${base}.jpg${v}") type("image/jpeg"))`
-        );
-        // Fetch the photo now: CSS only requests it at the first style pass,
-        // so a page switch could otherwise reveal this page without it.
-        const preload = document.createElement('link');
-        preload.rel = 'preload';
-        preload.as = 'image';
-        preload.type = 'image/avif';
-        preload.href = `${base}.avif${v}`;
-        document.head.append(preload);
-
-        const clean = name.replace('-unsplash', '');
-        const cut = clean.lastIndexOf('-');
-        const author = clean
-          .slice(0, cut)
-          .split('-')
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ');
-        document.addEventListener('DOMContentLoaded', () => {
-          const credit = document.querySelector('.bg-credit');
-          if (!credit) return;
-          credit.href = `https://unsplash.com/photos/${clean}`;
-          credit.textContent = `Background by ${author}`;
-        });
-      })();
-    </script>
+    <!-- Today's background and palette, shared with the rest of the site
+         (generated from src/pages/scene.js.ts). -->
+    <script src="/scene.js"></script>
   </head>
   <body>
     <div id="scene-bg" aria-hidden="true"></div>

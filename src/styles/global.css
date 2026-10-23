@@ -236,7 +236,8 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: rgba(236, 233, 227, 0.15); /* ivory overlay */
+  /* Faint wash in the photo's tint (scene-palette.ts sets --scene-wash). */
+  background: var(--scene-wash, rgba(236, 233, 227, 0.15));
   transition: background-color var(--motion-fast) ease;
 }
 
@@ -426,6 +427,31 @@ h3 {
   color: var(--text-main);
 }
 
+/* Headers are drawn straight on the photo, so each gets a soft blurred
+   backing in the photo's tint. scene-palette.ts sets its opacity per
+   background so the title and subtitle stay readable (WCAG AA) even over the
+   photo's darkest area. */
+header.page-header {
+  position: relative;
+  isolation: isolate;
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* Measured in Chromium at 1440 and 390 px wide: at least 79% of the backing's
+   opacity remains behind the text. scene-palette.ts assumes 75%
+   (SCRIM_COVERAGE); re-measure if you change the inset or blur. */
+header.page-header::before {
+  content: '';
+  position: absolute;
+  inset: -3rem -4.25rem;
+  z-index: -1;
+  border-radius: 5rem;
+  background: var(--header-scrim, transparent);
+  filter: blur(44px);
+  pointer-events: none;
+}
+
 header.page-header h1 {
   font-size: var(--text-4xl);
   line-height: var(--leading-tight);
@@ -513,7 +539,7 @@ header.page-header h1 {
 
 .home-hero {
   text-align: center;
-  width: min(900px, 100%);
+  max-width: min(900px, 100%);
   margin: 0 auto;
 }
 

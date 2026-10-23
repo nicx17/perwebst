@@ -1,170 +1,182 @@
 {
   "antonius-harel-2rkqE7SgcE8-unsplash": {
+    "accent": "#3c62b7",
+    "accentAlt": null,
     "average": "#aeb4c9",
     "dominant": "#f5e4d0",
     "isDark": false,
-    "luminance": 180.6
+    "luminance": 180.6,
+    "shade": "#0f2172"
   },
   "antonius-harel-VbOjY42c6a4-unsplash": {
+    "accent": "#2644b6",
+    "accentAlt": "#aaf4ef",
     "average": "#c6d0f0",
     "dominant": "#ffffff",
     "isDark": false,
-    "luminance": 208.658
-  },
-  "antonius-harel-WsaPcg512jE-unsplash": {
-    "average": "#e0ad9a",
-    "dominant": "#f3f1f2",
-    "isDark": false,
-    "luminance": 186.083
+    "luminance": 208.658,
+    "shade": "#1738a5"
   },
   "asi-mong-Gf5Q_5UF3vs-unsplash": {
+    "accent": "#fb4638",
+    "accentAlt": "#fbb443",
     "average": "#fb9875",
     "dominant": "#fcdfba",
     "isDark": false,
-    "luminance": 177.611
+    "luminance": 177.611,
+    "shade": "#fb2313"
   },
   "dirk-lach-_uamwvb8UlI-unsplash": {
+    "accent": "#fea3a2",
+    "accentAlt": null,
     "average": "#fdc8bd",
     "dominant": "#fdf4ed",
     "isDark": false,
-    "luminance": 214.593
-  },
-  "eve-9xY__xnwCy0-unsplash": {
-    "average": "#bfd2e8",
-    "dominant": "#f5f8f6",
-    "isDark": false,
-    "luminance": 206.827
+    "luminance": 214.593,
+    "shade": "#fd9c9c"
   },
   "eve-Fp96C-6Wd6o-unsplash": {
+    "accent": "#6258f0",
+    "accentAlt": "#b9e3f6",
     "average": "#c5cef6",
     "dominant": "#f9f9f9",
     "isDark": false,
-    "luminance": 207.869
+    "luminance": 207.869,
+    "shade": "#5b48ef"
   },
   "eve-WK9sTh1FiSs-unsplash": {
+    "accent": "#fb719f",
+    "accentAlt": "#faae4c",
     "average": "#f9c9c5",
     "dominant": "#f9f9f9",
     "isDark": false,
-    "luminance": 214.896
+    "luminance": 214.896,
+    "shade": "#fb64a2"
   },
   "eve-bKOpGRbHBGs-unsplash": {
+    "accent": "#f486ec",
+    "accentAlt": "#e7cc72",
     "average": "#e7dadf",
     "dominant": "#ecf0ee",
     "isDark": false,
-    "luminance": 222.457
+    "luminance": 222.457,
+    "shade": "#f474ed"
   },
   "eve-jCBLFtjpXfw-unsplash": {
+    "accent": "#86efbd",
+    "accentAlt": "#e6e793",
     "average": "#e5e7db",
     "dominant": "#ebebeb",
     "isDark": false,
-    "luminance": 229.034
+    "luminance": 229.034,
+    "shade": "#f4b78c"
   },
   "eve-lP_4h4oVO1E-unsplash": {
+    "accent": "#e9a296",
+    "accentAlt": "#928bc9",
     "average": "#d9cbd2",
     "dominant": "#e5e5e5",
     "isDark": false,
-    "luminance": 207.984
+    "luminance": 207.984,
+    "shade": "#8a81c4"
   },
   "eve-lxepp3ZUxTs-unsplash": {
+    "accent": "#f1a6f1",
+    "accentAlt": null,
     "average": "#eaddea",
     "dominant": "#e8edea",
     "isDark": false,
-    "luminance": 226.369
+    "luminance": 226.369,
+    "shade": "#f19ff2"
   },
   "hassaan-here-bKfkhVRAJTQ-unsplash": {
+    "accent": "#d5aee1",
+    "accentAlt": "#6dcfe2",
     "average": "#d4d2de",
     "dominant": "#e3e3e3",
     "isDark": false,
-    "luminance": 211.966
-  },
-  "iklas-FeNrGgQ1Tu8-unsplash": {
-    "average": "#b8b1db",
-    "dominant": "#e8e8e8",
-    "isDark": false,
-    "luminance": 183.881
-  },
-  "iklas-xjSu2KbJlAg-unsplash": {
-    "average": "#dde5ba",
-    "dominant": "#f2f7fa",
-    "isDark": false,
-    "luminance": 221.706
+    "luminance": 211.966,
+    "shade": "#a69ee1"
   },
   "iklas-y9Ujplj3KIU-unsplash": {
+    "accent": "#3fb2d2",
+    "accentAlt": null,
     "average": "#cad8e1",
     "dominant": "#dad9de",
     "isDark": false,
-    "luminance": 212.84
+    "luminance": 212.84,
+    "shade": "#3cb1d1"
   },
   "makesumo-doKatAORoIs-unsplash": {
+    "accent": "#f51e76",
+    "accentAlt": null,
     "average": "#f98eaf",
     "dominant": "#ffaba9",
     "isDark": false,
-    "luminance": 177.755
+    "luminance": 177.755,
+    "shade": "#f11172"
   },
   "mohammad-alizade-nIlwOYUbQEA-unsplash": {
+    "accent": "#5daae5",
+    "accentAlt": null,
     "average": "#afcff4",
     "dominant": "#9fc0ed",
     "isDark": false,
-    "luminance": 201.65
+    "luminance": 201.65,
+    "shade": "#50a2de"
   },
   "mymind-KnUX9qtR_4E-unsplash": {
+    "accent": "#fc7621",
+    "accentAlt": null,
     "average": "#f3c089",
     "dominant": "#eed3ae",
     "isDark": false,
-    "luminance": 200.979
+    "luminance": 200.979,
+    "shade": "#fc6443"
   },
   "pawel-czerwinski-z4n8CGRuzOA-unsplash": {
+    "accent": "#eab7ce",
+    "accentAlt": null,
     "average": "#edc0d4",
     "dominant": "#eac1d3",
     "isDark": false,
-    "luminance": 207.735
-  },
-  "plufow-le-studio-aE8Mx8-vQss-unsplash": {
-    "average": "#e8cfc0",
-    "dominant": "#fcddc8",
-    "isDark": false,
-    "luminance": 212.765
-  },
-  "radoslav-bali-Bp2sWPJGPHs-unsplash": {
-    "average": "#b1b2f5",
-    "dominant": "#e6ebee",
-    "isDark": false,
-    "luminance": 185.339
-  },
-  "radoslav-bali-rhnZzt9XblE-unsplash": {
-    "average": "#f4c1a3",
-    "dominant": "#f4eae8",
-    "isDark": false,
-    "luminance": 204.829
+    "luminance": 207.735,
+    "shade": "#e7a0bf"
   },
   "rohit-choudhari-_E6sXQHsgQc-unsplash": {
+    "accent": "#257cfb",
+    "accentAlt": null,
     "average": "#d1e5fc",
     "dominant": "#eff6fc",
     "isDark": false,
-    "luminance": 225.642
+    "luminance": 225.642,
+    "shade": "#207afb"
   },
   "sean-fahrenbruch-KUXkBy_Q0eA-unsplash": {
+    "accent": "#a63cf6",
+    "accentAlt": null,
     "average": "#c889f5",
     "dominant": "#f5e7fe",
     "isDark": false,
-    "luminance": 168.149
-  },
-  "sean-fahrenbruch-_07FxAO8oG0-unsplash": {
-    "average": "#948c77",
-    "dominant": "#e85631",
-    "isDark": false,
-    "luminance": 139.998
+    "luminance": 168.149,
+    "shade": "#a233f1"
   },
   "sean-fahrenbruch-g95tsUeCohM-unsplash": {
+    "accent": "#e44296",
+    "accentAlt": "#683d94",
     "average": "#c084b4",
     "dominant": "#f9d2d2",
     "isDark": false,
-    "luminance": 155.412
+    "luminance": 155.412,
+    "shade": "#4f3492"
   },
   "sean-sinclair-C_NJKfnTR5A-unsplash": {
+    "accent": "#287ac1",
+    "accentAlt": "#f6b55d",
     "average": "#9a9e9e",
     "dominant": "#008eb0",
     "isDark": false,
-    "luminance": 156.804
+    "luminance": 156.804,
+    "shade": "#0f50b8"
   }
 }

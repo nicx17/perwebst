@@ -1,4 +1,4 @@
-import { type SceneQuality } from '../types/client';
+import { type BackgroundConfig, type SceneQuality } from '../types/client';
 
 (() => {
   /**
@@ -20,7 +20,19 @@ import { type SceneQuality } from '../types/client';
   const sceneQualityKey = `bg-scene-quality-${backgroundAssetVersion}-ivory`;
   let activeLoadToken = 0;
 
-  const backgrounds = globalThis.__BACKGROUND_CONFIG ?? {
+  /** The layout's JSON data block names the background picked at build time. */
+  const readBackgroundConfig = (): BackgroundConfig | null => {
+    try {
+      const block = document.getElementById('background-config');
+      return block?.textContent
+        ? (JSON.parse(block.textContent) as BackgroundConfig)
+        : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const backgrounds = readBackgroundConfig() ?? {
     ivory: '/backgrounds/light/eve-jCBLFtjpXfw-unsplash.jpg',
   };
 
