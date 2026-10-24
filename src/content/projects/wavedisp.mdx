@@ -13,15 +13,154 @@ tags:
   - Hardware
 order: 4
 featured: true
+ogImage: /project-assets/wavedisp/og.jpg
 ---
 
 import FeatureGrid from '../../components/project/FeatureGrid.astro';
 import FeatureItem from '../../components/project/FeatureItem.astro';
 import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
 
+export const assets = '/project-assets/wavedisp';
+
+export const stats = [
+  ['4,096', 'RGB LEDs, 64 × 64'],
+  ['12', 'Display modes'],
+  ['<1%', 'Render CPU for a clock'],
+  ['10', 'Preset slots'],
+];
+
+export const modes = [
+  [
+    'clock',
+    'Clock',
+    'custom fonts & layouts',
+    'Clock mode: large stacked hours and minutes in yellow and pink',
+  ],
+  [
+    'clock-ms',
+    'Clock',
+    'with milliseconds',
+    'Clock mode with milliseconds shown below the time',
+  ],
+  [
+    'stopwatch',
+    'Stopwatch',
+    'start, stop, reset',
+    'Stopwatch mode showing 12 minutes 34.381 seconds',
+  ],
+  [
+    'rain',
+    'Matrix Rain',
+    'colour & speed',
+    'Matrix rain mode: green falling streaks with white heads',
+  ],
+  ['life', 'Game of Life', 'self-reseeding', "Conway's Game of Life in cyan"],
+  [
+    'badapple',
+    'Bad Apple',
+    '30 fps, 1-bit',
+    'A frame of the Bad Apple shadow-art animation in black and white',
+  ],
+  [
+    'qrcode',
+    'QR Code',
+    'URLs, Wi-Fi, vCards',
+    'A scannable QR code filling the panel',
+  ],
+  [
+    'draw',
+    'Drawing Canvas',
+    'paint from any device',
+    'Drawing canvas: a pink pixel-art heart above a blue wave',
+  ],
+  [
+    'smiley',
+    'Smiley',
+    'blinks & glances',
+    'Animated smiley face with blinking eyes',
+  ],
+  [
+    'warning',
+    'Warning',
+    'strobing sign',
+    'Yellow warning triangle with an exclamation mark',
+  ],
+];
+
+export const desktopShots = [
+  [
+    'dashboard-rain-dark',
+    'Dark theme',
+    'matrix rain, colour and fall speed',
+    'Dark theme dashboard in matrix rain mode with colour and fall speed settings',
+  ],
+  [
+    'dashboard-draw',
+    'Drawing canvas',
+    'paint pixels, see them on the panel',
+    'Drawing canvas in the dashboard with a heart and wave mirrored on the live preview',
+  ],
+  [
+    'dashboard-qrcode-dark',
+    'QR codes',
+    'payload builder, error correction, Micro QR',
+    'QR code settings with payload builder, error correction and colours',
+  ],
+  [
+    'dashboard-badapple-dark',
+    'Bad Apple',
+    '6,572 frames packed into 3.4 MB',
+    'Bad Apple playback with invert option and the live preview showing a silhouette frame',
+  ],
+];
+
+export const tallShots = [
+  [
+    'dashboard-presets-schedules',
+    738,
+    1975,
+    'Presets & schedules',
+    'ten slots, weekly timers',
+    'Ten named preset slots with save and load buttons, and weekly schedules that load presets at set times',
+  ],
+  [
+    'dashboard-mobile-modes',
+    780,
+    1688,
+    'On a phone',
+    'modes',
+    'Dashboard on a phone showing the display mode buttons and brightness slider',
+  ],
+  [
+    'dashboard-mobile-preview',
+    780,
+    1688,
+    'On a phone',
+    'live preview',
+    'Dashboard on a phone showing the live preview of the smiley mode and the presets list',
+  ],
+];
+
+export const img = { display: 'block', width: '100%', margin: 0 };
+export const caption = {
+  marginTop: '0.5rem',
+  fontSize: '0.85rem',
+  color: 'var(--text-muted)',
+  lineHeight: 1.45,
+};
+export const captionTitle = { color: 'var(--text-main)', fontWeight: 600 };
+export const grid = (min, gap = '1.25rem') => ({
+  display: 'grid',
+  gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}, 100%), 1fr))`,
+  gap,
+  margin: '1.5rem 0',
+  alignItems: 'start',
+});
+
 # WaveDisp
 
-Interactive LED Matrix Dashboard
+A 64 × 64 RGB LED matrix you control from any browser: clocks, animations, pixel
+art, QR codes and Spotify album art, rendered on a Raspberry Pi Zero 2 W.
 
 <div
   style={{
@@ -64,136 +203,288 @@ Interactive LED Matrix Dashboard
   />
 </div>
 
+{
+
+  <figure style={{ margin: '1.5rem 0 0' }}>
+    <img
+      src={`${assets}/dashboard-clock-light.webp`}
+      alt="WaveDisp dashboard in the light theme: display mode buttons, clock settings, a live preview of the matrix showing the time, and the preset memory bank"
+      width="2160"
+      height="1350"
+      style={img}
+    />
+    <figcaption style={{ ...caption, textAlign: 'center' }}>
+      The dashboard, with the live preview mirroring the panel in real time.
+    </figcaption>
+  </figure>
+}
+
+{
+
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))',
+      margin: '2.5rem 0 0.5rem',
+      border: '1px solid var(--button-border)',
+      borderRadius: '16px',
+      background: 'var(--button-bg)',
+      overflow: 'hidden',
+    }}
+  >
+    {stats.map(([value, label]) => (
+      <div style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '2.1rem',
+            fontWeight: 600,
+            lineHeight: 1.1,
+          }}
+        >
+          {value}
+        </div>
+        <div
+          style={{
+            fontSize: '0.78rem',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+            marginTop: '0.35rem',
+          }}
+        >
+          {label}
+        </div>
+      </div>
+    ))}
+  </div>
+}
+
 <FeatureGrid>
-  <FeatureItem title="Diverse Display Modes" icon="lucide:monitor-play">
-    Supports Clock, Warning Sign, Smiley, Matrix Rain, Game of Life, Bad Apple
-    video playback, QR Code, Drawing Canvas, and Spotify art.
+  <FeatureItem title="Twelve Display Modes" icon="lucide:monitor-play">
+    Clock, stopwatch, matrix rain, Game of Life, Bad Apple, QR codes, a drawing
+    canvas, Spotify album art and more, switched with a smooth fade.
   </FeatureItem>
-  <FeatureItem title="Live Preview Stream" icon="lucide:video">
-    MJPEG video stream mirroring the LED matrix framebuffer back to the web UI
-    in real-time.
+  <FeatureItem title="Live Preview" icon="lucide:video">
+    The dashboard streams the panel's framebuffer back as MJPEG, so you see
+    exactly what the LEDs show from anywhere on the network.
   </FeatureItem>
-  <FeatureItem title="Hardware Native" icon="lucide:cpu">
-    Integrates directly with the `hzeller/rpi-rgb-led-matrix` C++ driver via
-    Python bindings.
+  <FeatureItem title="Presets & Schedules" icon="lucide:calendar-clock">
+    Ten named preset slots, recalled instantly or on a weekly schedule, such as
+    a bright clock at 08:00 and lights out at 23:00.
+  </FeatureItem>
+  <FeatureItem title="Pixel-Art Canvas" icon="lucide:pencil">
+    Draw straight onto the matrix from a phone or laptop. Strokes are batched
+    and streamed to the panel as you paint.
+  </FeatureItem>
+  <FeatureItem title="Built for a 512 MB Pi" icon="lucide:cpu">
+    Two processes, shared-memory hand-off and frame skipping keep a Pi Zero 2 W
+    cool and responsive, driving the panel through `hzeller/rpi-rgb-led-matrix`.
+  </FeatureItem>
+  <FeatureItem title="Safe by Default" icon="lucide:shield-check">
+    Every setting is validated before it reaches the renderer, the Spotify
+    secret never leaves the device, and cross-site requests can't drive it.
   </FeatureItem>
 </FeatureGrid>
 
 ## Overview
 
-WaveDisp is an interactive control dashboard and rendering engine designed for Raspberry Pi LED matrix displays. Specifically, it is built and tested for the Waveshare RGB-Matrix-Px-64x64 (P2.5 64x64 HUB75) panel. The system uses a FastAPI backend coupled with a Vite/React frontend to provide real-time control, configuration, and rendering over the network.
+WaveDisp turns a [Waveshare P2.5 64 × 64 HUB75 panel](https://docs.waveshare.com/RGB-Matrix-Px-64x64?variant=P2.5-64x64)
+and a Raspberry Pi Zero 2 W into a network-connected display. A FastAPI backend
+owns the configuration and drives the panel; a React dashboard, served by the
+same backend, lets any device on the network change modes, tune colours and
+layouts, draw pixel art, and manage presets. Everything is also available over
+a small REST API, so the display can be scripted from Home Assistant or `curl`.
 
-## Features & Display Modes
+## Display Modes
 
-The platform supports a robust set of visual modes that can be hot-swapped from the dashboard:
+Every image below comes straight out of WaveDisp's own renderer: the exact
+64 × 64 frame it sends to the panel, drawn as an LED grid.
 
-- **Clock**: Highly customizable layouts with millisecond precision updates.
-- **Spotify Integration**: Connects via the Spotify Developer API using OAuth to fetch and display the currently playing album art and playback status.
-- **Interactive Drawing Canvas**: A pixel-art canvas integrated into the frontend, allowing real-time sketching directly onto the matrix.
-- **Bad Apple Playback**: The system plays the iconic "Bad Apple" video. It uses a pre-generated binary file (`bad_apple.bin`) processed via `yt-dlp` and `OpenCV` to avoid heavy video decoding overhead on the Pi's CPU at runtime.
-- **Game of Life**: Conway's cellular automaton simulation.
-- **Matrix Rain**: The classic falling green code effect.
-- **QR Code**: On-the-fly QR code generation (using Segno).
-- **Basic Graphics**: Includes Warning Sign, Alarm, and Smiley modes.
+{
 
-## Configuration & Presets
+  <div style={grid('min(230px, calc(50% - 0.5rem))', '1rem')}>
+    {modes.map(([file, title, detail, alt]) => (
+      <figure style={{ margin: 0 }}>
+        <img
+          src={`${assets}/mode-${file}.webp`}
+          alt={alt}
+          width="480"
+          height="480"
+          loading="lazy"
+          decoding="async"
+          style={img}
+        />
+        <figcaption style={caption}>
+          <span style={captionTitle}>{title}</span> · {detail}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+}
 
-- **Preset Memory Bank**: Includes a 10-slot persistent memory bank for saving and instantly recalling display configurations.
-- **Debounced Persistence**: The state is rigorously validated using Pydantic and saved to `backend/config.json`. The backend actively debounces these writes to minimize SD card wear on the Raspberry Pi.
-- **Hardware Tuning (`gpio_slowdown`)**: Hardware timing can be modified directly from the dashboard. This allows tuning to accommodate faster processors (like the Pi Zero 2 W or Pi 4) which otherwise cause visual rendering artifacts or flickering.
+Rounding it out are **Spotify** (the album art of whatever is playing, fetched
+through the Spotify Web API with OAuth), a full-panel colour-cycling **Alarm**,
+and **Off**.
 
-## Dashboard Showcase
+## The Dashboard
 
-The web UI provides a clean, responsive interface for managing the matrix.
+The dashboard is a single-page React app with a bold, high-contrast look and
+fully themeable light and dark palettes. Each mode gets its own settings panel,
+and changes show up on the panel almost instantly.
 
-<div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))',
-    gap: '1rem',
-    marginTop: '1rem',
-  }}
+{
+
+  <div style={grid('520px')}>
+    {desktopShots.map(([file, title, detail, alt]) => (
+      <figure style={{ margin: 0 }}>
+        <img
+          src={`${assets}/${file}.webp`}
+          alt={alt}
+          width="2160"
+          height="1350"
+          loading="lazy"
+          decoding="async"
+          style={img}
+        />
+        <figcaption style={caption}>
+          <span style={captionTitle}>{title}</span> · {detail}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+}
+
+{
+
+  <div style={grid('200px')}>
+    {tallShots.map(([file, width, height, title, detail, alt]) => (
+      <figure style={{ margin: 0 }}>
+        <img
+          src={`${assets}/${file}.webp`}
+          alt={alt}
+          width={width}
+          height={height}
+          loading="lazy"
+          decoding="async"
+          style={img}
+        />
+        <figcaption style={caption}>
+          <span style={captionTitle}>{title}</span> · {detail}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+}
+
+<ArchitectureSection
+  title="How It Works"
+  image="/project-assets/wavedisp/architecture.webp"
+  alt="Architecture diagram: the browser talks to a FastAPI main process holding the StateStore, scheduler, Spotify poller and watchdog; settings snapshots flow to a separate render process through shared memory and rendered frames flow back for the live preview; the render process drives the LED panel through the hzeller driver"
 >
-  <div>
-    <strong>General Overview & Live Stream</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-1.png"
-      alt="WaveDisp Dashboard General View showing live preview"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-  <div>
-    <strong>Bad Apple Playback Mode</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-2.png"
-      alt="WaveDisp Dashboard displaying the Bad Apple video mode"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-  <div>
-    <strong>Presets & State Controls</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-3.png"
-      alt="WaveDisp Dashboard Presets memory bank and configuration toggles"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-  <div>
-    <strong>Mode Selection Menu</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-4.png"
-      alt="WaveDisp Dashboard Modes list showing visual capabilities"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-  <div>
-    <strong>Interactive Drawing Canvas</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-5.png"
-      alt="WaveDisp Dashboard Interactive Drawing canvas interface"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-  <div>
-    <strong>Hardware Configuration Settings</strong>
-    <img
-      src="/project-assets/wavedisp/dashboard-6.png"
-      alt="WaveDisp Dashboard Hardware Settings for tuning gpio_slowdown and timing"
-      style={{ borderRadius: '8px', width: '100%' }}
-    />
-  </div>
-</div>
+
+- **Two processes, one writer.** The FastAPI process owns all configuration.
+  The API, the scheduler and the Spotify poller all go through a single
+  `StateStore`, which validates each change, bumps a version number, and
+  publishes a snapshot to the render process through shared memory. The
+  renderer only ever reads, so it never waits on a lock or a network call.
+- **Frame skipping.** Every display mode reports a small _frame key_ that
+  changes only when its picture would. If neither the key nor the settings
+  changed, the frame is skipped entirely; the LED driver's own real-time thread
+  keeps refreshing the panel. A plain clock redraws once per second instead of
+  120 times.
+- **Cached glyphs.** Rendered text is cached as alpha masks and pasted, so a
+  clock frame renders in about 0.4 ms on the Pi instead of 14 ms, with output
+  verified pixel-identical to drawing the text directly.
+- **Fades that actually fade.** The driver applies brightness as pixels are
+  written, so mode transitions ramp brightness across real frames rather than
+  adjusting a value the panel never sees.
+- **Supervised.** A failing frame is logged and blanked instead of crashing the
+  renderer. If the render process does die, the whole service exits so systemd
+  restarts it. On shutdown, the panel is cleared.
+
+</ArchitectureSection>
+
+## Performance on a Pi Zero 2 W
+
+Measured on the device, with the same configuration before and after the
+rendering pipeline rework:
+
+| Metric                          | Before     | After          |
+| ------------------------------- | ---------- | -------------- |
+| Render thread CPU, clock mode   | 75%        | **0.8%**       |
+| Clock frame render time         | 13.8 ms    | **0.42 ms**    |
+| Full drawing canvas render time | 29 ms      | **0.06 ms**    |
+| Matrix rain render time         | 4.9 ms     | **1.5 ms**     |
+| Python processes / memory (RSS) | 3 / 211 MB | **2 / 148 MB** |
+
+The LED driver's refresh thread, which bit-bangs the panel and runs at
+real-time priority, is unaffected and still uses most of one core by design.
+Everything WaveDisp adds on top now sits near idle.
+
+## Reliability & Security
+
+- **Validated configuration.** Every write is checked against a strict Pydantic
+  schema with ranges, enums and safe font file names. Invalid input is rejected
+  with a `422` before it can reach the renderer, and a stale or hand-edited
+  config file falls back to defaults key by key instead of failing to boot.
+- **SD-card friendly.** Saves are debounced and atomic (temp file, `fsync`,
+  rename), so a burst of slider changes becomes one write, and pulling the plug
+  can't corrupt the config.
+- **No secrets over the wire.** The Spotify client secret is stored on the
+  device but never returned by the API.
+- **No drive-by control.** Browser requests that change state are only accepted
+  from the dashboard's own origin, so a web page you happen to visit can't
+  drive the display. Scripts and Home Assistant are unaffected.
+- **Tested.** A pytest suite covers config validation, presets, the API and the
+  render loop (frame skipping, fades, error recovery) through a built-in
+  hardware emulator, so it runs on any machine.
 
 ## Technology Stack
 
 ### Frontend
 
 - **Framework**: React 19 / Vite 8
-- **Styling**: Vanilla CSS. The app uses dynamic custom CSS properties (`--bg-color`, `--accent`, etc.) to implement robust Light/Dark theming on the fly.
+- **Styling**: Vanilla CSS with custom properties, with user-editable light and
+  dark palettes.
 - **Icons**: `lucide-react`
 
 ### Backend
 
-- **Server Framework**: FastAPI and Uvicorn
-- **Data Validation**: Pydantic (config payload structure heavily typed in `backend/config.py`)
-- **Image Processing**: Pillow (PIL) for graphics and drawing.
-- **External Integrations**: Spotipy (Spotify API), Segno (QR Code generation).
+- **Server**: FastAPI and Uvicorn
+- **Validation**: Pydantic v2 (`backend/config.py`)
+- **Rendering**: Pillow and NumPy, with a shared-memory hand-off to the render
+  process (`backend/channels.py`)
+- **Integrations**: Spotipy (Spotify Web API), Segno (QR codes)
 
 ### Hardware & Deployment
 
-- **Hardware Target**: Raspberry Pi (Zero 2 W recommended) + Adafruit RGB Matrix Bonnet (or compatible wiring).
-- **Deployment Mechanism**: A `deploy.sh` shell script configures a systemd service (`wavedisp.service`) that serves the compiled React build statically via the FastAPI server, easing the deployment pipeline.
-- **Security**: Built-in support for HTTPS via environment variables (`WAVEDISP_USE_HTTPS`, `WAVEDISP_CERT_FILE`, `WAVEDISP_KEY_FILE`).
+- **Target**: Raspberry Pi Zero 2 W, Waveshare P2.5 64 × 64 HUB75 panel, and
+  an Adafruit RGB Matrix Bonnet or compatible wiring.
+- **Driver**: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
+  Python bindings.
+- **Deployment**: `deploy.sh` builds the dashboard, syncs it to the Pi over SSH
+  and installs a systemd service, without ever overwriting the device's own
+  config or Spotify tokens.
+- **HTTPS**: Optional, via `WAVEDISP_USE_HTTPS` and your own certificate.
 
-<ArchitectureSection title="Architecture & Performance Details">
+## Try It Without a Pi
 
-- **Multiprocessing Isolation**: The `backend/main.py` entry point uses Python's `multiprocessing` to run the FastAPI ASGI server and the matrix rendering loop in entirely separate processes (sharing state via `multiprocessing.Manager()`). This is critical because the matrix rendering loop is synchronous and timing-sensitive; blocking it with HTTP requests would cause visual flickering on the LED matrix.
-- **Frontend Network Throttling**: The React frontend uses a `setTimeout` throttle mechanism (~33 FPS / 30ms interval) for API updates (`/api/config`). This prevents network saturation when users rapidly change values, such as dragging a color picker or drawing on the canvas.
+The renderer can run against a built-in emulator, with the dashboard's live
+preview standing in for the panel:
 
-</ArchitectureSection>
+```bash
+git clone https://github.com/nicx17/wavedisp && cd wavedisp
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+npm --prefix dashboard install && npm --prefix dashboard run build
+WAVEDISP_EMULATE_MATRIX=true python backend/main.py
+# then open http://localhost:5000
+```
 
 ## Project Links & Reference
 
 - **Repository**: [github.com/nicx17/wavedisp](https://github.com/nicx17/wavedisp)
+- **API Reference**: [docs/API.md](https://github.com/nicx17/wavedisp/blob/main/docs/API.md)
 - **Hardware Reference**: [Waveshare P2.5 64x64](https://docs.waveshare.com/RGB-Matrix-Px-64x64?variant=P2.5-64x64)
 - **Underlying Driver**: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
