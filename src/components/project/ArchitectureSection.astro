@@ -1,8 +1,8 @@
 ---
 interface Props {
   title?: string;
-  image: string;
-  alt: string;
+  image?: string;
+  alt?: string;
 }
 
 const { title = 'Architecture', image, alt } = Astro.props;
@@ -10,15 +10,17 @@ const { title = 'Architecture', image, alt } = Astro.props;
 
 <div class="architecture-section">
   <h2 class="is-revealed">{title}</h2>
-  <div class="architecture-image-wrap">
-    <img
-      src={image}
-      alt={alt}
-      class="architecture-image"
-      loading="lazy"
-      decoding="async"
-    />
-  </div>
+  {image && (
+    <div class="architecture-image-wrap">
+      <img
+        src={image}
+        alt={alt}
+        class="architecture-image"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  )}
   <div class="architecture-content">
     <slot />
   </div>
