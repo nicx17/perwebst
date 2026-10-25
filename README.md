@@ -16,6 +16,7 @@ Astro 7, prerendered and served from Cloudflare Workers static assets, TypeScrip
 
 ## Projects
 
+- **[ChatViz](https://github.com/nicx17/chatviz)** — Privacy-first, 100% client-side chat export viewer for Instagram, Snapchat and WhatsApp with zero outbound network calls and an encrypted IndexedDB vault.
 - **[HyTrackV3](https://github.com/nicx17/HyTrackV3)** — Autonomous Python tracking engine with headless Selenium scraping, SHA-256 state hashing, and real-time shipment notifications.
 - **[HyTrack API](https://github.com/nicx17/hytrackapi)** — FastAPI backend for HyTrack with bcrypt auth, constant-time token comparison, and rate limiting.
 - **[ImmichSync](https://github.com/nicx17/ImmichSync)** — Python script for recursive, deduplicated directory sync to an Immich backend.

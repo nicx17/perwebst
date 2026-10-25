@@ -5,6 +5,7 @@
 ## Projects
 
 - [Mimick](https://nickcardoso.com/projects/mimick/): Premier unofficial Immich desktop client for Linux -- native GTK4 app built in Rust with background sync, watch folders, OCR search, and queue inspector.
+- [ChatViz](https://nickcardoso.com/projects/chatviz/): Privacy-first, 100% client-side chat export viewer for Instagram, Snapchat and WhatsApp with zero outbound network calls and an encrypted IndexedDB vault.
 - [DE 1](https://nickcardoso.com/projects/de-1/): Three hand-wired digital electronics builds -- an NE555 + CD4017 LED chaser, a 74LS90 / CD4513 two-digit BCD counter, and a microcontroller-free MAX7219 8x8 LED matrix -- with interactive board layouts.
 - [HyTrack API](https://nickcardoso.com/projects/hytrackapi/): Hardened FastAPI microservice for courier status scraping with key management, rate limiting, and edge-ready deployment.
 - [HyTrackV3](https://nickcardoso.com/projects/hytrackv3/): Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.

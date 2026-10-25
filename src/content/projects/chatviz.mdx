@@ -1,0 +1,390 @@
+---
+title: ChatViz
+summary: A privacy-first, 100% client-side chat export viewer for Instagram, Snapchat and WhatsApp with zero outbound network calls and an encrypted IndexedDB vault.
+icon: /project-icons/chatviz.svg
+repository: https://github.com/nicx17/chatviz
+repositoryLabel: nicx17/chatviz
+canonicalPath: /projects/chatviz/
+tags:
+  - React 19
+  - Tailwind CSS v4
+  - Web Workers
+  - WebCrypto
+  - IndexedDB
+  - Cloudflare Workers
+order: 1
+featured: true
+liveUrl: https://chatviz.nicx.dev/
+ogImage: /project-assets/chatviz/og.jpg
+---
+
+import FeatureGrid from '../../components/project/FeatureGrid.astro';
+import FeatureItem from '../../components/project/FeatureItem.astro';
+import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
+import ChatVizArchitecture from '../../components/project/ChatVizArchitecture.astro';
+
+export const assets = '/project-assets/chatviz';
+
+export const stats = [
+  ['0', 'Network calls (air-gapped CSP)'],
+  ['100%', 'Client-side memory processing'],
+  ['600k', 'PBKDF2-SHA256 iterations'],
+  ['100k+', 'Virtual messages at 60 fps'],
+];
+
+export const desktopShots = [
+  [
+    'landing-main',
+    'Landing screen',
+    'interactive doodled drop target, export guides, and immediate local file picker',
+    'ChatViz landing screen with hand-drawn speech bubble doodles and drag-and-drop target',
+  ],
+  [
+    'theme-palette',
+    'Theme engine',
+    'five contrast-checked backgrounds including OLED AMOLED and seven vibrant accents',
+    'Theme picker dropdown showing background themes and accent colour palettes',
+  ],
+];
+
+export const tallShots = [
+  [
+    'chat-mobile',
+    390,
+    844,
+    'Mobile experience',
+    'adaptive bottom controls',
+    'ChatViz running on a phone viewport with touch-sized controls and safe area margins',
+  ],
+  [
+    'vault-modal',
+    1200,
+    800,
+    'Encrypted vault',
+    'PBKDF2 & AES-256-GCM',
+    'Passphrase configuration dialog for client-side encrypted IndexedDB storage',
+  ],
+];
+
+export const img = {
+  display: 'block',
+  width: '100%',
+  margin: 0,
+  borderRadius: '12px',
+};
+export const caption = {
+  marginTop: '0.5rem',
+  fontSize: '0.85rem',
+  color: 'var(--text-muted)',
+  lineHeight: 1.45,
+};
+export const captionTitle = { color: 'var(--text-main)', fontWeight: 600 };
+export const grid = (min, gap = '1.25rem') => ({
+  display: 'grid',
+  gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}, 100%), 1fr))`,
+  gap,
+  margin: '1.5rem 0',
+  alignItems: 'start',
+});
+
+<style>{`
+  .chatviz-scope {
+    --font-display: 'Bricolage Grotesque', var(--font-sans);
+  }
+
+  .chatviz-stat-value {
+    font-family: var(--font-display) !important;
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
+  }
+
+  .chatviz-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--button-border);
+    background: var(--button-bg);
+  }
+`}</style>
+
+<div class="chatviz-scope">
+
+# ChatViz
+
+A private, client-side viewer for your Instagram, Snapchat and WhatsApp chat exports.
+Your conversation archives are processed entirely in browser memory and saved into an
+encrypted local vault—no servers, no telemetry, no tracking.
+
+<div
+  style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+    marginTop: '1rem',
+  }}
+>
+  <a
+    href="https://github.com/nicx17/chatviz/blob/main/LICENSE"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+      src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge"
+      alt="License: MIT"
+    />
+  </a>
+  <img
+    src="https://img.shields.io/badge/React-19.3-61DAFB?style=for-the-badge&logo=react&logoColor=black"
+    alt="React 19"
+  />
+  <img
+    src="https://img.shields.io/badge/Tailwind-CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white"
+    alt="Tailwind CSS v4"
+  />
+  <img
+    src="https://img.shields.io/badge/Vite-8.3-646CFF?style=for-the-badge&logo=vite&logoColor=white"
+    alt="Vite 8"
+  />
+  <img
+    src="https://img.shields.io/badge/Cloudflare_Workers-Assets-F38020?style=for-the-badge&logo=cloudflare&logoColor=white"
+    alt="Cloudflare Workers"
+  />
+  <img
+    src="https://img.shields.io/badge/WebCrypto-AES--256--GCM-green?style=for-the-badge"
+    alt="WebCrypto AES-256-GCM"
+  />
+</div>
+
+{
+
+  <figure style={{ margin: '1.5rem 0 0' }}>
+    <img
+      src={`${assets}/chat-screen-dark.webp`}
+      alt="ChatViz conversation screen in dark mode showing virtualized message list, stats bar, search highlights, and reaction pills"
+      width="2160"
+      height="1350"
+      style={{ ...img, border: '1px solid var(--border-color)', boxShadow: '0 16px 32px -16px var(--shadow-main)' }}
+    />
+    <figcaption style={{ ...caption, textAlign: 'center' }}>
+      The conversation screen: virtualized scrolling, timestamp grouping, media attachments, search with match highlights, and top conversation statistics.
+    </figcaption>
+  </figure>
+}
+
+{
+
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(min(170px, 100%), 1fr))',
+      margin: '2.5rem 0 0.5rem',
+      border: '1px solid var(--button-border)',
+      borderRadius: '16px',
+      background: 'var(--button-bg)',
+      overflow: 'hidden',
+    }}
+  >
+    {stats.map(([value, label], idx) => (
+      <div style={{ padding: '1.25rem 1rem', textAlign: 'center', borderRight: idx < stats.length - 1 ? '1px solid var(--button-border)' : 'none' }}>
+        <div class="chatviz-stat-value">
+          {value}
+        </div>
+        <div
+          style={{
+            fontSize: '0.78rem',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+            marginTop: '0.4rem',
+          }}
+        >
+          {label}
+        </div>
+      </div>
+    ))}
+  </div>
+}
+
+<FeatureGrid>
+  <FeatureItem title="Multi-Platform Import">
+    Parses Instagram <code>message_*.json</code> with automated Mojibake UTF-8
+    repair, Snapchat <code>chat_history.json</code>, and raw WhatsApp{' '}
+    <code>.txt</code> or media-packed <code>.zip</code> exports.
+  </FeatureItem>
+  <FeatureItem title="Zero-Trust Network Air Gap">
+    Enforces a strict Content-Security-Policy with{' '}
+    <code>connect-src 'none'</code> and <code>frame-ancestors 'none'</code>. The
+    application cannot execute outbound fetches, XHRs, WebSockets, or analytics
+    beacons.
+  </FeatureItem>
+  <FeatureItem title="Encrypted In-Browser Vault">
+    Protects stored chats using PBKDF2-SHA256 (600,000 iterations) and
+    AES-256-GCM. Decryption keys exist exclusively in volatile memory and are
+    purged on tab close or manual lock.
+  </FeatureItem>
+  <FeatureItem title="High-Capacity Virtualization">
+    Powered by <code>@tanstack/react-virtual</code> to smoothly render over
+    100,000 messages with dynamic height estimation, date separators, and sticky
+    headers at 60 fps.
+  </FeatureItem>
+  <FeatureItem title="Streaming Zip64 Engine">
+    A custom random-access unzipper reads media directly from multi-gigabyte ZIP
+    archives on demand using file slice handles without buffering entire
+    archives in browser RAM.
+  </FeatureItem>
+  <FeatureItem title="Accessible Theme Engine">
+    Five background themes (Dark, AMOLED for OLED screens, Midnight, Mocha,
+    Light) and seven accent shades verified for WCAG AA contrast (4.5:1) across
+    every surface.
+  </FeatureItem>
+</FeatureGrid>
+
+## Overview
+
+When you request your data archives from messaging services like Instagram, Snapchat, or WhatsApp, you receive gigabytes of raw JSON files, fragmented text logs, and nested media folders. Existing viewer tools require uploading these sensitive conversations to remote third-party servers.
+
+**ChatViz solves this without compromising privacy.** All parsing, unzipping, decrypting, and rendering executes 100% on the client. Outbound network communication is blocked at the browser level through a strict Content Security Policy.
+
+## Supported Export Formats
+
+### 1. Instagram (`message_*.json`)
+
+- **Mojibake UTF-8 Repair**: Resolves Instagram's longstanding export bug where Unicode text (emojis, accented characters) is encoded as broken Latin-1 byte escapes (e.g. `\u00c3\u00a9` decoded to clean characters).
+- **Multi-File Thread Stitching**: Automatically merges split sequential files (`message_1.json`, `message_2.json`) into single chronological conversation threads.
+- **Inline Reactions**: Renders Instagram reaction notifications as compact interactive emoji pills overlaid on the target message bubble.
+
+### 2. Snapchat (`chat_history.json`)
+
+- Ingests the full conversation tree rather than just the single largest thread.
+- Maps ephemeral media notices, text messages, and timestamped shared stories.
+
+### 3. WhatsApp (`.txt` and `.zip`)
+
+- **Zip64 Random-Access Reader**: Opens multi-gigabyte WhatsApp `.zip` archives directly using range slices from the local `File` handle, streaming photos, videos, voice notes, and stickers on demand without exhausting device memory.
+- **Universal Date & Time Parsing**: Automatically identifies 12-hour/24-hour clocks and ambiguous month/day ordering based on entire log context.
+
+## Interface & Aesthetics
+
+The interface is inspired by classic message bubbles and doodle aesthetics, featuring rounded corners, subtle transitions, and hand-drawn accents.
+
+{
+
+  <div style={grid('520px')}>
+    {desktopShots.map(([file, title, detail, alt]) => (
+      <figure style={{ margin: 0 }}>
+        <img
+          src={`${assets}/${file}.webp`}
+          alt={alt}
+          width="2160"
+          height="1350"
+          loading="lazy"
+          decoding="async"
+          style={{ ...img, border: '1px solid var(--border-color)', boxShadow: '0 12px 24px -12px var(--shadow-main)' }}
+        />
+        <figcaption style={caption}>
+          <span style={captionTitle}>{title}</span> · {detail}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+}
+
+{
+
+  <div style={grid('240px')}>
+    {tallShots.map(([file, width, height, title, detail, alt]) => (
+      <figure style={{ margin: 0 }}>
+        <img
+          src={`${assets}/${file}.webp`}
+          alt={alt}
+          width={width}
+          height={height}
+          loading="lazy"
+          decoding="async"
+          style={{ ...img, border: '1px solid var(--border-color)', boxShadow: '0 12px 24px -12px var(--shadow-main)' }}
+        />
+        <figcaption style={caption}>
+          <span style={captionTitle}>{title}</span> · {detail}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+}
+
+<ArchitectureSection title="Client-Side Pipeline Architecture">
+  <ChatVizArchitecture />
+
+- **Dedicated Web Worker**: File parsing and unzipping run off the main thread inside an inline `blob:` worker. Heavy multi-megabyte JSON trees are transformed into lightweight normalized schemas without freezing UI interaction.
+- **HMAC-Blinded Database Keys**: Chat IDs and participant names in IndexedDB are indexed through HMAC hashes derived from your master passphrase, preventing forensic inspection of database keys even if the browser disk storage is inspected.
+- **Volatile Key Lifecycles**: Passphrase stretching yields an AES-GCM encryption key that exists exclusively in memory. Pressing **Lock**, refreshing, or closing the tab drops the key reference.
+- **Streaming Media Extraction**: Rather than unzipping entire multi-gigabyte archives into RAM, the zip parser reads directory records from the end of the file and extracts individual image/audio blobs only when scrolled into view.
+
+</ArchitectureSection>
+
+## Cryptographic Security Model
+
+ChatViz treats browser storage as untrusted and implements defense-in-depth:
+
+| Security Layer         | Implementation Details                                                                          |
+| :--------------------- | :---------------------------------------------------------------------------------------------- |
+| **Key Derivation**     | PBKDF2-SHA256 with 600,000 iterations and a unique 16-byte cryptographic salt per vault.        |
+| **Message Encryption** | AES-256-GCM authenticated encryption for message text, participant names, and media blobs.      |
+| **Key Blind Hashing**  | HMAC-SHA256 obscures search terms and primary keys inside IndexedDB stores.                     |
+| **Network Air Gap**    | `connect-src 'none'`, `object-src 'none'`, `form-action 'none'`, and `frame-ancestors 'none'`.  |
+| **Link Defense**       | External links require explicit confirmation dialogs and open with `rel="noreferrer noopener"`. |
+| **Ephemeral Session**  | "View without saving" mode keeps chats in transient memory and clears all data on tab close.    |
+
+## Technology Stack
+
+### Frontend & UI
+
+- **Framework**: React 19 / Vite 8
+- **Styling**: Tailwind CSS v4 with custom property tokens
+- **Virtualization**: `@tanstack/react-virtual`
+- **Icons**: `lucide-react`
+- **Typography**: Bricolage Grotesque (display headline), Inter (interface text)
+
+### Parsing & Cryptography
+
+- **Off-Thread Processing**: Dedicated Web Worker (`src/workers/parseWorker.js`)
+- **Zip Extraction**: `fflate` with random-access slice reader
+- **Encryption**: WebCrypto API (`SubtleCrypto` PBKDF2, AES-256-GCM, HMAC)
+- **Local Storage**: IndexedDB via `idb`
+
+### Hosting & Deployment
+
+- **Platform**: Cloudflare Workers Static Assets (`wrangler.jsonc`)
+- **Static Delivery**: Zero server-side runtime code; pre-compiled static bundle
+- **Security Headers**: Edge-enforced CSP, HSTS, frame-ancestors 'none', and referrer-policy via `_headers`
+
+## Live Demo & Local Development
+
+ChatViz is hosted and accessible at [chatviz.nicx.dev](https://chatviz.nicx.dev/).
+
+To run or build ChatViz locally:
+
+```bash
+git clone https://github.com/nicx17/chatviz.git
+cd chatviz
+npm install
+npm run dev       # Start local development server
+npm test          # Run vitest test suite
+npm run lint      # Run eslint and code quality checks
+npm run build     # Compile production bundle with CSP
+```
+
+## Project Links & Reference
+
+- **Live Application**: [chatviz.nicx.dev](https://chatviz.nicx.dev/)
+- **Source Repository**: [github.com/nicx17/chatviz](https://github.com/nicx17/chatviz)
+- **License**: [MIT License](https://github.com/nicx17/chatviz/blob/main/LICENSE)
+
+</div>
