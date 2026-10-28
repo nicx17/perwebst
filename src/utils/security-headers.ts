@@ -132,7 +132,7 @@ const EXECUTABLE_SCRIPT_TYPES = new Set([
   'application/ecmascript',
 ]);
 
-const SCRIPT_BLOCK = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+const SCRIPT_BLOCK = /<script\b([^>]*)>([\s\S]*?)<\/script\b[^>]*>/gi;
 
 const attributeValue = (attributes: string, name: string) =>
   new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i')
@@ -167,7 +167,7 @@ export const extractInlineScripts = (html: string): string[] => {
  * markup built inside JavaScript strings isn't reported.
  */
 export const findBlockedInlineCode = (html: string): string[] => {
-  const markup = html.replace(SCRIPT_BLOCK, '');
+  const markup = html.replace(SCRIPT_BLOCK, ' ');
   const handlers = markup.match(/<[a-z][^>]*?\son[a-z]+\s*=/gi) ?? [];
   const jsUrls =
     markup.match(/\b(?:href|src|action)\s*=\s*["']?\s*javascript:/gi) ?? [];

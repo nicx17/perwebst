@@ -1874,8 +1874,7 @@
 
       /* Netlist check: every pin of every part on exactly one net, and the roles that matter for this circuit. */
       function checkNetlist() {
-        const { NETS, NC, PACKAGES, MAXPINS, ROWPIN, COLPIN, DIGPIN, SEG } =
-          DATA;
+        const { NETS, NC, PACKAGES, MAXPINS, ROWPIN, COLPIN, SEG } = DATA;
         const errors = [],
           seen = {};
         Object.entries(NETS).forEach(([n, ids]) =>
