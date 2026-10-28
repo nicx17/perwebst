@@ -1899,7 +1899,7 @@
           gold: '#c9a227',
         };
         const netColor = (n) => {
-          n = (n || '').replace("'", '');
+          n = (n || '').replaceAll("'", '');
           if (n === 'VCC') return 'var(--n-vcc)';
           if (n === 'GND') return 'var(--n-gnd)';
           if (n === 'CLK') return 'var(--n-clk)';

@@ -157,9 +157,13 @@ export default function staticHeaders() {
         ];
 
         const headersPath = join(clientDir, '_headers');
-        const existing = existsSync(headersPath)
-          ? stripGeneratedBlock(await readFile(headersPath, 'utf8')).trim()
-          : '';
+        const existing = await readFile(headersPath, 'utf8').then(
+          (text) => stripGeneratedBlock(text).trim(),
+          (error) => {
+            if (error.code === 'ENOENT') return '';
+            throw error;
+          }
+        );
         const generated = `${BEGIN_MARKER}\n${renderHeaderRules(rules)}${END_MARKER}\n`;
         const content = existing ? `${existing}\n\n${generated}` : generated;
 
