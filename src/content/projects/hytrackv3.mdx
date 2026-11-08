@@ -1,6 +1,6 @@
 ---
 title: HyTrackV3
-summary: Email-driven shipment intelligence engine that monitors waybills and pushes status-change notifications.
+summary: Email-driven shipment tracker for Blue Dart and Delhivery. Reads waybills from your inbox, watches each one, and emails a styled update with a journey log whenever the status changes.
 icon: /project-icons/hytrackv3.svg
 repository: https://github.com/nicx17/HyTrackV3
 repositoryLabel: nicx17/HyTrackV3
@@ -10,88 +10,202 @@ tags:
   - Selenium
   - SQLite
   - BeautifulSoup
+  - IMAP
 order: 4
 featured: true
+ogImage: /project-assets/hytrackv3/og.jpg
 ---
 
 import FeatureGrid from '../../components/project/FeatureGrid.astro';
 import FeatureItem from '../../components/project/FeatureItem.astro';
-import ArchitectureSection from '../../components/project/ArchitectureSection.astro';
+
+export const assets = '/project-assets/hytrackv3';
+
+export const desktopEmails = [
+  [
+    'in-transit',
+    1794,
+    'In transit',
+    'Blue Dart',
+    'The latest scan is highlighted in orange, with the route and expected delivery above the journey log.',
+  ],
+  [
+    'out-for-delivery',
+    2222,
+    'Out for delivery',
+    'Delhivery',
+    'Long journeys show the eight most recent scans and count the earlier ones left on the courier site.',
+  ],
+  [
+    'delivered',
+    1918,
+    'Delivered',
+    'Blue Dart',
+    'Expected delivery drops away once the parcel arrives, and the current scan turns slate.',
+  ],
+  [
+    'needs-attention',
+    1916,
+    'Needs attention',
+    'Delhivery',
+    'Failed attempts, refusals, returns and damage get a red badge so they stand out in your inbox.',
+  ],
+];
+
+export const mobileEmails = [
+  ['in-transit-mobile', 1974, 'In transit'],
+  ['out-for-delivery-mobile', 2592, 'Out for delivery'],
+  ['delivered-mobile', 2032, 'Delivered'],
+  ['needs-attention-mobile', 2160, 'Needs attention'],
+];
+
+export const img = {
+  display: 'block',
+  width: '100%',
+  height: 'auto',
+  margin: 0,
+  borderRadius: '14px',
+  border: '1px solid var(--border-color)',
+  boxShadow: '0 16px 32px -18px var(--shadow-main)',
+};
+export const caption = {
+  marginTop: '0.6rem',
+  fontSize: '0.88rem',
+  color: 'var(--text-muted)',
+  lineHeight: 1.5,
+};
+export const captionTitle = { color: 'var(--text-main)', fontWeight: 600 };
+export const grid = (min, gap = '1.5rem') => ({
+  display: 'grid',
+  gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}, 100%), 1fr))`,
+  gap,
+  margin: '1.5rem 0 2rem',
+  alignItems: 'start',
+});
 
 # HyTrackV3
 
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=activity&logoColor=white)
 ![GitHub Release](https://img.shields.io/github/v/release/nicx17/HyTrackV3?include_prereleases&style=for-the-badge&logo=github&color=FF90C3)
-![Python](https://img.shields.io/badge/Python_3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=white)
 ![License](https://img.shields.io/github/license/nicx17/HyTrackV3?style=for-the-badge&color=007EC6)
 
-**HyTrackV3** is an automated logistics intelligence tracker designed to streamline package tracking. It connects to your email server via IMAP, intelligently parses waybills for supported couriers (currently Blue Dart and Delhivery), and uses Selenium with BeautifulSoup to fetch real-time delivery statuses.
+**HyTrackV3** is an automated shipment tracker. It watches a mailbox over IMAP, picks out **Blue Dart** and **Delhivery** waybill numbers, checks each one with Requests, BeautifulSoup and headless Chrome, and emails you a styled update whenever a shipment's status changes.
 
 ## Try It Now
 
-You can use our hosted instance to track your packages immediately.
+You can use the hosted instance to track your packages straight away.
 
-Simply email your **Blue Dart** or **Delhivery** tracking numbers (waybills) to:
+Email your **Blue Dart** or **Delhivery** tracking numbers (waybills) to:
 
 > **notify@hyclotron.com**
 
-The system will ingest your tracking number, start monitoring the package, and send you beautiful, HTML-formatted status updates directly to your inbox whenever the status changes.
+HyTrack picks up the waybills, starts watching each package, and emails you whenever its status changes. Reply to any update with another waybill to track that one too.
 
-### Email Previews
+## The Update Email
 
-Here is what the automated status updates look like:
+Every update leads with the status and the latest scan, then the route, the expected delivery date, and a **journey log** of recent scans. Statuses fall into four groups, each with its own badge, and every message carries a plain-text version for clients that don't render HTML. The design matches this site's ivory theme, with every colour inlined so it survives email clients that strip styles.
 
-<img
-  src="/project-assets/hytrackv3/a64830_delivered_delhivery.png"
-  width="45%"
-  alt="Delivered Status (Delhivery)"
-/>
-<img
-  src="/project-assets/hytrackv3/e31ffe_out_for_delivery_delhivery.png"
-  width="45%"
-  alt="Out for Delivery"
-/>
-<br />
-<img
-  src="/project-assets/hytrackv3/694114_on_the_way.png"
-  width="45%"
-  alt="In Transit"
-/>
-<img
-  src="/project-assets/hytrackv3/c8e191_delivered_bluedart.png"
-  width="45%"
-  alt="Delivered Status (Blue Dart)"
-/>
+<div style={grid('440px', '2rem')}>
+  {desktopEmails.map(([file, height, status, courier, detail]) => (
+    <figure style={{ margin: 0 }}>
+      <img
+        src={`${assets}/email-${file}.webp`}
+        alt={`HyTrack ${status.toLowerCase()} email for a ${courier} shipment, showing the status, route and journey log`}
+        width="1520"
+        height={height}
+        loading="lazy"
+        decoding="async"
+        style={img}
+      />
+      <figcaption style={caption}>
+        <span style={captionTitle}>{status}</span> · {courier} · {detail}
+      </figcaption>
+    </figure>
+  ))}
+</div>
+
+### On a Phone
+
+Below 520 pixels the timestamp moves above each scan, the route and delivery date stack, and the card tightens up, so the journey log stays readable on a phone.
+
+<div style={grid('170px', '1rem')}>
+  {mobileEmails.map(([file, height, status]) => (
+    <figure style={{ margin: 0 }}>
+      <img
+        src={`${assets}/email-${file}.webp`}
+        alt={`HyTrack ${status.toLowerCase()} email on a phone-width screen`}
+        width="780"
+        height={height}
+        loading="lazy"
+        decoding="async"
+        style={img}
+      />
+      <figcaption style={{ ...caption, textAlign: 'center' }}>
+        <span style={captionTitle}>{status}</span>
+      </figcaption>
+    </figure>
+  ))}
+</div>
 
 ## Features
 
 <FeatureGrid>
-  <FeatureItem title="Automated Email Ingestion">
-    Seamlessly connects to your email provider to discover new tracking numbers
-    automatically.
+  <FeatureItem title="Inbox-Driven Tracking">
+    Connects to a mailbox over IMAP and reads waybill numbers from the subject
+    and body of new mail, so tracking a parcel is as simple as forwarding the
+    shipping email.
   </FeatureItem>
-  <FeatureItem title="Multi-Courier Support">
-    Built-in support for major Indian logistics providers: - **Blue Dart** (via
-    Requests/BeautifulSoup) - **Delhivery** (via Selenium Headless Browser)
+  <FeatureItem title="Blue Dart and Delhivery">
+    Blue Dart is fetched with Requests and BeautifulSoup over a retrying
+    session. Delhivery's dynamic tracking page is read with Selenium in headless
+    Chrome, including the scan history.
   </FeatureItem>
-  <FeatureItem title="Smart Tracking">
-    - Uses headless Chrome for dynamic content. - Handles session management and
-    retries for robust fetching.
+  <FeatureItem title="Careful Ingestion">
+    Skips numbers that look like phone numbers, ignores bounces, auto-replies
+    and mail that fails SPF, DKIM or DMARC, and caps waybills per email and
+    active shipments per sender.
   </FeatureItem>
-  <FeatureItem title="Database Persistence">
-    Maintains a local SQLite database (`hytrack3.db`) to track shipment history
-    and avoid duplicate processing.
+  <FeatureItem title="Status-Aware">
+    Each courier scan is sorted into in transit, out for delivery, delivered or
+    needs attention, so a failed attempt or a return is flagged rather than
+    buried in courier jargon.
   </FeatureItem>
-  <FeatureItem title="Automated Notifications">
-    Sends HTML-formatted email updates whenever a shipment status changes.
+  <FeatureItem title="Journey Log Emails">
+    Updates show the route, expected delivery and the eight latest scans, in
+    HTML with a plain-text fallback. A send that fails is retried on the next
+    run.
+  </FeatureItem>
+  <FeatureItem title="Self-Maintaining">
+    A local SQLite database records every shipment and the last event seen.
+    Delivered parcels stop being checked, and waybills that never resolve or
+    stop changing are retired.
+  </FeatureItem>
+  <FeatureItem title="Cron-Friendly">
+    Each run is a single pass that's safe to schedule: a lock makes an
+    overlapping run exit straight away, and the log file rotates on its own.
+  </FeatureItem>
+  <FeatureItem title="Tested in CI">
+    Unit tests cover parsing, classification, ingestion and the email builder,
+    and run on Python 3.12, 3.13 and 3.14 in GitHub Actions alongside CodeQL
+    scanning.
   </FeatureItem>
 </FeatureGrid>
+
+## How It Works
+
+1. **Read the inbox.** Each run fetches unseen mail over IMAP and pulls out waybill numbers, matching each one to its courier.
+2. **Check the courier.** Every active shipment's latest scan and history are fetched from Blue Dart or Delhivery.
+3. **Compare.** The latest event is hashed and compared with the last one stored in SQLite, so only real changes count.
+4. **Notify.** On a change, HyTrack sends the update email over SMTP to whoever sent in the waybill.
+5. **Tidy up.** Delivered shipments stop being checked, and stale ones expire after a configurable number of days.
+
 ## Prerequisites
 
-Before running HyTrackV3 locally, ensure you have the following installed:
+Before running HyTrackV3 yourself, make sure you have:
 
-- **Python 3.8+**
+- **Python 3.10+**
 - **Google Chrome** (latest stable version)
 - **Git**
 
@@ -115,11 +229,11 @@ Before running HyTrackV3 locally, ensure you have the following installed:
     ```bash
     pip install -r requirements.txt
     ```
-    _Note: This will install `selenium`, `beautifulsoup4`, `requests`, `webdriver-manager`, and other required packages._
+    _This installs `selenium`, `beautifulsoup4`, `requests`, `webdriver-manager` and the other required packages._
 
 ## Configuration
 
-HyTrackV3 requires environment variables to connect to your email accounts.
+HyTrackV3 reads its settings from environment variables.
 
 1.  **Copy the sample configuration**:
 
@@ -127,17 +241,35 @@ HyTrackV3 requires environment variables to connect to your email accounts.
     cp sample.env.txt .env
     ```
 
-2.  **Edit `.env`**:
-    Open the `.env` file and fill in your details.
+2.  **Edit `.env`** with your mail accounts, then adjust the limits if you like:
 
     ```ini
-    IMAP_SERVER=imap.gmail.com
-    EMAIL_ADDRESS=your_email@gmail.com
-    EMAIL_PASSWORD=your_app_password
-    ...
+    # Email IMAP configuration (for fetching tracking numbers)
+    IMAP_SERVER="imap.gmail.com"
+    IMAP_PORT=993
+    EMAIL_ADDRESS="your_email@example.com"
+    EMAIL_PASSWORD="your_app_specific_password"
+
+    # Email SMTP configuration (for sending status updates)
+    SMTP_SERVER="smtp.gmail.com"
+    SMTP_PORT=587
+    RECIPIENT_EMAIL="notify_me@example.com"
+
+    # Logging level and rotation
+    LOG_LEVEL="INFO"
+    LOG_MAX_BYTES=5242880
+    LOG_BACKUP_COUNT=3
+
+    # Abuse limits for the intake mailbox
+    MAX_WAYBILLS_PER_EMAIL=10
+    MAX_ACTIVE_PER_SENDER=25
+
+    # Stop tracking waybills that never resolve, or stop changing (days)
+    UNFOUND_EXPIRY_DAYS=7
+    IDLE_EXPIRY_DAYS=30
     ```
 
-    > **Note for Gmail Users**: You must use an **App Password** if 2-Step Verification is enabled. See the [Configuration Guide](docs/CONFIGURATION.md) for detailed instructions.
+    > **Note for Gmail users**: you must use an **App Password** if 2-Step Verification is enabled. See the [Configuration Guide](https://github.com/nicx17/HyTrackV3/blob/main/docs/CONFIGURATION.md) for step-by-step instructions, and the [Troubleshooting Guide](https://github.com/nicx17/HyTrackV3/blob/main/docs/TROUBLESHOOTING.md) if something doesn't connect.
 
 ## Usage
 
@@ -149,24 +281,28 @@ python Hytrack3.py
 
 ### Automation (Cron Job)
 
-To run the tracker periodically (e.g., every hour), add a cron job:
+To run the tracker on a schedule (every hour, for example), add a cron job:
 
 ```bash
 crontab -e
 ```
 
-Add the following line (adjust paths as necessary):
+Add the following line, adjusting the paths:
 
 ```bash
 0 * * * * /path/to/HyTrackV3/.venv/bin/python /path/to/HyTrackV3/Hytrack3.py >> /path/to/HyTrackV3/cron.log 2>&1
 ```
 
+A run that starts while the previous one is still going exits straight away, so overlapping cron runs are safe.
+
 ## Project Structure
 
 ```plaintext
 HyTrackV3/
-├── assets/             # Images and static assets
-├── docs/               # Documentation files
+├── .github/workflows/  # Tests (Python 3.12–3.14) and CodeQL
+├── assets/             # README screenshots
+├── docs/               # Configuration and troubleshooting guides
+├── tests/              # Unit tests
 ├── Hytrack3.py         # Main application script
 ├── requirements.txt    # Python dependencies
 ├── sample.env.txt      # Template for environment variables
@@ -186,4 +322,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-Distributed under the GPL-3.0 License. See `LICENSE` for more information.
+Distributed under the GPL-3.0 License. See [`LICENSE`](https://github.com/nicx17/HyTrackV3/blob/main/LICENSE) for more information.

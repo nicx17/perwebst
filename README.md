@@ -20,7 +20,7 @@ Astro 7, prerendered and served from Cloudflare Workers static assets, TypeScrip
 - **[HyTrackV3](https://github.com/nicx17/HyTrackV3)** — Autonomous Python tracking engine with headless Selenium scraping, SHA-256 state hashing, and real-time shipment notifications.
 - **[HyTrack API](https://github.com/nicx17/hytrackapi)** — FastAPI backend for HyTrack with bcrypt auth, constant-time token comparison, and rate limiting.
 - **[ImmichSync](https://github.com/nicx17/ImmichSync)** — Python script for recursive, deduplicated directory sync to an Immich backend.
-- **[Mimick](https://github.com/nicx17/mimick)** — GTK4 + Libadwaita Linux desktop app for Immich sync with tray controls and Flatpak packaging.
+- **[Mimick](https://github.com/nicx17/mimick)** — GTK4 + Libadwaita Immich client for Linux: background folder backup plus a native library browser with editing, search, maps, and sharing. On Flathub, AUR, and AppImage.
 - **[Unstats](https://github.com/nicx17/unstats)** — Home Assistant HACS integration surfacing live Unsplash account stats.
 - **[MultiWave](https://github.com/nicx17/MultiWave)** — Wireless multi-cable tester on C++ and Arduino Mega.
 - **[InfinityX](https://github.com/nicx17/InfinityX)** — ESPHome config wiring an ESP32 inside a Bluetooth speaker for Home Assistant GPIO control.
