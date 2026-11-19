@@ -20,7 +20,7 @@ import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
    * - Only in-page anchor jumps scroll smoothly (see below).
    */
   const PROGRESS_DELAY_MS = 150;
-  let progressTimer = 0;
+  let progressTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
 
   const getProgressBar = () => document.getElementById('nav-progress');
 
@@ -33,7 +33,7 @@ import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
 
   const stopProgress = () => {
     globalThis.clearTimeout(progressTimer);
-    progressTimer = 0;
+    progressTimer = undefined;
     getProgressBar()?.removeAttribute('data-state');
   };
 

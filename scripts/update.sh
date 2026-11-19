@@ -46,8 +46,19 @@ npx @astrojs/upgrade -y
 success "Astro upgraded."
 # -------------------
 
+step "Approving dependency lifecycle scripts (allowScripts)..."
+if command -v npm >/dev/null 2>&1 && npm approve-scripts -h >/dev/null 2>&1; then
+    npm approve-scripts --all
+    success "Allowed scripts updated."
+else
+    warn "npm approve-scripts not supported by this npm version. Skipping."
+fi
+
 step "Running npm audit fix to resolve vulnerabilities..."
 npm audit fix || true
+if command -v npm >/dev/null 2>&1 && npm approve-scripts -h >/dev/null 2>&1; then
+    npm approve-scripts --all
+fi
 success "Audit complete."
 
 step "Formatting code (Prettier)..."
@@ -70,4 +81,4 @@ step "Verifying production build (Astro)..."
 npm run build
 success "Build completed successfully."
 
-echo -e "\n${GREEN}🎉 All major updates, formatting, linting, tests, and build checks passed successfully!${NC}"
+echo -e "\n${GREEN}All major updates, formatting, linting, tests, and build checks passed successfully!${NC}"
